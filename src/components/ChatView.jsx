@@ -1,14 +1,15 @@
-import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { useState, useEffect, useLayoutEffect, useRef, useMemo, useCallback } from "react";
 import styles from "./ChatView.module.css";
 import {
   IconSend, IconPaperclip, IconArrowLeft, IconDownload,
   IconClipboard, IconImage, IconUser, IconSparkle, IconCheck, IconClose, IconSearch,
+  IconPin, IconEraser, IconTrash,
 } from "./Icons";
 import { usePhoto } from "../utils/photo";
 import { fetchFriendships, fetchUsersBrief } from "../utils/friendsApi";
 import {
   fetchChatOverview, fetchThread, openConversation, sendChatMessage,
-  markThreadRead, getChatUploadUrl,
+  markThreadRead, getChatUploadUrl, pinChat, clearChatThread, deleteChatThread,
 } from "../utils/chatApi";
 import { createConversationStream } from "../utils/chatRealtime";
 import {
@@ -37,6 +38,48 @@ function Avatar({ u, size = 40 }) {
     <div className={styles.avatar} style={style}>
       <span>{initial}</span>
     </div>
+  );
+}
+
+function ChatMenu({ x, y, pinned, onPin, onClear, onDelete, onClose }) {
+  const ref = useRef(null);
+  const [pos, setPos] = useState({ left: x, top: y });
+
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    let left = x;
+    let top = y;
+    if (left + rect.width > vw - 8) left = Math.max(8, vw - rect.width - 8);
+    if (top + rect.height > vh - 8) top = Math.max(8, vh - rect.height - 8);
+    setPos({ left, top });
+  }, [x, y]);
+
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === "Escape") { e.preventDefault(); onClose(); } };
+    document.addEventListener("keydown", onKey, true);
+    return () => document.removeEventListener("keydown", onKey, true);
+  }, [onClose]);
+
+  return (
+    <>
+      <div className={styles.menuBackdrop} onClick={onClose} onContextMenu={(e) => { e.preventDefault(); onClose(); }} />
+      <div ref={ref} className={styles.chatMenu} style={pos} onClick={(e) => e.stopPropagation()}>
+        <button className={styles.chatMenuItem} onClick={onPin}>
+          <IconPin size={15} /> {pinned ? "Desfijar chat" : "Fijar chat"}
+        </button>
+        <button className={styles.chatMenuItem} onClick={onClear}>
+          <IconEraser size={15} /> Vaciar chat
+        </button>
+        <div className={styles.chatMenuDivider} />
+        <button className={`${styles.chatMenuItem} ${styles.chatMenuItemDanger}`} onClick={onDelete}>
+          <IconTrash size={15} /> Eliminar chat
+        </button>
+      </div>
+    </>
   );
 }
 
@@ -672,6 +715,13 @@ export default function ChatView({ user, malla, notasClaseData, asignacionesData
   const [infoOpen, setInfoOpen] = useState(false);
   const [threadMessages, setThreadMessages] = useState([]);
   const [search, setSearch] = useState("");
+  const [menu, setMenu] = useState(null);
+  const [threadNonce, setThreadNonce] = useState(0);
+
+  const pressRef = useRef({ timer: null, x: 0, y: 0 });
+  const suppressClickRef = useRef(0);
+
+  useEffect(() => () => clearTimeout(pressRef.current.timer), []);
 
   useEffect(() => {
     let active = true;
@@ -715,10 +765,12 @@ export default function ChatView({ user, malla, notasClaseData, asignacionesData
         channel_token: c ? c.channel_token : "",
         last: c ? c.last : null,
         unread: c ? c.unread || 0 : 0,
+        pinned: c ? !!c.pinned : false,
         updatedAt: c && c.last ? new Date(c.last.created_at).getTime() : 0,
       };
     });
     rows.sort((a, b) => {
+      if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
       if (a.unread !== b.unread) return b.unread - a.unread;
       if (a.updatedAt !== b.updatedAt) return b.updatedAt - a.updatedAt;
       return (a.partner.name || a.partner.username).localeCompare(b.partner.name || b.partner.username);
@@ -749,6 +801,73 @@ export default function ChatView({ user, malla, notasClaseData, asignacionesData
     if (last.kind === "assignment") return "📋 Compartió una asignación";
     if (last.kind === "note") return "📒 Compartió un apunte";
     return "Mensaje";
+  };
+
+  const openMenu = (row, x, y) => {
+    suppressClickRef.current = Date.now();
+    setMenu({ key: row.key, x, y, pinned: !!row.pinned });
+  };
+
+  const startPress = (row, e) => {
+    const t = e.touches ? e.touches[0] : e;
+    pressRef.current.x = t.clientX;
+    pressRef.current.y = t.clientY;
+    clearTimeout(pressRef.current.timer);
+    pressRef.current.timer = setTimeout(() => {
+      openMenu(row, t.clientX, t.clientY);
+    }, 480);
+  };
+
+  const movePress = (e) => {
+    const t = e.touches ? e.touches[0] : e;
+    const dx = Math.abs(t.clientX - pressRef.current.x);
+    const dy = Math.abs(t.clientY - pressRef.current.y);
+    if (dx > 10 || dy > 10) clearTimeout(pressRef.current.timer);
+  };
+
+  const endPress = () => clearTimeout(pressRef.current.timer);
+
+  const rowClick = (row) => {
+    if (Date.now() - suppressClickRef.current < 700) return;
+    setActiveOther(row.key);
+  };
+
+  const handlePin = async () => {
+    if (!menu) return;
+    const key = menu.key;
+    const nextPinned = !menu.pinned;
+    setMenu(null);
+    setOverview((prev) => (prev || []).map((c) => (c.partner === key ? { ...c, pinned: nextPinned } : c)));
+    const res = await pinChat(key, nextPinned);
+    if (res.needsMigration) { setNeedsMig(true); return; }
+    if (!res.ok) { if (onNotify) onNotify(res.error || "No se pudo fijar el chat"); return; }
+    loadOverview();
+  };
+
+  const handleClear = async () => {
+    if (!menu) return;
+    const key = menu.key;
+    setMenu(null);
+    const res = await clearChatThread(key);
+    if (res.needsMigration) { setNeedsMig(true); return; }
+    if (!res.ok) { if (onNotify) onNotify(res.error || "No se pudo vaciar el chat"); return; }
+    if (onNotify) onNotify("Chat vaciado");
+    setOverview((prev) => (prev || []).map((c) => (c.partner === key ? { ...c, last: null, unread: 0 } : c)));
+    if (activeOther === key) setThreadNonce((n) => n + 1);
+    loadOverview();
+  };
+
+  const handleDelete = async () => {
+    if (!menu) return;
+    const key = menu.key;
+    setMenu(null);
+    const res = await deleteChatThread(key);
+    if (res.needsMigration) { setNeedsMig(true); return; }
+    if (!res.ok) { if (onNotify) onNotify(res.error || "No se pudo eliminar el chat"); return; }
+    if (onNotify) onNotify("Chat eliminado");
+    setOverview((prev) => (prev || []).filter((c) => c.partner !== key));
+    if (activeOther === key) { setActiveOther(null); setInfoOpen(false); setThreadMessages([]); }
+    loadOverview();
   };
 
   return (
@@ -804,8 +923,13 @@ export default function ChatView({ user, malla, notasClaseData, asignacionesData
               {filteredList.map((row) => (
                 <button
                   key={row.key}
-                  className={`${styles.convRow} ${activeOther === row.key ? styles.convRowActive : ""}`}
-                  onClick={() => setActiveOther(row.key)}
+                  className={`${styles.convRow} ${activeOther === row.key ? styles.convRowActive : ""} ${row.pinned ? styles.convRowPinned : ""}`}
+                  onClick={() => rowClick(row)}
+                  onContextMenu={(e) => { e.preventDefault(); clearTimeout(pressRef.current.timer); openMenu(row, e.clientX, e.clientY); }}
+                  onTouchStart={(e) => startPress(row, e)}
+                  onTouchMove={movePress}
+                  onTouchEnd={endPress}
+                  onTouchCancel={endPress}
                 >
                   <span className={styles.convAvatar}>
                     <Avatar u={row.partner} size={46} />
@@ -813,7 +937,10 @@ export default function ChatView({ user, malla, notasClaseData, asignacionesData
                   </span>
                   <span className={styles.convInfo}>
                     <span className={styles.convTop}>
-                      <span className={styles.convName}>{(row.partner.name || row.partner.username) + (row.unread > 0 ? " •" : "")}</span>
+                      <span className={styles.convNameWrap}>
+                        {row.pinned && <IconPin size={12} className={styles.convPinIcon} />}
+                        <span className={styles.convName}>{(row.partner.name || row.partner.username) + (row.unread > 0 ? " •" : "")}</span>
+                      </span>
                       {row.last && <span className={styles.convTime}>{fmtTimeFull(row.last.created_at)}</span>}
                     </span>
                     <span className={styles.convPreview}>{previewOf(row)}</span>
@@ -829,7 +956,7 @@ export default function ChatView({ user, malla, notasClaseData, asignacionesData
         <div className={styles.chatMain}>
           {activeOther && activeFriend ? (
             <ThreadView
-              key={activeOther}
+              key={`${activeOther}-${threadNonce}`}
               user={user}
               friend={activeFriend}
               onBack={() => { setActiveOther(null); setInfoOpen(false); setThreadMessages([]); loadOverview(); }}
@@ -861,6 +988,18 @@ export default function ChatView({ user, malla, notasClaseData, asignacionesData
           ) : null}
         </div>
       </div>
+
+      {menu && (
+        <ChatMenu
+          x={menu.x}
+          y={menu.y}
+          pinned={menu.pinned}
+          onPin={handlePin}
+          onClear={handleClear}
+          onDelete={handleDelete}
+          onClose={() => setMenu(null)}
+        />
+      )}
     </div>
   );
 }

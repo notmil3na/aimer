@@ -54,6 +54,39 @@ export async function markThreadRead(other) {
   }
 }
 
+export async function pinChat(other, pinned) {
+  try {
+    const res = await api("/friendships", { method: "POST", body: { action: "chatPin", other, pinned } });
+    if (res && res.needsMigration) return { ok: false, needsMigration: true, error: "Chat no disponible" };
+    return { ok: !!(res && res.ok), needsMigration: false, error: res?.error || null };
+  } catch (err) {
+    if (err && err.needsMigration) return { ok: false, needsMigration: true, error: "Chat no disponible" };
+    return { ok: false, needsMigration: false, error: (err && err.message) || "No se pudo fijar el chat" };
+  }
+}
+
+export async function clearChatThread(other) {
+  try {
+    const res = await api("/friendships", { method: "POST", body: { action: "chatClear", other } });
+    if (res && res.needsMigration) return { ok: false, needsMigration: true, error: "Chat no disponible" };
+    return { ok: !!(res && res.ok), needsMigration: false, error: res?.error || null };
+  } catch (err) {
+    if (err && err.needsMigration) return { ok: false, needsMigration: true, error: "Chat no disponible" };
+    return { ok: false, needsMigration: false, error: (err && err.message) || "No se pudo vaciar el chat" };
+  }
+}
+
+export async function deleteChatThread(other) {
+  try {
+    const res = await api("/friendships", { method: "POST", body: { action: "chatDelete", other } });
+    if (res && res.needsMigration) return { ok: false, needsMigration: true, error: "Chat no disponible" };
+    return { ok: !!(res && res.ok), needsMigration: false, error: res?.error || null };
+  } catch (err) {
+    if (err && err.needsMigration) return { ok: false, needsMigration: true, error: "Chat no disponible" };
+    return { ok: false, needsMigration: false, error: (err && err.message) || "No se pudo eliminar el chat" };
+  }
+}
+
 export async function getChatUploadUrl(other, meta) {
   try {
     const res = await api("/friendships", { method: "POST", body: { action: "chatUploadURL", other, ...meta } });

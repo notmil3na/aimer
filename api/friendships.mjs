@@ -12,6 +12,13 @@ function isTableMissing(err) {
   return code === "42P01" || code === "PGRST205" || msg.includes("does not exist") || msg.includes("no existe");
 }
 
+function isColumnMissing(err) {
+  if (!err) return false;
+  const msg = String(err.message || err.hint || "");
+  const code = String(err.code || "");
+  return code === "42703" || (msg.includes("column") && (msg.includes("does not exist") || msg.includes("no existe")));
+}
+
 const CHAT_BUCKET = "chat-attachments";
 const MAX_FILE_BYTES = 8 * 1024 * 1024;
 const MAX_TEXT = 8000;
@@ -111,7 +118,7 @@ async function ensureConversation(me, other) {
 async function membersOf(conversationId) {
   const { data, error } = await admin
     .from("conversation_members")
-    .select("conversation_id, username, last_read_at")
+    .select("*")
     .eq("conversation_id", conversationId);
   if (error) return { members: [], error };
   return { members: data || [], error: null };
@@ -166,12 +173,21 @@ async function signedUrlFor(absPath) {
 async function handleChatList(me) {
   const { data: mine, error: mineErr } = await admin
     .from("conversation_members")
-    .select("conversation_id, last_read_at")
+    .select("*")
     .eq("username", me);
   if (mineErr) return { needsMigration: isTableMissing(mineErr) };
   const myConvs = mine || [];
   const convIds = myConvs.map((c) => c.conversation_id);
   if (convIds.length === 0) return { data: [] };
+
+  const clearedByConv = {};
+  const hiddenByConv = {};
+  const pinnedByConv = {};
+  for (const c of myConvs) {
+    if (c.cleared_at) clearedByConv[c.conversation_id] = new Date(c.cleared_at).getTime();
+    if (c.hidden_at) hiddenByConv[c.conversation_id] = new Date(c.hidden_at).getTime();
+    pinnedByConv[c.conversation_id] = !!c.pinned_at;
+  }
 
   const { data: convRows, error: convsErr } = await admin
     .from("conversations")
@@ -203,40 +219,50 @@ async function handleChatList(me) {
 
   const lastByConv = {};
   const unreadByConv = {};
+  const visibleAfterHidden = new Set();
   for (const m of msgRows || []) {
+    const createdMs = new Date(m.created_at).getTime();
+    const clearedMs = clearedByConv[m.conversation_id];
+    if (clearedMs && createdMs <= clearedMs) continue;
+    const hiddenMs = hiddenByConv[m.conversation_id];
+    if (hiddenMs && createdMs > hiddenMs) visibleAfterHidden.add(m.conversation_id);
     if (lastByConv[m.conversation_id] === undefined) lastByConv[m.conversation_id] = m;
     if (m.sender !== me && !m.read) unreadByConv[m.conversation_id] = (unreadByConv[m.conversation_id] || 0) + 1;
   }
 
   const info = await usersInfo(partnerUsernames);
 
-  const list = convIds.map((convId) => {
-    const conv = convMap[convId] || {};
-    const partner = partnerByConv[convId];
-    const last = lastByConv[convId];
-    const prev = lastPreview(last);
-    return {
-      conversation_id: convId,
-      channel_token: conv.channel_token || "",
-      updated_at: conv.updated_at || null,
-      partner: partner || null,
-      partnerName: info[partner] ? info[partner].name : "",
-      partnerHasPhoto: !!(info[partner] && info[partner].hasPhoto),
-      last: last
-        ? {
-            id: last.id,
-            sender: last.sender,
-            created_at: last.created_at,
-            kind: last.message_type,
-            label: prev.label,
-            content: last.content,
-          }
-        : null,
-      unread: unreadByConv[convId] || 0,
-    };
-  });
+  const list = convIds
+    .filter((convId) => !hiddenByConv[convId] || visibleAfterHidden.has(convId))
+    .map((convId) => {
+      const conv = convMap[convId] || {};
+      const partner = partnerByConv[convId];
+      const last = lastByConv[convId];
+      const prev = lastPreview(last);
+      return {
+        conversation_id: convId,
+        channel_token: conv.channel_token || "",
+        updated_at: conv.updated_at || null,
+        partner: partner || null,
+        partnerName: info[partner] ? info[partner].name : "",
+        partnerHasPhoto: !!(info[partner] && info[partner].hasPhoto),
+        pinned: pinnedByConv[convId],
+        last: last
+          ? {
+              id: last.id,
+              sender: last.sender,
+              created_at: last.created_at,
+              kind: last.message_type,
+              label: prev.label,
+              content: last.content,
+            }
+          : null,
+        unread: unreadByConv[convId] || 0,
+      };
+    });
 
   list.sort((x, y) => {
+    if (x.pinned !== y.pinned) return x.pinned ? -1 : 1;
     const tx = x.last ? new Date(x.last.created_at).getTime() : 0;
     const ty = y.last ? new Date(y.last.created_at).getTime() : 0;
     return ty - tx;
@@ -264,6 +290,9 @@ async function handleChatThread(me, other) {
   const usernames = members.map((m) => m.username);
   if (!usernames.includes(me)) return { error: "No tienes acceso a esta conversación", status: 403 };
 
+  const myMember = members.find((m) => m.username === me) || {};
+  const clearedMs = myMember.cleared_at ? new Date(myMember.cleared_at).getTime() : 0;
+
   const { data: msgs, error: msgsErr } = await admin
     .from("messages")
     .select("id, sender, message_type, content, read, created_at, deleted_at")
@@ -271,7 +300,9 @@ async function handleChatThread(me, other) {
     .order("created_at", { ascending: true });
   if (msgsErr) return { needsMigration: isTableMissing(msgsErr) };
 
-  const visible = (msgs || []).filter((m) => !m.deleted_at);
+  const visible = (msgs || []).filter(
+    (m) => !m.deleted_at && (!clearedMs || new Date(m.created_at).getTime() > clearedMs)
+  );
   const ids = visible.map((m) => m.id);
 
   let attachments = [];
@@ -436,6 +467,7 @@ async function actionChatSend(me, other, body) {
 
   await admin.from("conversations").update({ updated_at: now }).eq("id", conversationId);
   await admin.from("conversation_members").update({ last_read_at: now }).eq("conversation_id", conversationId).eq("username", me);
+  await admin.from("conversation_members").update({ hidden_at: null }).eq("conversation_id", conversationId).eq("username", me);
 
   const { data: convRow } = await admin
     .from("conversations")
@@ -473,6 +505,60 @@ async function actionChatRead(me, other) {
     .update({ last_read_at: new Date().toISOString() })
     .eq("conversation_id", conversationId)
     .eq("username", me);
+  return { ok: true };
+}
+
+async function actionChatPin(me, other, body) {
+  const resolved = await resolveConversationId(me, other);
+  if (resolved.tableMissing) return { needsMigration: true };
+  if (!resolved.conversationId) return { ok: true, data: { pinned: false } };
+
+  const pinned = !!body.pinned;
+  const { error } = await admin
+    .from("conversation_members")
+    .update({ pinned_at: pinned ? new Date().toISOString() : null })
+    .eq("conversation_id", resolved.conversationId)
+    .eq("username", me);
+  if (error) {
+    if (isColumnMissing(error)) return { needsMigration: true };
+    return { error: "No se pudo fijar el chat" };
+  }
+  return { ok: true, data: { pinned } };
+}
+
+async function actionChatClear(me, other) {
+  const resolved = await resolveConversationId(me, other);
+  if (resolved.tableMissing) return { needsMigration: true };
+  if (!resolved.conversationId) return { ok: true };
+
+  const now = new Date().toISOString();
+  const { error } = await admin
+    .from("conversation_members")
+    .update({ cleared_at: now, last_read_at: now })
+    .eq("conversation_id", resolved.conversationId)
+    .eq("username", me);
+  if (error) {
+    if (isColumnMissing(error)) return { needsMigration: true };
+    return { error: "No se pudo vaciar el chat" };
+  }
+  return { ok: true };
+}
+
+async function actionChatDelete(me, other) {
+  const resolved = await resolveConversationId(me, other);
+  if (resolved.tableMissing) return { needsMigration: true };
+  if (!resolved.conversationId) return { ok: true };
+
+  const now = new Date().toISOString();
+  const { error } = await admin
+    .from("conversation_members")
+    .update({ cleared_at: now, hidden_at: now, pinned_at: null, last_read_at: now })
+    .eq("conversation_id", resolved.conversationId)
+    .eq("username", me);
+  if (error) {
+    if (isColumnMissing(error)) return { needsMigration: true };
+    return { error: "No se pudo eliminar el chat" };
+  }
   return { ok: true };
 }
 
@@ -574,7 +660,8 @@ export default async function handler(req, res) {
     const body = await readBody(req);
     const { action, other } = body;
 
-    if (action === "chatOpen" || action === "chatSend" || action === "chatRead" || action === "chatUploadURL") {
+    if (action === "chatOpen" || action === "chatSend" || action === "chatRead" || action === "chatUploadURL"
+      || action === "chatPin" || action === "chatClear" || action === "chatDelete") {
       if (!other || typeof other !== "string") return json(res, 400, { error: "Falta el usuario" });
       if (other === username) return json(res, 400, { error: "No puedes chatear contigo mismo" });
 
@@ -582,6 +669,9 @@ export default async function handler(req, res) {
       if (action === "chatOpen") r = await actionChatOpen(username, other);
       else if (action === "chatSend") r = await actionChatSend(username, other, body);
       else if (action === "chatRead") r = await actionChatRead(username, other);
+      else if (action === "chatPin") r = await actionChatPin(username, other, body);
+      else if (action === "chatClear") r = await actionChatClear(username, other);
+      else if (action === "chatDelete") r = await actionChatDelete(username, other);
       else r = await actionChatUploadURL(username, other, body);
 
       if (r.needsMigration) return json(res, 200, { ok: false, needsMigration: true, error: "Chat no disponible" });
