@@ -1,12 +1,12 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* ── Dark theme (default) ─────────────────────────── */
+
 :root, [data-theme="dark"] {
   --font-display: 'Inter', system-ui, sans-serif;
   --font-body: 'DM Sans', system-ui, sans-serif;
 
-/* ── Tipografía editorial ───────────────────────────── */
-/* Palabra clave en itálica + acento dentro de títulos */
+
+
 h1 > em, h2 > em, h3 > em {
   font-style: italic;
   font-weight: 500;
@@ -35,7 +35,7 @@ h1 > em, h2 > em, h3 > em {
   --aurora-3: rgba(210,60,150,0.22);
   --aurora-4: rgba(100,150,230,0.16);
 
-  --glass-blur: 8px;
+  --glass-blur: 6px;
   --radius-xl: 26px;
   --radius-lg: 18px;
   --radius-md: 14px;
@@ -49,7 +49,7 @@ h1 > em, h2 > em, h3 > em {
   color-scheme: dark;
 }
 
-/* ── Light theme ──────────────────────────────────── */
+
 [data-theme="light"] {
   --bg:       #f8f4fc;
   --surface:  rgba(255,255,255,0.62);
@@ -153,7 +153,7 @@ textarea {
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
-/* ── Selects nativos: opciones con color del tema ─── */
+
 select option {
   background: var(--modal-bg);
   color: var(--modal-text);
@@ -186,7 +186,7 @@ select option {
   }
 }
 
-/* ── Utilidades globales de movimiento ─────────────── */
+
 @keyframes viewReveal {
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -211,7 +211,7 @@ select option {
   }
 }
 
-/* ── Accesibilidad ─────────────────────────────────── */
+
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;

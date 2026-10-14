@@ -5,11 +5,10 @@ const UpdatePrompt = lazy(() => import("./components/UpdatePrompt"));
 const CustomCursor = lazy(() => import("./components/CustomCursor"));
 import { api, saveSession, clearSession, getToken, prewarm } from "./api";
 import { ensureFont } from "./utils/fonts";
-import { getPhoto, setPhotoCache } from "./utils/photo";
+import { getPhoto } from "./utils/photo";
 import useAppHeightFix from "./hooks/useAppHeightFix";
 import "./App.css";
 
-// ── Theme definitions ──────────────────────────────────────────────────────
 export const APP_THEMES = {
   rojo: {
     name: "Rojo",
@@ -67,7 +66,6 @@ export const APP_THEMES = {
   },
 };
 
-// ── Cortes disponibles ─────────────────────────────────────────────────────
 export function generateCortes(from = "2023-2", to = "2028-1") {
   const cortes = [];
   let [year, sem] = from.split("-").map(Number);
@@ -89,7 +87,6 @@ export function corteForSemester(ingresoCorte, semNum) {
   return CORTES[target] || null;
 }
 
-// ── CSS variable injection ─────────────────────────────────────────────────
 const BG_BY_MODE = { dark: "#0e0a18", light: "#f8f4fc" };
 
 export function applyTheme(themeKey, mode, fontBody) {
@@ -110,7 +107,6 @@ export function applyTheme(themeKey, mode, fontBody) {
   if (themeColorMeta) themeColorMeta.setAttribute("content", BG_BY_MODE[m] || BG_BY_MODE.dark);
 }
 
-// ── Backend (Vercel Functions) ─────────────────────────────────────────────
 export async function saveUser(userData) {
   const body = {
     name:         userData.name,
@@ -139,13 +135,11 @@ export async function saveUser(userData) {
       await attempt();
       return { ok: true };
     } catch (error2) {
-      console.error("saveUser error:", error2);
       return { ok: false, error: error2 };
     }
   }
 }
 
-// ── App root ───────────────────────────────────────────────────────────────
 export default function App() {
   const [user, setUser]   = useState(null);
   const [ready, setReady] = useState(false);
@@ -190,10 +184,7 @@ export default function App() {
   }, []);
 
   const handleLogin = (auth) => {
-    if (!auth || !auth.token || !auth.user) {
-      console.error("Respuesta de login inválida", auth);
-      return;
-    }
+    if (!auth?.token || !auth?.user) return;
     saveSession(auth.token, auth.user, auth.data);
     setUser(auth.user);
     applyTheme(auth.user.appTheme || "ambar", auth.user.appMode || "light", auth.user.fontBody);

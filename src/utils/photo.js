@@ -10,14 +10,6 @@ export function setPhotoCache(username, photo) {
   } catch (_) {}
 }
 
-export function clearPhotoCache(username) {
-  try {
-    localStorage.removeItem(cacheKey(username));
-  } catch (_) {}
-}
-
-// Reduce una imagen (data URL) a JPEG de máx. `maxSize` px para que nunca se
-// guarden fotos gigantes en la base de datos.
 export async function compressPhoto(dataUrl, maxSize = 256, quality = 0.82) {
   if (typeof document === "undefined" || !dataUrl) return dataUrl;
   try {

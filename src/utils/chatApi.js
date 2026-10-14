@@ -1,8 +1,5 @@
 import { api } from "../api";
 
-// ── Cliente del chat entre amigos ──────────────────────────────────────────
-// Los mensajes son "en vivo": el thread se refresca con Realtime (broadcast)
-// y se re-pide cada vez que el backend confirma un envío.
 
 export async function fetchChatOverview() {
   try {

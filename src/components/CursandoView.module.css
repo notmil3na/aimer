@@ -1,4 +1,4 @@
-/* ── Layout ───────────────────────────────────────── */
+
 .wrap {
   position: relative;
   padding: 28px 32px 36px;
@@ -82,7 +82,7 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ── Ponderado banner ─────────────────────────────── */
+
 .ponderadoBanner {
   position: relative;
   z-index: 1;
@@ -101,7 +101,7 @@
 .ponderadoMax { font-size: 18px; color: var(--text-muted); }
 .ponderadoEquiv { font-size: 13px; color: var(--text-muted); margin-left: 4px; }
 
-/* ── Empty state ──────────────────────────────────── */
+
 .emptyState {
   position: relative;
   z-index: 1;
@@ -116,10 +116,10 @@
 }
 .emptyIcon { display: block; font-size: 32px; margin-bottom: 12px; }
 
-/* ── Cards list ───────────────────────────────────── */
+
 .cardsList { display: flex; flex-direction: column; gap: 12px; margin-bottom: 28px; }
 
-/* ── Materia card ─────────────────────────────────── */
+
 .card {
   position: relative;
   z-index: 1;
@@ -162,7 +162,7 @@
 .notaEmpty { font-size: 12px; color: var(--border); }
 .expandIcon { font-size: 10px; color: var(--text-muted); margin-top: 6px; }
 
-/* ── Card body ────────────────────────────────────── */
+
 .cardBody {
   border-top: 1px solid var(--border);
   padding: 18px 20px;
@@ -174,7 +174,7 @@
 
 .infoRow { display: flex; gap: 14px; flex-wrap: wrap; }
 
-/* ── Cortes section ───────────────────────────────── */
+
 .cortesSection { display: flex; flex-direction: column; gap: 10px; }
 
 .sectionHeader { display: flex; align-items: center; justify-content: space-between; }
@@ -187,7 +187,7 @@
   letter-spacing: 0.08em; color: #e07070;
 }
 
-/* ── Corte section (nuevo) ────────────────────────── */
+
 .corteSection {
   background: color-mix(in srgb, var(--surface) 96%, transparent);
   border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
@@ -281,7 +281,7 @@
   font-size: 11px; color: var(--text-muted); align-self: flex-end; padding-bottom: 8px;
 }
 
-/* ── Nota final row ───────────────────────────────── */
+
 .notaFinalRow {
   display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
   padding: 12px 14px;
@@ -300,7 +300,7 @@
   font-size: 12px; font-weight: 600; margin-left: auto;
 }
 
-/* ── Repeticion section ───────────────────────────── */
+
 .repSection {
   border: 1px solid color-mix(in srgb, #e07070 24%, var(--border)); border-radius: 18px;
   padding: 14px; background: color-mix(in srgb, #e07070 6%, transparent);
@@ -315,7 +315,7 @@
 }
 .repBadge { font-size: 12px; font-weight: 600; padding: 6px 0; }
 
-/* ── Shared inputs ────────────────────────────────── */
+
 .inputGroup { display: flex; flex-direction: column; gap: 5px; }
 .inputGroup label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-muted); }
 
@@ -365,7 +365,7 @@
 }
 .removeBtn:hover { color: #e07070; background: rgba(224,112,112,0.08); }
 
-/* ── Resumen table ────────────────────────────────── */
+
 .resumenTable {
   background: linear-gradient(135deg, color-mix(in srgb, var(--surface) 94%, transparent), color-mix(in srgb, var(--surface2) 90%, transparent));
   border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);

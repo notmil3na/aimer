@@ -147,22 +147,6 @@ export function IconStar({ size = 16, className = "" }) {
   );
 }
 
-export function IconCoffee({ size = 16, className = "" }) {
-  return (
-    <svg aria-hidden="true" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <path className="coffeeSteam" d="M6.8 7.4c-1.1-1 1.1-2 0-3" />
-      <path className="coffeeSteam" d="M10.4 6.6c-1.1-1 1.1-2 0-3" />
-      <path className="coffeeSteam" d="M14 7.4c-1.1-1 1.1-2 0-3" />
-      <path d="M3.5 8.6h13v3a5.5 5.5 0 0 1-5.5 5.5h-2a5.5 5.5 0 0 1-5.5-5.5z" />
-      <path d="M16.5 9.8h1.2a2.6 2.6 0 0 1 0 5.2h-1.2" />
-      <path d="M3 19.8h14" />
-      <path d="M10.3 14.6C8.9 13.5 8.6 12.9 8.6 12.2C8.6 11.4 9.2 10.8 10 10.8C10.4 10.8 10.7 11 11 11.4C11.3 11 11.6 10.8 12 10.8C12.8 10.8 13.4 11.4 13.4 12.2C13.4 12.9 13.1 13.5 11.7 14.6C11.3 14.9 10.7 14.9 10.3 14.6Z"
-        fill="currentColor" stroke="none" />
-    </svg>
-  );
-}
-
 export function IconSparkle({ size = 16, className = "" }) {
   return (
     <svg aria-hidden="true" width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className}>
@@ -183,7 +167,6 @@ export function IconLogout({ size = 16, className = "" }) {
   );
 }
 
-// ── Event type icons ──────────────────────────────
 
 export function IconExamen({ size = 16, className = "" }) {
   return (
@@ -307,7 +290,6 @@ export function IconFin({ size = 16, className = "" }) {
   );
 }
 
-// ── Building icons ────────────────────────────────
 
 export function IconMar({ size = 16, className = "" }) {
   return (
@@ -387,7 +369,6 @@ export function IconVirtual({ size = 16, className = "" }) {
   );
 }
 
-// ── Action icons ──────────────────────────────────
 
 export function IconPlus({ size = 16, className = "" }) {
   return (
@@ -497,7 +478,6 @@ export function IconChevronLeft({ size = 16, className = "" }) {
   );
 }
 
-// ── Status icons ──────────────────────────────────
 
 export function IconLocation({ size = 16, className = "" }) {
   return (
@@ -576,7 +556,6 @@ export function IconScale({ size = 16, className = "" }) {
   );
 }
 
-// ── Status indicators ─────────────────────────────
 
 export function IconCheck({ size = 16, className = "" }) {
   return (
@@ -597,15 +576,6 @@ export function IconX({ size = 16, className = "" }) {
   );
 }
 
-export function IconCircle({ size = 16, className = "" }) {
-  return (
-    <svg aria-hidden="true" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth="2" className={className}>
-      <circle cx="12" cy="12" r="10" />
-    </svg>
-  );
-}
-
 export function IconCircleDash({ size = 16, className = "" }) {
   return (
     <svg aria-hidden="true" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -620,16 +590,6 @@ export function IconCircleHalf({ size = 16, className = "" }) {
     <svg aria-hidden="true" width={size} height={size} viewBox="0 0 24 24" className={className}>
       <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="2" />
       <path d="M12 2a10 10 0 0 1 0 20V2z" fill="currentColor" />
-    </svg>
-  );
-}
-
-export function IconLock({ size = 16, className = "" }) {
-  return (
-    <svg aria-hidden="true" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <rect x="4" y="11" width="16" height="10" rx="2" />
-      <path d="M8 11V7a4 4 0 0 1 8 0v4" />
     </svg>
   );
 }
@@ -660,17 +620,6 @@ export function IconSettings({ size = 16, className = "" }) {
       strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
       <circle cx="12" cy="12" r="3" />
       <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-    </svg>
-  );
-}
-
-export function IconMenu({ size = 16, className = "" }) {
-  return (
-    <svg aria-hidden="true" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <line x1="3" y1="6" x2="21" y2="6" />
-      <line x1="3" y1="12" x2="21" y2="12" />
-      <line x1="3" y1="18" x2="21" y2="18" />
     </svg>
   );
 }
@@ -715,50 +664,26 @@ export function IconArrowLeft({ size = 16, className = "" }) {
   );
 }
 
-export function IconMoreVertical({ size = 16, className = "" }) {
+export function IconGrip({ size = 16, className = "" }) {
   return (
-    <svg aria-hidden="true" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <circle cx="12" cy="5" r="1.6" fill="currentColor" />
-      <circle cx="12" cy="12" r="1.6" fill="currentColor" />
-      <circle cx="12" cy="19" r="1.6" fill="currentColor" />
+    <svg aria-hidden="true" width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <circle cx="9" cy="6" r="1.4" />
+      <circle cx="15" cy="6" r="1.4" />
+      <circle cx="9" cy="12" r="1.4" />
+      <circle cx="15" cy="12" r="1.4" />
+      <circle cx="9" cy="18" r="1.4" />
+      <circle cx="15" cy="18" r="1.4" />
     </svg>
   );
 }
 
-// ── Map from old Unicode strings ──────────────────
-export const NAV_ICONS = {
-  horario: IconSchedule,
-  calendario: IconCalendar,
-  asignaciones: IconClipboard,
-  cursando: IconSemester,
-  notas: IconGrades,
-  malla: IconMalla,
-  config: IconSettings,
-  colaboracion: IconUsers,
-};
+export function IconDuplicate({ size = 16, className = "" }) {
+  return (
+    <svg aria-hidden="true" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+    </svg>
+  );
+}
 
-export const EVENT_TYPE_ICONS = {
-  examen: IconExamen,
-  quiz: IconQuiz,
-  tarea: IconTarea,
-  proyecto: IconProyecto,
-  foro: IconForo,
-  laboratorio: IconLaboratorio,
-  informe: IconInforme,
-  taller: IconTaller,
-  evento: IconEvento,
-  inicio_semestre: IconInicio,
-  fin_semestre: IconFin,
-};
-
-export const BUILDING_ICONS = {
-  "Mar Caribe": IconMar,
-  "Ciénaga Grande": IconCienaga,
-  "Sierra Nevada": IconSierra,
-  "Innovación": IconInnovacion,
-  "Bloque 3": IconBloque,
-  "Bloque 8": IconBloque,
-  "Hangar A": IconHangar,
-  "Espacio Virtual": IconVirtual,
-};

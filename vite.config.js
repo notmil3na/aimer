@@ -3,7 +3,6 @@ import react from '@vitejs/plugin-react'
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
-// Lista todos los archivos de dist/ (menos HTML) para precachearlos en el SW.
 function listFiles(dir, prefix) {
   const out = []
   if (!existsSync(dir)) return out
@@ -16,11 +15,6 @@ function listFiles(dir, prefix) {
   return out
 }
 
-// Cambia el nombre de caché del Service Worker en CADA build. Así sw.js
-// siempre difiere entre despliegues → el navegador detecta una versión nueva
-// → main.jsx dispara el evento "mimalla:swupdate" → UpdatePrompt pide recargar.
-// Además llena PRECACHE con los assets con hash de este release, de modo que el
-// SW nuevo descarga la versión completa en segundo plano y el recargo es al instante.
 function swCacheVersion() {
   return {
     name: 'sw-cache-version',

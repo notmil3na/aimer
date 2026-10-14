@@ -1,19 +1,18 @@
 import { useEffect, useRef } from "react";
 
-/* ── Constelación de Virgo ────────────────────────── */
 const VIRGO_STARS = [
-  [0.50, 0.90],  // Spica (α) — más brillante, abajo
-  [0.47, 0.55],  // Porrima (γ) — centro
-  [0.28, 0.22],  // Zavijava (β) — rama izq arriba
-  [0.36, 0.38],  // Auva (δ) — izq del centro
-  [0.62, 0.15],  // Vindemiatrix (ε) — rama der arriba
-  [0.56, 0.07],  // ζ — tope der
-  [0.48, 0.02],  // η — tope
-  [0.50, 0.72],  // τ — bajo centro
-  [0.16, 0.32],  // κ — lejos izq
-  [0.37, 0.67],  // ν — izq bajo
-  [0.54, 0.40],  // λ — der del centro
-  [0.64, 0.75],  // ι — der bajo
+  [0.50, 0.90],
+  [0.47, 0.55],
+  [0.28, 0.22],
+  [0.36, 0.38],
+  [0.62, 0.15],
+  [0.56, 0.07],
+  [0.48, 0.02],
+  [0.50, 0.72],
+  [0.16, 0.32],
+  [0.37, 0.67],
+  [0.54, 0.40],
+  [0.64, 0.75],
 ];
 const VIRGO_EDGES = [
   [6, 5], [5, 4], [4, 10], [10, 1], [1, 0],
@@ -21,7 +20,6 @@ const VIRGO_EDGES = [
 ];
 const N_CONST = VIRGO_STARS.length;
 
-/* ── Shaders ─────────────────────────────────────── */
 const VERT_POINT = `
 attribute vec2 a_pos;
 attribute float a_size;
@@ -67,7 +65,6 @@ void main(){
   gl_FragColor=vec4(u_col,v_a);
 }`;
 
-/* ── Helpers ─────────────────────────────────────── */
 function mkShader(gl, type, src) {
   const s = gl.createShader(type);
   gl.shaderSource(s, src);
@@ -84,7 +81,6 @@ function mkProgram(gl, vs, fs) {
   return p;
 }
 
-/* ── Componente ──────────────────────────────────── */
 export default function WebGLBackground({ color, style }) {
   const ref = useRef(null);
 
@@ -102,7 +98,6 @@ export default function WebGLBackground({ color, style }) {
     const CONNECT_DIST = isMobile ? 120 * dpr : 170 * dpr;
     const MAX_LINES = isMobile ? 200 : 400;
 
-    /* ── Partículas ──────────────────────────────── */
     const particles = [];
     for (let i = 0; i < TOTAL; i++) {
       const isConst = i >= BG_COUNT;
@@ -128,7 +123,6 @@ export default function WebGLBackground({ color, style }) {
       });
     }
 
-    /* ── Mouse ───────────────────────────────────── */
     let mouseX = -9e4, mouseY = -9e4;
     const onMove = (e) => {
       const r = canvas.getBoundingClientRect();
@@ -142,7 +136,6 @@ export default function WebGLBackground({ color, style }) {
     document.addEventListener("touchmove", onMove, { passive: true });
     document.addEventListener("mouseleave", onLeave);
 
-    /* ── GL programs ─────────────────────────────── */
     const pVS = mkShader(gl, gl.VERTEX_SHADER, VERT_POINT);
     const pFS = mkShader(gl, gl.FRAGMENT_SHADER, FRAG_POINT);
     const lVS = mkShader(gl, gl.VERTEX_SHADER, VERT_LINE);
@@ -169,7 +162,6 @@ export default function WebGLBackground({ color, style }) {
     const lPosBuf = gl.createBuffer();
     const lAlphaBuf = gl.createBuffer();
 
-    /* ── Resize / targets ────────────────────────── */
     let W = 0, H = 0;
     const computeTargets = () => {
       const cw = canvas.width, ch = canvas.height;
@@ -213,7 +205,13 @@ export default function WebGLBackground({ color, style }) {
     resize();
     window.addEventListener("resize", resize);
 
-    /* ── Animation state ─────────────────────────── */
+    const posArr = new Float32Array(TOTAL * 2);
+    const sizeArr = new Float32Array(TOTAL);
+    const alphaArr = new Float32Array(TOTAL);
+    const MAX_LINE_VERTS = MAX_LINES * 2;
+    const linePosArr = new Float32Array(MAX_LINE_VERTS * 2);
+    const lineAlphaArr = new Float32Array(MAX_LINE_VERTS);
+
     let raf;
     let t = 0;
     let phase = "drift";
@@ -222,7 +220,6 @@ export default function WebGLBackground({ color, style }) {
     const lineCol = [1.0, 1.0, 0.98];
 
     const render = () => {
-      /* If canvas not sized yet, retry next frame */
       if (canvas.width === 0 || canvas.height === 0) {
         resize();
         raf = requestAnimationFrame(render);
@@ -232,7 +229,6 @@ export default function WebGLBackground({ color, style }) {
       t += 0.008;
       const cw = canvas.width, ch = canvas.height;
 
-      /* Phase transitions */
       if (phase === "drift" && t > 8) phase = "converge";
       const convergeFactor = phase !== "drift"
         ? Math.min(1, Math.max(0, (t - 8) / 20))
@@ -247,11 +243,9 @@ export default function WebGLBackground({ color, style }) {
         ? Math.min(1, (t - completeTime) / 2)
         : 0;
 
-      /* ── Update particles ──────────────────────── */
       for (let i = 0; i < TOTAL; i++) {
         const p = particles[i];
 
-        /* Target attraction */
         if (p.isConst && convergeFactor > 0 && !p.locked) {
           const dx = p.targetX - p.x;
           const dy = p.targetY - p.y;
@@ -270,13 +264,11 @@ export default function WebGLBackground({ color, style }) {
           }
         }
 
-        /* Drift wobble — stronger for visibility */
         if (!p.locked) {
           p.vx += Math.sin(t * 0.5 + p.phase) * 0.005;
           p.vy += Math.cos(t * 0.65 + p.phase * 1.5) * 0.005;
         }
 
-        /* Mouse repulsion — stronger */
         const mdx = mouseX - p.x;
         const mdy = mouseY - p.y;
         const md = Math.sqrt(mdx * mdx + mdy * mdy);
@@ -286,17 +278,14 @@ export default function WebGLBackground({ color, style }) {
           p.vy -= (mdy / md) * f;
         }
 
-        /* Damping */
         p.vx *= 0.97;
         p.vy *= 0.97;
 
-        /* Move */
         if (!p.locked) {
           p.x += p.vx;
           p.y += p.vy;
         }
 
-        /* Wrap background stars */
         if (!p.isConst) {
           const margin = 40 * dpr;
           if (p.x < -margin) p.x = cw + margin;
@@ -305,23 +294,16 @@ export default function WebGLBackground({ color, style }) {
           if (p.y > ch + margin) p.y = -margin;
         }
 
-        /* Alpha with pulse */
         const pulse = 0.8 + 0.2 * Math.sin(t * 1.2 + p.phase);
         const glowBoost = p.isConst ? glowFactor * 0.35 : 0;
         p.alpha = Math.min(1, (p.baseAlpha + glowBoost) * pulse);
       }
 
-      /* ── GL state ──────────────────────────────── */
       gl.viewport(0, 0, cw, ch);
       gl.clearColor(0, 0, 0, 0);
       gl.clear(gl.COLOR_BUFFER_BIT);
       gl.enable(gl.BLEND);
       gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-
-      /* ── Draw particles ────────────────────────── */
-      const posArr = new Float32Array(TOTAL * 2);
-      const sizeArr = new Float32Array(TOTAL);
-      const alphaArr = new Float32Array(TOTAL);
 
       for (let i = 0; i < TOTAL; i++) {
         const p = particles[i];
@@ -354,27 +336,31 @@ export default function WebGLBackground({ color, style }) {
 
       gl.drawArrays(gl.POINTS, 0, TOTAL);
 
-      /* ── Draw lines ────────────────────────────── */
-      const lp = [];
-      const la = [];
+      let lineCount = 0;
 
-      /* Proximity lines (all particles) */
-      for (let i = 0; i < TOTAL && lp.length / 2 < MAX_LINES; i++) {
-        for (let j = i + 1; j < TOTAL && lp.length / 2 < MAX_LINES; j++) {
+      for (let i = 0; i < TOTAL && lineCount < MAX_LINES; i++) {
+        for (let j = i + 1; j < TOTAL && lineCount < MAX_LINES; j++) {
           const ex = particles[i].x - particles[j].x;
           const ey = particles[i].y - particles[j].y;
           const d = Math.sqrt(ex * ex + ey * ey);
           if (d < CONNECT_DIST) {
             const a = (1 - d / CONNECT_DIST) * 0.12;
-            lp.push(particles[i].x, particles[i].y, particles[j].x, particles[j].y);
-            la.push(a, a);
+            const idx = lineCount * 4;
+            const aidx = lineCount * 2;
+            linePosArr[idx] = particles[i].x;
+            linePosArr[idx + 1] = particles[i].y;
+            linePosArr[idx + 2] = particles[j].x;
+            linePosArr[idx + 3] = particles[j].y;
+            lineAlphaArr[aidx] = a;
+            lineAlphaArr[aidx + 1] = a;
+            lineCount++;
           }
         }
       }
 
-      /* Constellation edges */
       const cStart = BG_COUNT;
       for (const [a, b] of VIRGO_EDGES) {
+        if (lineCount >= MAX_LINES) break;
         const pa = particles[cStart + a];
         const pb = particles[cStart + b];
         if (!pa.locked || !pb.locked) continue;
@@ -386,27 +372,34 @@ export default function WebGLBackground({ color, style }) {
         const edgeAlpha = Math.min(fadeA, fadeB) * (0.35 + glowFactor * 0.55);
 
         if (edgeAlpha > 0.01) {
-          lp.push(pa.x, pa.y, pb.x, pb.y);
-          la.push(edgeAlpha, edgeAlpha);
+          const idx = lineCount * 4;
+          const aidx = lineCount * 2;
+          linePosArr[idx] = pa.x;
+          linePosArr[idx + 1] = pa.y;
+          linePosArr[idx + 2] = pb.x;
+          linePosArr[idx + 3] = pb.y;
+          lineAlphaArr[aidx] = edgeAlpha;
+          lineAlphaArr[aidx + 1] = edgeAlpha;
+          lineCount++;
         }
       }
 
-      if (lp.length > 0) {
+      if (lineCount > 0) {
         gl.useProgram(lProg);
         gl.uniform2f(lRes, cw, ch);
         gl.uniform3f(lCol, lineCol[0], lineCol[1], lineCol[2]);
 
         gl.bindBuffer(gl.ARRAY_BUFFER, lPosBuf);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(lp), gl.DYNAMIC_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, linePosArr.subarray(0, lineCount * 4), gl.DYNAMIC_DRAW);
         gl.enableVertexAttribArray(lPos);
         gl.vertexAttribPointer(lPos, 2, gl.FLOAT, false, 0, 0);
 
         gl.bindBuffer(gl.ARRAY_BUFFER, lAlphaBuf);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(la), gl.DYNAMIC_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, lineAlphaArr.subarray(0, lineCount * 2), gl.DYNAMIC_DRAW);
         gl.enableVertexAttribArray(lAlpha);
         gl.vertexAttribPointer(lAlpha, 1, gl.FLOAT, false, 0, 0);
 
-        gl.drawArrays(gl.LINES, 0, lp.length / 2);
+        gl.drawArrays(gl.LINES, 0, lineCount * 2);
       }
 
       raf = requestAnimationFrame(render);

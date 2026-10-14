@@ -1,5 +1,4 @@
-/* MiMalla – Service Worker */
-const CACHE = "mimalla-v1788071897964";
+const CACHE = "mimalla-v1791956990253";
 const CORE = [
   "/",
   "/manifest.webmanifest",
@@ -8,15 +7,11 @@ const CORE = [
   "/icons/icon-512-maskable.png",
   "/icons/apple-touch-icon.png",
 ];
-// PRECACHE se llena en cada build (vite.config.js) con todos los .js/.css con
-// hash de este release. Así el SW nuevo descarga la versión completa en segundo
-// plano y, al pulsar "Recargar ahora", la app abre al instante desde el caché.
-const PRECACHE = ["/assets/AsignacionesView-9d4ed75b.js","/assets/AsignacionesView-eae2c64e.css","/assets/CalendarioView-25af4333.js","/assets/CalendarioView-ba797205.css","/assets/ChatView-3849c99f.css","/assets/ChatView-5e8deee6.js","/assets/ColaboracionView-21e9c4cb.css","/assets/ColaboracionView-d89fda33.js","/assets/CursandoView-32b5748e.css","/assets/CursandoView-8011dda4.js","/assets/CustomCursor-1e37d8bf.css","/assets/CustomCursor-9400d9f6.js","/assets/Dashboard-2f38f6de.js","/assets/Dashboard-3326c616.css","/assets/HorarioExport-5bb870ae.js","/assets/HorarioExport-c424b9ab.css","/assets/HorarioView-48485da0.js","/assets/HorarioView-4f1084d3.css","/assets/HorarioWallpaper-06250728.js","/assets/HorarioWallpaper-9442894b.css","/assets/Login-52608b3d.js","/assets/Login-aa3f8f79.css","/assets/MallaView-927a4d83.js","/assets/MallaView-d43b257d.css","/assets/NotasView-3956a57e.js","/assets/NotasView-ce7e8ec4.css","/assets/SettingsView-058eedc1.js","/assets/SettingsView-a16686a6.css","/assets/UpdatePrompt-01375f59.js","/assets/UpdatePrompt-53502737.css","/assets/careerProgress-654522fe.js","/assets/friendsApi-f7ab40a2.js","/assets/horarioHelpers-52dd78e7.js","/assets/html2canvas.esm-f16e60ff.js","/assets/index-1b1ae201.js","/assets/index-56874985.js","/assets/index-a7cba66d.js","/assets/index-dbb9e88a.css","/assets/index.es-aea41031.js","/assets/notasClase-10c4ec8c.js","/assets/purify.es-541be1bb.js","/assets/semesterCountdown-a51eb9e3.js","/assets/useBodyScrollLock-feb2afa0.js","/assets/vendor-27d6d7f2.js","/icons/apple-touch-icon.png","/icons/icon-192.png","/icons/icon-512-maskable.png","/icons/icon-512.png","/manifest.webmanifest"];
+const PRECACHE = ["/assets/AsignacionesView-1812742b.js","/assets/AsignacionesView-7b51041b.css","/assets/CalendarioView-220bfe1c.css","/assets/CalendarioView-f5a86740.js","/assets/ChatView-665c95b9.css","/assets/ChatView-a866a252.js","/assets/ColaboracionView-2eb3e26e.css","/assets/ColaboracionView-503c7405.js","/assets/CursandoView-d3de19ba.js","/assets/CursandoView-d9992b55.css","/assets/CustomCursor-414bbb10.css","/assets/CustomCursor-669a8e48.js","/assets/Dashboard-b107d519.js","/assets/Dashboard-b329c188.css","/assets/HorarioExport-4441eb03.css","/assets/HorarioExport-a05ae5e1.js","/assets/HorarioView-09405986.css","/assets/HorarioView-1fad8847.js","/assets/HorarioWallpaper-05e5c4bb.css","/assets/HorarioWallpaper-5963d349.js","/assets/Login-1dea8ddd.css","/assets/Login-6c990f3d.js","/assets/MallaView-a06c7cbe.css","/assets/MallaView-c74a6f71.js","/assets/NotasView-05d5481e.js","/assets/NotasView-80ba163b.css","/assets/SettingsView-656c58df.js","/assets/SettingsView-f9305d00.css","/assets/UpdatePrompt-90a3fafd.css","/assets/UpdatePrompt-b8dbf392.js","/assets/academic-4c78966e.js","/assets/careerProgress-4497761c.js","/assets/friendsApi-e50cfd92.js","/assets/horarioHelpers-6d83de28.js","/assets/html2canvas.esm-f16e60ff.js","/assets/index-1b1ae201.js","/assets/index-a7cba66d.js","/assets/index-eb63b814.js","/assets/index-eb93115c.css","/assets/index.es-650d34a6.js","/assets/jspdf.es.min-b475143f.js","/assets/notasClase-34006f8a.js","/assets/purify.es-541be1bb.js","/assets/semesterCountdown-a51eb9e3.js","/assets/useBodyScrollLock-93de64dc.js","/assets/vendor-27d6d7f2.js","/icons/apple-touch-icon.png","/icons/icon-192.png","/icons/icon-512-maskable.png","/icons/icon-512.png","/manifest.webmanifest"];
 
 const isSwVersion = (key) => key.startsWith("mimalla-v");
 const toNumber = (key) => Number(key.replace(/^mimalla-v/, "")) || 0;
 
-// Busca primero en el caché actual; si falta, en versiones anteriores (aún válidas).
 function findInCaches(req) {
   return caches
     .keys()
@@ -46,9 +41,6 @@ function networkFirst(req) {
   });
 }
 
-// HTML stale-while-revalidate: sirve la copia en caché al instante y la
-// refresca en segundo plano. Solo el recargo post-actualización (?_sw=) va
-// primero a la red. La versión nueva se aplica con el aviso de recarga.
 const HTML_NETWORK_TIMEOUT = 1500;
 
 function fetchWithTimeout(req, ms) {
@@ -82,7 +74,6 @@ async function serveHtml(req, url) {
   const cached = await findInCaches(key).catch(() => undefined);
 
   if (url.searchParams.has("_sw")) {
-    // Recargo tras la actualización: siempre a la red primero.
     let res;
     try { res = await fetch(req); } catch (_) {}
     putHtml(key, res);
@@ -91,7 +82,6 @@ async function serveHtml(req, url) {
   }
 
   if (cached) {
-    // Pintar al instante y refrescar el caché en segundo plano.
     fetch(req).then((res) => putHtml(key, res)).catch(() => {});
     return cached;
   }
@@ -109,9 +99,6 @@ self.addEventListener("install", (e) => {
     caches
       .open(CACHE)
       .then(async (c) => {
-        // En la primera visita precachea solo lo esencial (sin duplicar las
-        // descargas de la página). Al actualizar (ya hay SW activo) precachea
-        // la versión completa → el recargo tras el aviso es instantáneo.
         const list = self.registration.active ? [...CORE, ...PRECACHE] : CORE;
         const jobs = [...new Set(list)].map(async (url) => {
           try {
@@ -147,7 +134,6 @@ self.addEventListener("message", (e) => {
   if (e.data && e.data.type === "SKIP_WAITING") self.skipWaiting();
 });
 
-// ── Push (notificaciones con la app cerrada) ────────────────────────────────
 self.addEventListener("push", (e) => {
   let payload = {};
   try {
@@ -192,12 +178,10 @@ self.addEventListener("fetch", (e) => {
   const url = new URL(req.url);
   if (url.pathname === "/sw.js") return;
 
-  // HTML (navegación) y raíz: caché al instante, refresco en segundo plano.
   if (req.mode === "navigate" || url.pathname === "/" || url.pathname.endsWith(".html")) {
     e.respondWith(serveHtml(req, url));
     return;
   }
 
-  // JS/CSS con hash (inmutables), iconos, fuentes y manifest: caché primero.
   e.respondWith(cacheFirst(req));
 });

@@ -3,6 +3,14 @@ export const ACCENT_COLORS = [
   "#82B8E8","#E882B8","#82E8B8","#E8B882",
 ];
 
+export function buildColorMap(materias) {
+  const map = {};
+  (materias || []).forEach((m, i) => {
+    map[m.id] = ACCENT_COLORS[i % ACCENT_COLORS.length];
+  });
+  return map;
+}
+
 export const HORAS_FORM = [
   "06:00 a. m.","07:00 a. m.","08:00 a. m.","09:00 a. m.","10:00 a. m.","11:00 a. m.",
   "12:00 p. m.","01:00 p. m.","02:00 p. m.","03:00 p. m.","04:00 p. m.","05:00 p. m.",
@@ -30,7 +38,6 @@ export function horaIdx(h) {
   return HORAS_FORM.indexOf(normalizeHora(h));
 }
 
-// ── Conflictos de horario ────────────────────────────────────────────────
 export function findConflicts(clases, pending) {
   const conflicts = [];
   const pendientes = pending.filter((c) =>

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import styles from "./NotasView.module.css";
 import {
   MAX_GRADE,
@@ -12,7 +12,6 @@ import {
 import { projectDesiredAverage, calcGlobalPond, simulateFailMateria } from "../utils/careerProgress.js";
 import { IconCheck, IconX, IconClose, IconWarning } from "./Icons";
 
-// ── helpers ──────────────────────────────────────────────────────────────────
 function calcPonderado(materias, notasMap, semestreById) {
   let sumPond = 0, sumCred = 0;
   materias.forEach((m) => {
@@ -38,7 +37,6 @@ function buildSemestreMap(malla) {
   return map;
 }
 
-// ── sub-components ────────────────────────────────────────────────────────────
 
 function GradeInput({ value, onChange, placeholder = "0 – 500" }) {
   return (
@@ -202,7 +200,6 @@ function MateriaRow({ mat, semestre, notaData, onChange, colorAprobada, colorCur
   );
 }
 
-// ── Main component ────────────────────────────────────────────────────────────
 export default function NotasView({ malla, notas, onSave, user }) {
   const [localNotas, setLocalNotas] = useState(notas || {});
   const [savedMsg, setSavedMsg]     = useState(false);
@@ -219,15 +216,15 @@ export default function NotasView({ malla, notas, onSave, user }) {
   const colorC = colors.cursando || "#c8a96e";
   const colorF = colors.faltante || "#3a3a52";
 
-  const semestreById = buildSemestreMap(malla);
+  const semestreById = useMemo(() => buildSemestreMap(malla), [malla]);
 
   const isLocalEdit = useRef(false);
   const saveTimerRef = useRef(null);
 
-  const updateNota = (id, data) => {
+  const updateNota = useCallback((id, data) => {
     isLocalEdit.current = true;
     setLocalNotas((prev) => ({ ...prev, [id]: data }));
-  };
+  }, []);
 
   useEffect(() => {
     if (!isLocalEdit.current) return;
@@ -241,16 +238,16 @@ export default function NotasView({ malla, notas, onSave, user }) {
     return () => window.clearTimeout(saveTimerRef.current);
   }, [localNotas, onSave]);
 
-  const activeSemesters = malla.filter((sem) =>
+  const activeSemesters = useMemo(() => malla.filter((sem) =>
     typeof sem.semestre === "number"
     && sem.materias.some((m) => m.estado === "cursando" || m.estado === "aprobada")
-  );
+  ), [malla]);
 
-  const allMaterias = malla.flatMap((s) => s.materias);
-  const globalPond  = calcGlobalPond(malla, localNotas);
+  const allMaterias = useMemo(() => malla.flatMap((s) => s.materias), [malla]);
+  const globalPond  = useMemo(() => calcGlobalPond(malla, localNotas), [malla, localNotas]);
 
-  const totalCreditos = allMaterias.reduce((a, m) => a + m.creditos, 0);
-  const creditosAprobados = allMaterias.reduce((acc, m) => {
+  const totalCreditos = useMemo(() => allMaterias.reduce((a, m) => a + m.creditos, 0), [allMaterias]);
+  const creditosAprobados = useMemo(() => allMaterias.reduce((acc, m) => {
     const n = localNotas[m.id];
     if (!n) return acc;
     const sem = semestreById.get(m.id);
@@ -260,34 +257,33 @@ export default function NotasView({ malla, notas, onSave, user }) {
     const tieneIntentoAprobado = intentos.some((i) => isGradePassed(m, sem, i.nota));
     if (aprobadoMain || tieneIntentoAprobado) return acc + m.creditos;
     return acc;
-  }, 0);
+  }, 0), [allMaterias, localNotas, semestreById]);
   const pctAprobados = totalCreditos > 0 ? Math.round((creditosAprobados / totalCreditos) * 100) : 0;
 
   const formatNotaResumen = (m, nota) => {
     if (nota === undefined || nota === null || nota === "") return "—";
-    const sem = semestreById.get(m.id);
-    if (isEnglishLetterGrade(m, sem)) return nota;
     return nota;
   };
 
-  const projection = showDesiredMode && desiredAvg !== ""
+  const projection = useMemo(() => (showDesiredMode && desiredAvg !== ""
     ? projectDesiredAverage(malla, localNotas, desiredAvg)
-    : null;
+    : null), [showDesiredMode, desiredAvg, malla, localNotas]);
 
-  const simulables = allMaterias
+  const simulables = useMemo(() => allMaterias
     .filter((m) => {
       if (m.estado !== "cursando") return false;
       if (isEnglishLetterGrade(m, semestreById.get(m.id))) return false;
       return true;
     })
-    .sort((a, b) => (semestreById.get(a.id) ?? 99) - (semestreById.get(b.id) ?? 99));
+    .sort((a, b) => (semestreById.get(a.id) ?? 99) - (semestreById.get(b.id) ?? 99)),
+    [allMaterias, semestreById]);
 
-  const failSim = showFailSim && failSimId
+  const failSim = useMemo(() => (showFailSim && failSimId
     ? simulateFailMateria(malla, localNotas, failSimId, {
         failedGrade: failGrade !== "" ? Number(failGrade) : undefined,
         retakeGrade: retakeGrade !== "" ? Number(retakeGrade) : undefined,
       })
-    : null;
+    : null), [showFailSim, failSimId, malla, localNotas, failGrade, retakeGrade]);
 
   return (
     <div className={styles.wrap}>

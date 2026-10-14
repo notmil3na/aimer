@@ -1,8 +1,3 @@
-// ── Realtime del chat (broadcast) ──────────────────────────────────────────
-// Usa Supabase Realtime con la clave anónima en el cliente; la suscripción al
-// canal `chat:{channel_token}` solo es viable si el backend dispensa el token
-// (el token es parte del canal, así que no se puede espiar sin tenerlo).
-// No se usa Supabase Auth: la identidad real la valida el JWT propio.
 
 let clientPromise = null;
 
@@ -19,7 +14,6 @@ function getClient() {
   return clientPromise;
 }
 
-// Crea un flujo por conversación: escucha broadcasts y permite emitirlos.
 export function createConversationStream(token, onMessage) {
   let client = null;
   let channel = null;
@@ -58,13 +52,4 @@ export function createConversationStream(token, onMessage) {
       });
     },
   };
-}
-
-export function resetClient() {
-  if (clientPromise) {
-    clientPromise.then((c) => {
-      if (c) c.removeAllChannels();
-    });
-  }
-  clientPromise = null;
 }

@@ -1,4 +1,4 @@
-/* ── Layout ───────────────────────────────────────── */
+
 .wrap { padding: 28px 32px; min-height: 100%; }
 
 .header {
@@ -15,7 +15,7 @@
   font-size: 12px; font-weight: 600; color: var(--text); white-space: nowrap;
 }
 
-/* ── Secciones ────────────────────────────────────── */
+
 .section { margin-bottom: 30px; }
 
 .sectionTitleRow { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
@@ -27,7 +27,7 @@
   padding: 2px 10px; font-size: 11px; font-weight: 700;
 }
 
-/* ── Búsqueda ─────────────────────────────────────── */
+
 .searchRow {
   display: flex; align-items: center; gap: 10px;
   background: var(--surface); border: 1px solid var(--border);
@@ -51,7 +51,7 @@
   border-radius: var(--radius-sm); padding: 8px 12px;
 }
 
-/* ── Avatar ───────────────────────────────────────── */
+
 .avatar {
   display: flex; align-items: center; justify-content: center;
   border-radius: 50%; flex-shrink: 0; overflow: hidden;
@@ -61,7 +61,7 @@
 }
 .avatarImg { width: 100%; height: 100%; object-fit: cover; }
 
-/* ── Tarjetas de persona ──────────────────────────── */
+
 .personGrid {
   display: grid; gap: 12px;
   grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
@@ -83,7 +83,7 @@
 
 .personActions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 
-/* ── Botones ──────────────────────────────────────── */
+
 .btnPrimary {
   display: inline-flex; align-items: center; gap: 6px;
   background: linear-gradient(135deg, var(--accent), var(--accent2));
@@ -118,7 +118,7 @@
 }
 .btnIconDanger:hover { border-color: #E87098; color: #E87098; }
 
-/* ── Tags de estado ───────────────────────────────── */
+
 .tagFriend {
   display: inline-flex; align-items: center; gap: 5px;
   font-size: 12px; font-weight: 600; color: #6EC88A;
@@ -133,7 +133,7 @@
   border-radius: var(--radius-sm); padding: 7px 12px;
 }
 
-/* ── Estado vacío de amigos ───────────────────────── */
+
 .friendsEmpty {
   text-align: center; padding: 40px 20px; color: var(--text-muted);
   background: var(--surface); border: 1px solid var(--border);
@@ -142,7 +142,7 @@
 .friendsEmptyIcon { display: block; font-size: 26px; color: var(--accent); margin-bottom: 10px; }
 .friendsEmptySub { font-size: 12.5px; }
 
-/* ── Avisos ───────────────────────────────────────── */
+
 .errorBanner {
   display: flex; align-items: center; gap: 7px;
   font-size: 12.5px; color: #E87098;
@@ -151,7 +151,7 @@
   border-radius: var(--radius-sm); padding: 10px 14px; margin-bottom: 20px;
 }
 
-/* ── Migración faltante ───────────────────────────── */
+
 .migrationCard {
   display: flex; gap: 16px; padding: 18px 20px; margin-bottom: 24px;
   background: color-mix(in srgb, var(--modal-bg) 92%, transparent);
@@ -176,7 +176,7 @@
   overflow-x: auto; white-space: pre; margin-bottom: 12px;
 }
 
-/* ── Comparación ──────────────────────────────────── */
+
 .compareSection {
   background: var(--surface); border: 1px solid var(--border);
   backdrop-filter: blur(var(--glass-blur));
@@ -224,7 +224,7 @@
 .progressTrack { height: 8px; border-radius: 999px; background: var(--surface2); border: 1px solid var(--border); overflow: hidden; }
 .progressFill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width 0.4s ease; }
 
-/* ── Cuadrícula de huecos ─────────────────────────── */
+
 .gridCard { min-width: 0; }
 .gridHeader {
   display: flex; align-items: center; justify-content: space-between;
@@ -272,7 +272,7 @@
 .cellAmigo { background: var(--surface2); border: 1px solid var(--border); }
 .cellAmbos { background: color-mix(in srgb, #E87098 18%, transparent); border: 1px solid color-mix(in srgb, #E87098 40%, transparent); }
 
-/* ── Franjas en común ─────────────────────────────── */
+
 .slotStats { display: flex; gap: 20px; flex-wrap: wrap; margin: 14px 0 10px; }
 .slotStat { font-size: 12px; color: var(--text-muted); }
 .slotStat strong { color: var(--text); font-size: 15px; }
@@ -292,7 +292,7 @@
 }
 .slotEmpty { font-size: 12.5px; color: var(--text-muted); }
 
-/* ── Comparar horarios ──────────────────────────── */
+
 .comparadorCol { min-width: 0; }
 .comparadorTabs {
   display: inline-flex; gap: 4px; padding: 4px;
@@ -379,7 +379,7 @@
 .coincSalon { color: var(--accent); font-weight: 600; }
 .coincDetalle strong { color: var(--text); }
 
-/* ── Cargando comparación ─────────────────────────── */
+
 .comparingCard {
   display: flex; align-items: center; gap: 10px;
   font-size: 13px; color: var(--text-muted);
@@ -407,7 +407,7 @@
   margin-bottom: 14px;
 }
 
-/* ── Quién está disponible (en vivo) ─────────────── */
+
 .dispCard {
   background: linear-gradient(135deg, color-mix(in srgb, var(--surface) 94%, transparent), color-mix(in srgb, var(--surface2) 90%, transparent));
   border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);

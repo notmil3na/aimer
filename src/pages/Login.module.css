@@ -11,7 +11,7 @@
   background: #070b16;
 }
 
-/* Constelación decorativa reemplazada por WebGLBackground */
+
 .wrap::before {
   display: none;
 }
@@ -30,7 +30,7 @@
   animation: fadeUp 0.55s cubic-bezier(0.2, 0.7, 0.3, 1);
 }
 
-/* Filete superior tipo "borde de carta" */
+
 .card::before {
   content: "";
   position: absolute;

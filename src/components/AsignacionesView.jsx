@@ -6,6 +6,7 @@ import {
 import { HORAS_FORM } from "../utils/horarioHelpers";
 import { semesterDatesFor, semesterCorteFor } from "../utils/semesterCountdown";
 import { REMINDER_OPTIONS } from "../utils/reminders";
+import { uuid } from "../utils/notasClase";
 import useBodyScrollLock from "../hooks/useBodyScrollLock";
 
 const NOTA_PASS_PCT = 0.6;
@@ -62,10 +63,6 @@ const TIPO_INFO = {
   taller:      { label: "Taller",      Icon: IconTaller,      color: "#C87CE0" },
 };
 
-function uuid() {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-}
-
 const PESOS_DEFAULT = [150, 150, 200];
 
 function calcCorteNota(items) {
@@ -76,19 +73,6 @@ function calcCorteNota(items) {
     if (!isNaN(n)) { suma += n; contados++; }
   });
   return contados > 0 ? Number(suma.toFixed(1)) : null;
-}
-
-function calcNotaFinal(cortes) {
-  if (!cortes || cortes.length === 0) return null;
-  let sumaPts = 0, sumaPeso = 0;
-  cortes.forEach((c) => {
-    const p = parseFloat(c.peso);
-    if (!isNaN(p) && p > 0) sumaPeso += p;
-    const pts = calcCorteNota(c.items);
-    if (pts !== null) sumaPts += pts;
-  });
-  if (sumaPeso === 0) return null;
-  return Number(((sumaPts / sumaPeso) * 500).toFixed(1));
 }
 
 function migrateCortes(cortes) {
@@ -145,7 +129,8 @@ function AsignacionCard({ item, allMaterias, onUpdate, onDelete, onEdit, onSyncC
 
   const handleGrade = (nota) => {
     const val = Number(item.valoracion) || 100;
-    const updated = { ...item, nota: nota === "" ? undefined : Number(nota) };
+    const completada = nota !== "";
+    const updated = { ...item, nota: nota === "" ? undefined : Number(nota), completada };
     onUpdate(updated);
     if (item.corteIdx !== undefined && item.materiaId) {
       const corteIdx = item.corteIdx;
@@ -264,12 +249,12 @@ function AsignacionCard({ item, allMaterias, onUpdate, onDelete, onEdit, onSyncC
   );
 }
 
-export default function AsignacionesView({ malla, asignacionesData, onSave, user, cursandoData, onSaveCursando, calendarioData, onSaveCalendario, semestre }) {
+export default function AsignacionesView({ malla, asignacionesData, onSave, cursandoData, onSaveCursando, calendarioData, onSaveCalendario, semestre }) {
   const [filterTipo, setFilterTipo] = useState("todos");
   const [filterMateria, setFilterMateria] = useState("todas");
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState(null);
-  const [showCompleted, setShowCompleted] = useState(false);
+  const [showCompleted, setShowCompleted] = useState(true);
 
   const anioSemestre = semesterDatesFor(semestre).start.getFullYear();
   const corteSemestre = semesterCorteFor(semestre);
@@ -278,22 +263,30 @@ export default function AsignacionesView({ malla, asignacionesData, onSave, user
   const allMaterias = malla.flatMap(s => s.materias);
   const cursandoMaterias = allMaterias.filter(m => m.estado === "cursando");
 
+  const sortItems = (arr) => arr.slice().sort((a, b) => {
+    const da = a.fechaExamen || a.fechaEntrega || a.fechaFin || "";
+    const db = b.fechaExamen || b.fechaEntrega || b.fechaFin || "";
+    if (!da && !db) return 0;
+    if (!da) return 1;
+    if (!db) return -1;
+    return da < db ? -1 : da > db ? 1 : 0;
+  });
+
   const filteredItems = useMemo(() => {
     let result = items;
     if (filterTipo !== "todos") result = result.filter(it => it.tipo === filterTipo);
     if (filterMateria !== "todas") result = result.filter(it => it.materiaId === filterMateria);
-    if (!showCompleted) result = result.filter(it => !it.completada);
-    return result.slice().sort((a, b) => {
-      const da = a.fechaExamen || a.fechaEntrega || a.fechaFin || "";
-      const db = b.fechaExamen || b.fechaEntrega || b.fechaFin || "";
-      if (!da && !db) return 0;
-      if (!da) return 1;
-      if (!db) return -1;
-      return da < db ? -1 : da > db ? 1 : 0;
-    });
-  }, [items, filterTipo, filterMateria, showCompleted]);
+    return sortItems(result.filter(it => !it.completada));
+  }, [items, filterTipo, filterMateria]);
 
-  const completedCount = items.filter(it => it.completada).length;
+  const completedItems = useMemo(() => {
+    let result = items;
+    if (filterTipo !== "todos") result = result.filter(it => it.tipo === filterTipo);
+    if (filterMateria !== "todas") result = result.filter(it => it.materiaId === filterMateria);
+    return sortItems(result.filter(it => it.completada));
+  }, [items, filterTipo, filterMateria]);
+
+  const completedCount = completedItems.length;
 
   const handleAdd = (newItem) => {
     const { diaExamen, mesExamen, diaEntrega, mesEntrega, diaFinEx, mesFinEx, diaFinEn, mesFinEn, ...rest } = newItem;
@@ -330,7 +323,7 @@ export default function AsignacionesView({ malla, asignacionesData, onSave, user
     if (updated.calendarId) {
       if (fecha) {
         newEvts = evts.map(ev => ev.id === updated.calendarId
-          ? { ...ev, tipo: updated.tipo, fecha, hora, titulo: updated.titulo, materiaId: updated.materiaId, lugar: updated.lugar, descripcion: updated.descripcion, esBinas: updated.esBinas, corteIdx: updated.corteIdx, temas: updated.temas, fechaFin: updated.fechaFin, recordatorio: updated.recordatorio ?? 1 }
+          ? { ...ev, tipo: updated.tipo, fecha, hora, titulo: updated.titulo, materiaId: updated.materiaId, lugar: updated.lugar, descripcion: updated.descripcion, esBinas: updated.esBinas, corteIdx: updated.corteIdx, temas: updated.temas, fechaFin: updated.fechaFin, recordatorio: updated.recordatorio ?? 1, notificar: updated.completada ? false : ev.notificar }
           : ev);
       } else {
         newEvts = evts.filter(ev => ev.id !== updated.calendarId);
@@ -393,9 +386,6 @@ export default function AsignacionesView({ malla, asignacionesData, onSave, user
           <p className={styles.subtitle}>{items.length} asignación{items.length !== 1 ? "es" : ""}</p>
         </div>
         <div className={styles.headerActions}>
-          <button className={styles.showCompletedBtn} onClick={() => setShowCompleted(v => !v)}>
-            {showCompleted ? "Ocultar completadas" : `Ver completadas (${completedCount})`}
-          </button>
           <button className={styles.addBtn} onClick={() => setShowModal(true)}>+ Asignación</button>
         </div>
       </div>
@@ -424,7 +414,7 @@ export default function AsignacionesView({ malla, asignacionesData, onSave, user
         </div>
       </div>
 
-      {filteredItems.length === 0 && (
+      {filteredItems.length === 0 && completedCount === 0 && (
         <div className={styles.emptyState}>
           <span className={styles.emptyIcon}><IconClipboard size={32} /></span>
           <p>No hay asignaciones {filterTipo !== "todos" || filterMateria !== "todas" ? "con estos filtros" : "todavía"}</p>
@@ -432,20 +422,48 @@ export default function AsignacionesView({ malla, asignacionesData, onSave, user
         </div>
       )}
 
-      <div className={styles.cardsList}>
-        {filteredItems.map(item => (
-          <AsignacionCard
-            key={item.id}
-            item={item}
-            allMaterias={allMaterias}
-            onUpdate={handleUpdate}
-            onDelete={handleDelete}
-            onEdit={(id) => setEditing(items.find(it => it.id === id))}
-            onSyncCalendar={(materiaId, data) => onSaveCursando({ ...cursandoData, [materiaId]: data })}
-            cortesData={cursandoData}
-          />
-        ))}
-      </div>
+      {filteredItems.length > 0 && (
+        <div className={styles.cardsList}>
+          {filteredItems.map(item => (
+            <AsignacionCard
+              key={item.id}
+              item={item}
+              allMaterias={allMaterias}
+              onUpdate={handleUpdate}
+              onDelete={handleDelete}
+              onEdit={(id) => setEditing(items.find(it => it.id === id))}
+              onSyncCalendar={(materiaId, data) => onSaveCursando({ ...cursandoData, [materiaId]: data })}
+              cortesData={cursandoData}
+            />
+          ))}
+        </div>
+      )}
+
+      {completedCount > 0 && (
+        <div className={styles.completedSection}>
+          <button className={styles.completedToggle} onClick={() => setShowCompleted(v => !v)}>
+            <IconCheck size={14} />
+            <span>Completadas ({completedCount})</span>
+            <span className={styles.completedChevron}>{showCompleted ? <IconChevronUp size={12} /> : <IconChevronDown size={12} />}</span>
+          </button>
+          {showCompleted && (
+            <div className={styles.cardsList}>
+              {completedItems.map(item => (
+                <AsignacionCard
+                  key={item.id}
+                  item={item}
+                  allMaterias={allMaterias}
+                  onUpdate={handleUpdate}
+                  onDelete={handleDelete}
+                  onEdit={(id) => setEditing(items.find(it => it.id === id))}
+                  onSyncCalendar={(materiaId, data) => onSaveCursando({ ...cursandoData, [materiaId]: data })}
+                  cortesData={cursandoData}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {(showModal || editing) && (
         <AddModal

@@ -1,8 +1,7 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useMemo } from "react";
 import { toPng } from "html-to-image";
-import { jsPDF } from "jspdf";
 import {
-  ACCENT_COLORS,
+  buildColorMap,
   LEGACY_HORAS,
   horaIdx,
   toViewHora,
@@ -35,20 +34,29 @@ export default function HorarioExport({ user, horarioData, malla, onClose, onNot
   const sheetRef = useRef(null);
   const [busy, setBusy] = useState(false);
 
-  const clases   = horarioData?.clases || [];
-  const materias = malla.flatMap((s) => s.materias);
-  const materiaMap = Object.fromEntries(materias.map((m) => [m.id, m]));
-  const materiasCursando = materias.filter((m) => m.estado === "cursando");
-  const colorMap = {};
-  materiasCursando.forEach((m, i) => {
-    colorMap[m.id] = ACCENT_COLORS[i % ACCENT_COLORS.length];
-  });
+  const clases = horarioData?.clases || [];
+  const materias = useMemo(() => malla.flatMap((s) => s.materias), [malla]);
+  const materiaMap = useMemo(() => Object.fromEntries(materias.map((m) => [m.id, m])), [materias]);
+  const colorMap = useMemo(
+    () => buildColorMap(materias.filter((m) => m.estado === "cursando")),
+    [materias]
+  );
 
-  const { visHoras, minH, diasMostrar } = buildGridInfo(clases, horarioData?.dias);
+  const { visHoras, minH, diasMostrar } = useMemo(
+    () => buildGridInfo(clases, horarioData?.dias),
+    [clases, horarioData?.dias]
+  );
   const CELL_H = 46;
 
-  const materiaIds = [...new Set(clases.map((c) => c.materiaId))];
-  const totalCred = materiaIds.reduce((a, id) => a + (materiaMap[id]?.creditos || 0), 0);
+  const materiaIds = useMemo(
+    () => [...new Set(clases.map((c) => c.materiaId))],
+    [clases]
+  );
+
+  const totalCred = useMemo(
+    () => materiaIds.reduce((a, id) => a + (materiaMap[id]?.creditos || 0), 0),
+    [materiaIds, materiaMap]
+  );
 
   const safeName = (user.username || "estudiante").replace(/[^\w.-]/g, "_");
   const now = new Date();
@@ -68,8 +76,7 @@ export default function HorarioExport({ user, horarioData, malla, onClose, onNot
       const dataUrl = await toPng(node, { pixelRatio: 2 });
       download(dataUrl, "png");
       onNotify?.("Horario descargado como PNG");
-    } catch (err) {
-      console.error(err);
+    } catch {
       onNotify?.("No se pudo exportar la imagen");
     } finally {
       setBusy(false);
@@ -81,7 +88,10 @@ export default function HorarioExport({ user, horarioData, malla, onClose, onNot
     if (!node || busy) return;
     setBusy(true);
     try {
-      const dataUrl = await toPng(node, { pixelRatio: 2 });
+      const [{ jsPDF }, dataUrl] = await Promise.all([
+        import("jspdf"),
+        toPng(node, { pixelRatio: 2 }),
+      ]);
       const img = new Image();
       await new Promise((resolve, reject) => {
         img.onload = resolve;
@@ -99,8 +109,7 @@ export default function HorarioExport({ user, horarioData, malla, onClose, onNot
       pdf.addImage(dataUrl, "PNG", 0, 0, w, h, undefined, "FAST");
       pdf.save(`horario_${safeName}.pdf`);
       onNotify?.("Horario descargado como PDF");
-    } catch (err) {
-      console.error(err);
+    } catch {
       onNotify?.("No se pudo exportar el PDF");
     } finally {
       setBusy(false);
@@ -108,35 +117,34 @@ export default function HorarioExport({ user, horarioData, malla, onClose, onNot
   };
 
   return (
-    <div className={styles.overlay} onClick={onClose}>
+    <div className={styles.overlay} onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="modal-export-title">
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.modalHeader}>
           <div>
-            <h3 className={styles.modalTitle}>Exportar horario</h3>
+            <h3 id="modal-export-title" className={styles.modalTitle}>Exportar horario</h3>
             <p className={styles.modalSub}>
               Vista previa del diseño que se compartirá o imprimirá.
             </p>
           </div>
           <div className={styles.modalActions}>
             {onOpenWallpaper && (
-              <button className={styles.btnSecondary} onClick={onOpenWallpaper} disabled={busy}>
+              <button type="button" className={styles.btnSecondary} onClick={onOpenWallpaper} disabled={busy}>
                 <IconDownload size={13} /> Fondo de pantalla
               </button>
             )}
-            <button className={styles.btnSecondary} onClick={handlePdf} disabled={busy}>
+            <button type="button" className={styles.btnSecondary} onClick={handlePdf} disabled={busy}>
               <IconDownload size={13} /> PDF
             </button>
-            <button className={styles.btnPrimary} onClick={handlePng} disabled={busy}>
+            <button type="button" className={styles.btnPrimary} onClick={handlePng} disabled={busy}>
               <IconDownload size={13} /> {busy ? "Generando…" : "Imagen PNG"}
             </button>
-            <button className={styles.modalClose} onClick={onClose}>
+            <button type="button" className={styles.modalClose} onClick={onClose} aria-label="Cerrar modal">
               <IconClose size={14} />
             </button>
           </div>
         </div>
         <div className={styles.preview}>
           <div className={styles.sheetWrap}>
-            {/* ── Diseño exportable ── */}
             <div ref={sheetRef} className={styles.sheet}>
               <div className={styles.sheetHeader}>
                 <div className={styles.sheetBrand}>

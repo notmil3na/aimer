@@ -1,8 +1,8 @@
-import { useState, useEffect, lazy, Suspense } from "react";
+import { useState, useEffect, useMemo, lazy, Suspense } from "react";
 import {
   HORAS_FORM,
   LEGACY_HORAS,
-  ACCENT_COLORS,
+  buildColorMap,
   normalizeHora,
   toViewHora,
   horaIdx,
@@ -21,7 +21,6 @@ import useBodyScrollLock from "../hooks/useBodyScrollLock";
 const HorarioExport = lazy(() => import("./HorarioExport"));
 const HorarioWallpaper = lazy(() => import("./HorarioWallpaper"));
 
-// ── Edificios y salones ───────────────────────────────────────────────────
 const EDIFICIOS = [
   { id:"mar_caribe", nombre:"Mar Caribe", IconComp:IconMar, lados:["Norte","Sur"],
     salones: Array.from({length:28},(_,i)=>`${100*(Math.floor(i/7)+1)+(i%7+1)}`), },
@@ -53,7 +52,6 @@ function saveCustomSalones(obj) {
   try { localStorage.setItem(CUSTOM_SALONES_KEY, JSON.stringify(obj)); } catch {}
 }
 
-// ── Detección de móvil (coincide con el media query de la vista) ─────────
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
@@ -75,7 +73,6 @@ const TODOS_DIAS = [
   {id:"J",label:"Jueves"},{id:"V",label:"Viernes"},{id:"S",label:"Sábado"},
 ];
 
-// ── Clases de hoy ─────────────────────────────────────────────────────────
 const HOY_DIA_MAP = { 0: "D", 1: "L", 2: "M", 3: "X", 4: "J", 5: "V", 6: "S" };
 
 function parseHoraNum(h) {
@@ -91,7 +88,6 @@ function parseHoraNum(h) {
   return hh + (mm || 0) / 60;
 }
 
-// ── helpers ───────────────────────────────────────────────────────────────
 function buildSalonLabel(edificioId, lado, salon) {
   const ed = EDIFICIOS.find(e=>e.id===edificioId);
   if (!ed) return "";
@@ -128,7 +124,6 @@ function buildEditando(clases, idx) {
   };
 }
 
-// ── Detección de choques persistente ──────────────────────────────────────
 function computeConflictIdxs(clases) {
   const set = new Set();
   for (let i = 0; i < clases.length; i++) {
@@ -144,7 +139,6 @@ function computeConflictIdxs(clases) {
   return set;
 }
 
-// ── ClaseModal ────────────────────────────────────────────────────────────
 function ClaseModal({ materiasDisponibles, allMaterias, existingClases, editIdxSet, prefill, diasActivos, onSave, onClose, editando, onDelete, onNotify }) {
   useBodyScrollLock();
   const [form, setForm] = useState(editando ? {
@@ -311,7 +305,7 @@ function ClaseModal({ materiasDisponibles, allMaterias, existingClases, editIdxS
             </div>
           </div>
 
-          {/* Choques detectados en vivo */}
+          {}
           {conflicts.length > 0 && (
             <div className={styles.conflictPanel}>
               <div className={styles.conflictTitle}><IconWarning size={13} /> Choque de horario detectado</div>
@@ -329,7 +323,7 @@ function ClaseModal({ materiasDisponibles, allMaterias, existingClases, editIdxS
             </div>
           )}
 
-          {/* Edificio */}
+          {}
           <div className={styles.formField}>
             <label>Edificio (opcional)</label>
             <div className={styles.edificioGrid}>
@@ -381,7 +375,7 @@ function ClaseModal({ materiasDisponibles, allMaterias, existingClases, editIdxS
           )}
           {salonLabel && <div className={styles.salonPreview}><IconLocation size={12} /> {salonLabel}</div>}
 
-          {/* Segundo día toggle */}
+          {}
           <div className={styles.formField}>
             <label>
               <input type="checkbox" checked={form.segundoDiaActivo}
@@ -418,7 +412,7 @@ function ClaseModal({ materiasDisponibles, allMaterias, existingClases, editIdxS
                 </select>
               </div>
             </div>
-            {/* Edificio 2 */}
+            {}
             <div className={styles.formField}>
               <label>Edificio día 2 (opcional)</label>
               <div className={styles.edificioGrid}>
@@ -490,7 +484,6 @@ function ClaseModal({ materiasDisponibles, allMaterias, existingClases, editIdxS
   );
 }
 
-// ── ClaseBloque (main view) ───────────────────────────────────────────────
 function ClaseBloque({ clase, materia, color, horaStart, duracion, onClick, isConflict }) {
   const top=horaStart*64, height=duracion*64-4;
   const showName = duracion >= 2;
@@ -518,7 +511,6 @@ function ClaseBloque({ clase, materia, color, horaStart, duracion, onClick, isCo
   );
 }
 
-// ── MiniHorario: small schedule card for planner ─────────────────────────
 function MiniHorario({ opcion, priority, colorMap, materiasRef, diasActivos, onEdit, onDelete, onRename, isSelected, onSelect, onAddClase, onTransfer, onMove }) {
   const [editingName, setEditingName] = useState(false);
   const [tempName, setTempName] = useState(opcion.nombre);
@@ -549,7 +541,7 @@ function MiniHorario({ opcion, priority, colorMap, materiasRef, diasActivos, onE
   return (
     <div className={`${styles.miniCard} ${isSelected?styles.miniCardSelected:""}`}
       onClick={onSelect}>
-      {/* Header */}
+      {}
       <div className={styles.miniCardHeader}>
         <div className={styles.miniCardName}>
           <span className={styles.miniDragHandle} title="Arrastra para reordenar">⠿</span>
@@ -585,17 +577,17 @@ function MiniHorario({ opcion, priority, colorMap, materiasRef, diasActivos, onE
         </div>
       </div>
 
-      {/* Mini grid */}
+      {}
       <div className={styles.miniGridWrap}>
         <div className={styles.miniGridInner} style={{"--num-dias":diasMostrar.length}}>
-          {/* Hora col */}
+          {}
           <div>
             <div className={styles.miniHoraColHeader}/>
             {visHoras.map(h=>(
               <div key={h} className={styles.miniHoraColCell}>{h}</div>
             ))}
           </div>
-          {/* Día cols */}
+          {}
           {diasMostrar.map(dia=>(
             <div key={dia.id} className={styles.miniDiaCol}>
               <div className={styles.miniDiaHeader}>{dia.id}</div>
@@ -628,7 +620,7 @@ function MiniHorario({ opcion, priority, colorMap, materiasRef, diasActivos, onE
         </div>
       </div>
 
-      {/* Stats + add */}
+      {}
       <div className={styles.miniStats}>
         <span className={styles.miniStat}><strong>{clases.length}</strong> clases</span>
         <span className={styles.miniStat}><strong>{totalCred}</strong> créditos</span>
@@ -649,7 +641,6 @@ function MiniHorario({ opcion, priority, colorMap, materiasRef, diasActivos, onE
   );
 }
 
-// ── TransferConfirmModal ─────────────────────────────────────────────────
 function TransferConfirmModal({ nombre, onEnrollMaterias, onCancel, onConfirm }) {
   useBodyScrollLock();
   return (
@@ -677,11 +668,10 @@ function TransferConfirmModal({ nombre, onEnrollMaterias, onCancel, onConfirm })
   );
 }
 
-// ── PlanificadorView ──────────────────────────────────────────────────────
 function PlanificadorView({ malla, planData, onSavePlan, user, onNotify, mainDias, onTransferToHorario, onEnrollMaterias }) {
-  const allMaterias = malla.flatMap((s) => s.materias);
-  const materiasActuales = allMaterias.filter((m) => m.estado === "cursando");
-  const materiasDisponibles = allMaterias
+  const allMaterias = useMemo(() => malla.flatMap((s) => s.materias), [malla]);
+  const materiasActuales = useMemo(() => allMaterias.filter((m) => m.estado === "cursando"), [allMaterias]);
+  const materiasDisponibles = useMemo(() => allMaterias
     .filter((m) => m.estado === "cursando" || m.estado === "faltante")
     .map((m) => ({
       ...m,
@@ -692,10 +682,11 @@ function PlanificadorView({ malla, planData, onSavePlan, user, onNotify, mainDia
           const p = allMaterias.find((x) => x.id === pid);
           return p?.estado !== "aprobada";
         }),
-    }));
-  const coloreables = materiasDisponibles.length ? materiasDisponibles : materiasActuales;
-  const colorMap = {};
-  coloreables.forEach((m,i)=>{ colorMap[m.id]=ACCENT_COLORS[i%ACCENT_COLORS.length]; });
+    })), [allMaterias]);
+  const colorMap = useMemo(
+    () => buildColorMap(materiasDisponibles.length ? materiasDisponibles : materiasActuales),
+    [materiasDisponibles, materiasActuales]
+  );
 
   const [opciones, setOpciones] = useState(planData?.opciones || []);
   const [selectedIdx, setSelectedIdx] = useState(planData?.selectedIdx ?? 0);
@@ -801,7 +792,7 @@ function PlanificadorView({ malla, planData, onSavePlan, user, onNotify, mainDia
 
   return (
     <div className={styles.planWrap}>
-      {/* Top bar */}
+      {}
       <div className={styles.planTopBar}>
         <div className={styles.planOpciones}>
           <span className={styles.planOpcionLabel}>Opciones:</span>
@@ -818,7 +809,7 @@ function PlanificadorView({ malla, planData, onSavePlan, user, onNotify, mainDia
         </div>
       </div>
 
-      {/* Resumen de matrícula de la opción seleccionada */}
+      {}
       {opciones[selectedIdx] && (() => {
         const opSel = opciones[selectedIdx];
         const clasesSel = opSel.clases || [];
@@ -879,7 +870,7 @@ function PlanificadorView({ malla, planData, onSavePlan, user, onNotify, mainDia
         );
       })()}
 
-      {/* Opciones en grid mini */}
+      {}
       {opciones.length === 0 ? (
         <div className={styles.planEmptyState}>
           <span className={styles.planEmptyIcon}><IconSchedule size={36} /></span>
@@ -919,7 +910,7 @@ function PlanificadorView({ malla, planData, onSavePlan, user, onNotify, mainDia
         </div>
       )}
 
-      {/* Modal */}
+      {}
       {modalState && (
         <ClaseModal
           materiasDisponibles={materiasDisponibles}
@@ -937,7 +928,7 @@ function PlanificadorView({ malla, planData, onSavePlan, user, onNotify, mainDia
         />
       )}
 
-      {/* Confirmación de transferencia a Mi horario */}
+      {}
       {confirmTransferIdx !== null && opciones[confirmTransferIdx] && (
         <TransferConfirmModal
           nombre={opciones[confirmTransferIdx].nombre}
@@ -950,8 +941,11 @@ function PlanificadorView({ malla, planData, onSavePlan, user, onNotify, mainDia
   );
 }
 
-// ── HoyWidget: clases de hoy ──────────────────────────────────────────────
 function HoyWidget({ horarioData, malla }) {
+  const colorMap = useMemo(
+    () => buildColorMap(malla.flatMap((s) => s.materias).filter((m) => m.estado === "cursando")),
+    [malla]
+  );
   const today = new Date();
   const diaKey = HOY_DIA_MAP[today.getDay()];
   if (diaKey === "D" || diaKey === "S") return null;
@@ -961,9 +955,6 @@ function HoyWidget({ horarioData, malla }) {
   if (claseHoy.length === 0) return null;
   const allMaterias = malla.flatMap(s => s.materias);
   const materiaMap = Object.fromEntries(allMaterias.map(m => [m.id, m]));
-  const materiasActuales = allMaterias.filter(m => m.estado === "cursando");
-  const colorMap = {};
-  materiasActuales.forEach((m, i) => { colorMap[m.id] = ACCENT_COLORS[i % ACCENT_COLORS.length]; });
   return (
     <div className={styles.hoyWidget}>
       <div className={styles.hoyList}>
@@ -994,7 +985,6 @@ function HoyWidget({ horarioData, malla }) {
   );
 }
 
-// ── Vista principal ───────────────────────────────────────────────────────
 export default function HorarioView({ malla, horarioData, planData, onSave, onSavePlan, user, onNotify, onEnrollMaterias }) {
   const [mode, setMode] = useState("horario");
   const [data, setData] = useState(horarioData || {dias:["L","M","X","J","V"],clases:[]});
@@ -1013,10 +1003,9 @@ export default function HorarioView({ malla, horarioData, planData, onSave, onSa
     setData(horarioData || {dias:["L","M","X","J","V"],clases:[]});
   }, [horarioData]);
 
-  const allMaterias = malla.flatMap(s=>s.materias);
-  const materiasActuales = allMaterias.filter(m=>m.estado==="cursando");
-  const colorMap = {};
-  materiasActuales.forEach((m,i)=>{ colorMap[m.id]=ACCENT_COLORS[i%ACCENT_COLORS.length]; });
+  const allMaterias = useMemo(() => malla.flatMap((s) => s.materias), [malla]);
+  const materiasActuales = useMemo(() => allMaterias.filter((m) => m.estado === "cursando"), [allMaterias]);
+  const colorMap = useMemo(() => buildColorMap(materiasActuales), [materiasActuales]);
 
   const toggleDia = (id) => {
     const dias = data.dias.includes(id)
@@ -1068,7 +1057,7 @@ export default function HorarioView({ malla, horarioData, planData, onSave, onSa
 
   const diasActivos=TODOS_DIAS.filter(d=>data.dias.includes(d.id));
 
-  const schedule = (() => {
+  const schedule = useMemo(() => {
     const claseIdxs = data.clases.flatMap(c => {
       const s = horaIdx(c.horaInicio), e = horaIdx(c.horaFin);
       if (s < 0 || e <= s) return [];
@@ -1087,8 +1076,9 @@ export default function HorarioView({ malla, horarioData, planData, onSave, onSa
       visEnd,
       visHoras: LEGACY_HORAS.slice(visStart, visEnd + 1),
     };
-  })();
-  const conflictSet = (() => {
+  }, [data.clases]);
+
+  const conflictSet = useMemo(() => {
     const set = new Set();
     const cs = data.clases;
     for (let i = 0; i < cs.length; i++) {
@@ -1102,7 +1092,7 @@ export default function HorarioView({ malla, horarioData, planData, onSave, onSa
       }
     }
     return set;
-  })();
+  }, [data.clases]);
 
   const handleDragOver = (e, diaId) => {
     if (!dragMateriaId) return;
@@ -1141,7 +1131,6 @@ export default function HorarioView({ malla, horarioData, planData, onSave, onSa
     setTouchPos(null);
   };
 
-  // ── Arrastrar por toque (móvil): el HTML5 DnD no funciona en táctil ──
   useEffect(() => {
     if (!touchDrag) return;
     const findTarget = (clientX, clientY) => {
@@ -1154,22 +1143,36 @@ export default function HorarioView({ malla, horarioData, planData, onSave, onSa
       const end = Math.min(h + 2, schedule.visEnd + 1);
       return { dia: col.dataset.dia, start: h, end };
     };
+
+    let rafId = null;
+    let pendingCoords = null;
+
     const onMove = (e) => {
       if (e.pointerType !== "touch") return;
-      setTouchPos({ x: e.clientX, y: e.clientY });
-      setDragHover(findTarget(e.clientX, e.clientY));
+      pendingCoords = { x: e.clientX, y: e.clientY };
+      if (!rafId) {
+        rafId = requestAnimationFrame(() => {
+          if (pendingCoords) {
+            setTouchPos(pendingCoords);
+            setDragHover(findTarget(pendingCoords.x, pendingCoords.y));
+          }
+          rafId = null;
+        });
+      }
     };
     const onUp = (e) => {
       if (e.pointerType !== "touch") return;
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      }
       const dx = e.clientX - touchDrag.startX;
       const dy = e.clientY - touchDrag.startY;
       if (Math.abs(dx) + Math.abs(dy) < 10) {
-        // Toque sin arrastre → abrir modal con la materia preseleccionada
         setEditando(null);
         setModalPrefill({ materiaId: touchDrag.materiaId });
         setShowModal(true);
       } else {
-        // Arrastre real → soltar sobre la franja
         const t = findTarget(e.clientX, e.clientY);
         if (t) {
           setModalPrefill({
@@ -1191,18 +1194,19 @@ export default function HorarioView({ malla, horarioData, planData, onSave, onSa
     window.addEventListener("pointerup", onUp);
     window.addEventListener("pointercancel", onUp);
     return () => {
+      if (rafId) cancelAnimationFrame(rafId);
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", onUp);
       window.removeEventListener("pointercancel", onUp);
     };
-  }, [touchDrag]);
+  }, [touchDrag, schedule.visStart, schedule.visEnd]);
 
   return (
     <div className={styles.wrap}>
-      {/* Clases de hoy */}
+      {}
       <HoyWidget horarioData={data} malla={malla} />
 
-      {/* Header */}
+      {}
       <div className={styles.header}>
         <div>
           <h2 className={styles.title}>Horario</h2>
@@ -1220,7 +1224,7 @@ export default function HorarioView({ malla, horarioData, planData, onSave, onSa
         </div>
       </div>
 
-      {/* Mode toggle */}
+      {}
       <div className={styles.modeBar}>
         <div className={styles.modeToggleGroup}>
           {[{id:"horario",label:"Mi horario",IconComp:IconSchedule},{id:"planificador",label:"Planificar",IconComp:IconStar}].map(m=>(
@@ -1233,7 +1237,7 @@ export default function HorarioView({ malla, horarioData, planData, onSave, onSa
         </div>
       </div>
 
-      {/* ── MODO HORARIO ── */}
+      {}
       {mode==="horario" && (<>
         <div className={styles.diasRow}>
           <span className={styles.diasLabel}>Días activos:</span>
@@ -1361,7 +1365,7 @@ export default function HorarioView({ malla, horarioData, planData, onSave, onSa
         )}
       </>)}
 
-      {/* ── MODO PLANIFICADOR ── */}
+      {}
       {mode==="planificador" && (
         <PlanificadorView
           malla={malla}
@@ -1375,7 +1379,7 @@ export default function HorarioView({ malla, horarioData, planData, onSave, onSa
         />
       )}
 
-      {/* Modal horario principal */}
+      {}
       {showModal && (
         <ClaseModal
           materiasDisponibles={materiasActuales}
@@ -1392,7 +1396,7 @@ export default function HorarioView({ malla, horarioData, planData, onSave, onSa
         />
       )}
 
-      {/* Exportación */}
+      {}
       {showExport && (
         <Suspense fallback={null}>
           <HorarioExport
@@ -1406,7 +1410,7 @@ export default function HorarioView({ malla, horarioData, planData, onSave, onSa
         </Suspense>
       )}
 
-      {/* Fondo de pantalla */}
+      {}
       {showWallpaper && (
         <Suspense fallback={null}>
           <HorarioWallpaper

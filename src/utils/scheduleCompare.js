@@ -1,8 +1,7 @@
 import { HORAS_FORM, horaIdx, toViewHora } from "./horarioHelpers.js";
 
-// ── Ventana académica ─────────────────────────────────────────────────────
 export const WINDOW_START = 0;
-export const WINDOW_END   = HORAS_FORM.length; // exclusivo (22:00)
+export const WINDOW_END   = HORAS_FORM.length;
 
 export const DAY_ORDER = ["L", "M", "X", "J", "V", "S"];
 export const DAY_LABELS = { L: "Lunes", M: "Martes", X: "Miércoles", J: "Jueves", V: "Viernes", S: "Sábado" };
@@ -19,7 +18,6 @@ export function compactHour(hora) {
   return `${h}:00`;
 }
 
-// ── Intervalos ocupados por día (fusionados) ──────────────────────────────
 export function buildBusyByDay(clases) {
   const byDay = {};
   for (const c of clases || []) {
@@ -42,7 +40,6 @@ export function buildBusyByDay(clases) {
   return byDay;
 }
 
-// ── Franjas libres por día (complemento de la ventana) ────────────────────
 export function freeSlotsPerDay(busy) {
   const out = {};
   for (const d of DAY_ORDER) {
@@ -59,7 +56,6 @@ export function freeSlotsPerDay(busy) {
   return out;
 }
 
-// ── Huecos en común ───────────────────────────────────────────────────────
 export function commonFreeSlots(myBusy, friendBusy, minDuracion = 1) {
   const aFree = freeSlotsPerDay(myBusy || {});
   const bFree = freeSlotsPerDay(friendBusy || {});
@@ -87,7 +83,6 @@ export function commonFreeSlots(myBusy, friendBusy, minDuracion = 1) {
   return result;
 }
 
-// ── Comparación de clases (coincidencias de horario) ──────────────────────
 function hourSetByDay(clases) {
   const out = {};
   for (const c of clases || []) {
@@ -101,7 +96,6 @@ function hourSetByDay(clases) {
   return out;
 }
 
-// Horas (índices) donde AMBOS tienen clase, por día.
 export function overlapHoursByDay(myClases, frClases) {
   const mine = hourSetByDay(myClases || []);
   const theirs = hourSetByDay(frClases || []);
@@ -116,7 +110,6 @@ export function overlapHoursByDay(myClases, frClases) {
   return out;
 }
 
-// Parejas de clases (una tuya, una del amigo) que se solapan en tiempo.
 export function overlappingClasses(myClases, frClases) {
   const valid = (c) => c && c.dia && horaIdx(c.horaInicio) >= 0 && horaIdx(c.horaFin) > horaIdx(c.horaInicio);
   const mine = (myClases || []).filter(valid);
@@ -149,7 +142,6 @@ export function overlappingClasses(myClases, frClases) {
   return result;
 }
 
-// ── Matriz para la cuadrícula visual ──────────────────────────────────────
 export function cellStatuses(myBusy, friendBusy) {
   const toSet = (intervals) => {
     const set = new Set();
@@ -173,7 +165,6 @@ export function cellStatuses(myBusy, friendBusy) {
   return out;
 }
 
-// ── Días a mostrar (unión de días activos + días con clases) ──────────────
 export function unionDias(horarioA, horarioB) {
   const set = new Set();
   for (const h of [horarioA, horarioB]) {
@@ -183,7 +174,6 @@ export function unionDias(horarioA, horarioB) {
   return DAY_ORDER.filter((d) => set.has(d));
 }
 
-// ── Materias compartidas / cursando del amigo ─────────────────────────────
 export function cursandoMaterias(malla) {
   return (malla || []).flatMap((s) => s.materias || []).filter((m) => m.estado === "cursando");
 }
@@ -193,9 +183,6 @@ export function commonSubjects(myMalla, friendMalla) {
   return cursandoMaterias(friendMalla).filter((m) => mine.has(m.id));
 }
 
-// ── Progreso de carrera a partir de la malla guardada ─────────────────────
-// Solo cuenta materias de semestres numéricos (obligatorias), igual que la
-// vista "Malla"; así el % es comparable entre compañeros de la misma carrera.
 export function progressFromMalla(malla) {
   const materias = (malla || [])
     .filter((s) => typeof s.semestre === "number")

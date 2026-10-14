@@ -1,4 +1,4 @@
-/* ── Overlay / modal ────────────────────────────────── */
+
 .modal, .modal * { color: var(--modal-text); }
 
 .overlay {
@@ -47,7 +47,7 @@
 .body { overflow-y: auto; flex: 1; min-height: 0; padding: 20px; }
 .emptyMsg { text-align: center; color: var(--modal-muted); font-size: 13px; padding: 30px 0; }
 
-/* ── Grid controles + preview ───────────────────────── */
+
 .grid { display: flex; gap: 22px; align-items: flex-start; }
 .controls { flex: 0 0 310px; display: flex; flex-direction: column; gap: 18px; }
 .previewCol { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 10px; }
@@ -144,12 +144,10 @@
   color: var(--modal-text);
 }
 
-/* ── Vista previa ─────────────────────────────────── */
+
 .previewBox { width: 100%; display: flex; justify-content: center; }
 .previewFrame {
-  /* content-box: el ancho/alto (W·ps × H·ps) se refiere al área interior, y
-     el borde del marco (bezel) se suma por fuera; así el fondo escalado llena
-     exactamente el marco y queda centrado al teléfono. */
+  
   box-sizing: content-box;
   position: relative;
   border-radius: 30px; overflow: hidden;
@@ -168,7 +166,7 @@
 }
 .previewCaption { font-size: 11px; color: var(--modal-muted); text-align: center; }
 
-/* ── Footer ───────────────────────────────────────── */
+
 .footer {
   display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap;
   padding: 14px 22px 18px;
@@ -193,10 +191,8 @@
 .btnSecondary:hover:not(:disabled) { border-color: var(--modal-muted); color: var(--modal-text); }
 .btnSecondary:disabled { opacity: 0.55; cursor: wait; }
 
-/* ═══ Fondo exportable (widget de lock screen) ═══ */
-/* box-sizing: border-box en todo el componente exportable para que el ancho
-   fijo en px de las pastillas mida exactamente igual en preview y en el
-   nodo oculto que captura toPng(). */
+
+
 .wall, .wall *, .wall *::before, .wall *::after { box-sizing: border-box; }
 
 .wall {
@@ -233,8 +229,7 @@
   font-family: 'Fraunces', Georgia, serif;
   font-weight: 400; text-transform: uppercase;
   line-height: 1.02; letter-spacing: 0.03em; white-space: nowrap;
-  /* Color calculado dinámicamente según la luminancia del color base; se
-     declara aquí para no heredar un color fijo del modal (`.modal *`). */
+  
   color: var(--solid-text);
 }
 .dayLine1 { font-size: calc(var(--s, 1) * 34px); }

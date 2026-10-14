@@ -4,3 +4,5 @@ node_modules/
 .vercel/
 *.log
 .env*
+src-tauri/target/
+src-tauri/gen/

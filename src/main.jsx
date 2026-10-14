@@ -63,7 +63,7 @@ if ("serviceWorker" in navigator && import.meta.env.PROD) {
           if (ev.persisted) check();
         });
       })
-      .catch((err) => console.warn("Service Worker no disponible:", err));
+      .catch(() => {});
   };
 
   navigator.serviceWorker.addEventListener("message", (event) => {

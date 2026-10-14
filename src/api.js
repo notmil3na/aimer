@@ -83,8 +83,6 @@ export async function api(path, { method = "GET", body, skipAuth = false, soft40
   return data;
 }
 
-// Calienta las funciones serverless de Vercel para que el login y la carga de
-// datos no paguen el cold start en el momento en que el usuario más lo nota.
 const WARM_PATHS = ["/auth/login", "/auth/me", "/user_data", "/auth/security"];
 
 export function prewarm() {

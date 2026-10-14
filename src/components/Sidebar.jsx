@@ -16,7 +16,7 @@ export default function Sidebar({ user, tabs, activeTab, onTabChange, onLogout, 
 
   return (
     <aside className={styles.sidebar}>
-      {/* Brand + mode toggle + recordatorios */}
+      {}
       <div className={styles.brandRow}>
         <div className={styles.brand}>
           <span className={styles.brandIcon}><IconStar size={20} /></span>
@@ -30,13 +30,13 @@ export default function Sidebar({ user, tabs, activeTab, onTabChange, onLogout, 
         </div>
       </div>
 
-      {/* Theme dot indicator */}
+      {}
       <div className={styles.themeIndicator}>
         <span className={styles.themeDot} style={{ background: theme.accent }} />
         <span className={styles.themeLabel}>Tema {theme.name}</span>
       </div>
 
-      {/* Profile */}
+      {}
       <div className={styles.profile}>
         <div className={styles.avatar}>
           {photo
@@ -58,7 +58,7 @@ export default function Sidebar({ user, tabs, activeTab, onTabChange, onLogout, 
         </button>
       </div>
 
-      {/* Nav */}
+      {}
       <nav className={styles.nav}>
         {tabs.map(t => {
           const IconComp = t.icon;

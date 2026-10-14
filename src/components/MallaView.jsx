@@ -3,7 +3,7 @@ import { MALLA, ESTADOS } from "../data/malla.js";
 import { getSemesterCountdown, semesterCorteFor, semesterDatesFor } from "../utils/semesterCountdown.js";
 import { canEnrollMateria } from "../utils/gradeHelpers.js";
 import { buildMallaTxt, downloadTxt } from "../utils/mallaExport.js";
-import { IconChevronRight, IconClose, IconLightbulb, IconWarning } from "./Icons";
+import { IconClose, IconLightbulb, IconWarning } from "./Icons";
 import { getObligatorias } from "../utils/careerProgress.js";
 import MateriaCard from "./MateriaCard";
 import styles from "./MallaView.module.css";
@@ -32,7 +32,6 @@ export default function MallaView({ malla: initialMalla, notas, onSave, user, on
   const [showMatriculables, setShowMatriculables] = useState(false);
   const [confirm, setConfirm] = useState(null);
   const confirmBtnRef = useRef(null);
-  const detailPanelRef = useRef(null);
 
   useEffect(() => {
     const handleEscape = (e) => {
@@ -265,7 +264,7 @@ export default function MallaView({ malla: initialMalla, notas, onSave, user, on
 
   return (
     <div className={styles.wrap} style={{ "--fs": fs }}>
-      {/* Header */}
+      {}
       <div className={styles.header}>
         <div className={styles.headerLeft}>
           <div>
@@ -293,7 +292,7 @@ export default function MallaView({ malla: initialMalla, notas, onSave, user, on
         </div>
       </div>
 
-      {/* Progress */}
+      {}
       <div className={styles.progressWrap}>
         <div className={styles.progressInfo}>
           <span>Progreso académico</span><span>{progress}%</span>
@@ -362,7 +361,7 @@ export default function MallaView({ malla: initialMalla, notas, onSave, user, on
         )}
       </div>
 
-      {/* Legend */}
+      {}
       <div className={styles.legend}>
         <span className={styles.legendHint}><IconLightbulb size={13} /> Toca una materia para ver sus prerequisitos</span>
         <div className={styles.legendItems}>
@@ -375,7 +374,7 @@ export default function MallaView({ malla: initialMalla, notas, onSave, user, on
         </div>
       </div>
 
-      {/* Grid */}
+      {}
       <div className={styles.grid}>
         {malla.map((sem, si) => {
           const isOptativas = sem.semestre === "opt";
@@ -484,9 +483,9 @@ export default function MallaView({ malla: initialMalla, notas, onSave, user, on
         </div>
       )}
 
-      {/* Detail panel */}
+      {}
       {selected && (
-        <div className={styles.detailPanel} ref={detailPanelRef} role="dialog" aria-modal="true" aria-label={`Detalle de ${selected.nombre}`}>
+        <div className={styles.detailPanel} role="dialog" aria-modal="true" aria-label={`Detalle de ${selected.nombre}`}>
           <div className={styles.detailHeader}>
             <div>
               <span className={styles.detailEstado} style={{ background: getColor(selected.estado), color: "#0e0e14" }}>

@@ -16,7 +16,6 @@ export function envReady() {
   return !!(SUPABASE_URL && SERVICE_KEY && SESSION_SECRET);
 }
 
-// ── Respuestas JSON ─────────────────────────────────────────────────────────
 export function json(res, status, body) {
   res.setHeader("Content-Type", "application/json");
   res.setHeader("Cache-Control", "no-store");
@@ -41,7 +40,6 @@ export function readBody(req) {
   });
 }
 
-// ── Hashing de contraseñas (scrypt nativo) ────────────────────────────────
 const SCRYPT_OPTS = { N: 16384, r: 8, p: 1 };
 
 function scryptAsync(password, salt, keylen) {
@@ -72,7 +70,6 @@ export async function verifyPassword(password, stored) {
   }
 }
 
-// ── JWT HS256 ──────────────────────────────────────────────────────────────
 function b64url(str) {
   return Buffer.from(str).toString("base64url");
 }
@@ -124,7 +121,6 @@ export function requireUser(req) {
   return verifyToken(getToken(req));
 }
 
-// ── Detección de columnas faltantes (migración pendiente) ────────────────
 export function isColumnMissing(err) {
   if (!err) return false;
   const msg = String(err.message || err.hint || "");
@@ -137,7 +133,6 @@ export function isColumnMissing(err) {
   );
 }
 
-// ── Perfil público ─────────────────────────────────────────────────────────
 export function publicUser(row) {
   if (!row) return null;
   return {

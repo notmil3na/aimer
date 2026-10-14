@@ -5,14 +5,13 @@ import { fileURLToPath } from "node:url";
 
 const OUT = join(dirname(fileURLToPath(import.meta.url)), "..", "public", "icons");
 
-// Paleta de la app (App.css / APP_THEMES)
-const BG        = [14, 10, 24];       // --bg
+const BG        = [14, 10, 24];
 const GOLD_HI   = [247, 231, 188];
 const GOLD_LO   = [176, 132, 62];
-const GOLD_ACC  = [238, 206, 123];    // --accent
-const VIOLET    = [168, 110, 220];    // aurora-1
-const PINK      = [210, 60, 150];     // aurora-3
-const BLUE      = [100, 150, 230];    // aurora-4
+const GOLD_ACC  = [238, 206, 123];
+const VIOLET    = [168, 110, 220];
+const PINK      = [210, 60, 150];
+const BLUE      = [100, 150, 230];
 
 const clamp255 = (v) => Math.max(0, Math.min(255, Math.round(v)));
 

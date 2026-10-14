@@ -1,4 +1,4 @@
-/* ── Layout ───────────────────────────────────────── */
+
 .wrap {
   position: relative;
   padding: 28px 32px 36px;
@@ -32,7 +32,7 @@
 .title { font-family: var(--font-display); font-size: 28px; font-weight: 400; color: var(--text); }
 .subtitle { font-size: 13px; color: var(--text-muted); margin-top: 3px; }
 
-/* ── Clases de hoy ─────────────────────────────────── */
+
 .hoyWidget {
   position: relative;
   z-index: 1;
@@ -98,7 +98,7 @@
 }
 .exportBtn:hover { border-color: var(--accent); color: var(--accent); box-shadow: 0 4px 14px rgba(var(--accent-rgb), 0.15); }
 
-/* ── Días selector ────────────────────────────────── */
+
 .diasRow {
   position: relative;
   z-index: 1;
@@ -122,7 +122,7 @@
   background: color-mix(in srgb, var(--accent) 14%, var(--surface)) !important;
 }
 
-/* ── Leyenda ──────────────────────────────────────── */
+
 .legendRow {
   position: relative;
   z-index: 1;
@@ -162,7 +162,7 @@
 .legendId { font-size: 11px; font-weight: 700; color: var(--text); }
 .legendNombre { font-size: 11px; color: var(--text-muted); }
 
-/* ── Empty state ──────────────────────────────────── */
+
 .emptyState {
   position: relative;
   z-index: 1;
@@ -177,7 +177,7 @@
 }
 .emptyIcon { display: block; font-size: 32px; margin-bottom: 12px; }
 
-/* ── Grid wrapper ─────────────────────────────────── */
+
 .gridWrap {
   position: relative;
   z-index: 1;
@@ -198,7 +198,7 @@
   min-width: 600px;
 }
 
-/* ── Hora column ──────────────────────────────────── */
+
 .horaCol { display: flex; flex-direction: column; }
 .horaColHeader { height: 44px; border-bottom: 1px solid var(--border); }
 .horaCell {
@@ -207,7 +207,7 @@
   font-size: 10px; color: var(--text-muted); border-bottom: 1px solid var(--border);
 }
 
-/* ── Día column ───────────────────────────────────── */
+
 .diaCol { display: flex; flex-direction: column; border-left: 1px solid var(--border); }
 .diaHeader {
   height: 44px; display: flex; align-items: center; justify-content: center;
@@ -219,10 +219,10 @@
   position: relative; flex: 1;
 }
 
-/* ── Líneas guía ──────────────────────────────────── */
+
 .horaLine { height: 64px; border-bottom: 1px solid var(--border); }
 
-/* ── Bloque de clase ──────────────────────────────── */
+
 .claseBloque {
   position: absolute; left: 4px; right: 4px;
   background: color-mix(in srgb, var(--clase-color) 18%, transparent);
@@ -272,7 +272,7 @@
 }
 .claseIcon { display: none; }
 
-/* ── Modal ────────────────────────────────────────── */
+
 .modalOverlay {
   position: fixed; inset: 0; z-index: 200;
   background: rgba(0, 0, 0, 0.42);
@@ -361,7 +361,7 @@
   position: relative; z-index: 1; background: var(--modal-bg);
 }
 
-/* ── Form elements ────────────────────────────────── */
+
 .formField { display: flex; flex-direction: column; gap: 7px; }
 .formField label {
   font-size: 11px; font-weight: 700; text-transform: uppercase;
@@ -381,7 +381,7 @@
 }
 .select:focus, .input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.12); }
 
-/* ── Edificios grid ───────────────────────────────── */
+
 .edificioGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
 .edificioBtn {
   display: flex; flex-direction: column; align-items: center; gap: 4px;
@@ -394,7 +394,7 @@
 .edificioBtn:hover { border-color: var(--accent); color: var(--text); }
 .edificioBtnActive { border-color: var(--accent) !important; color: var(--accent) !important; background: rgba(var(--accent-rgb), 0.16) !important; }
 
-/* ── Lado row ─────────────────────────────────────── */
+
 .ladoRow { display: flex; gap: 8px; }
 .ladoBtn {
   flex: 1; background: var(--surface2); border: 1px solid var(--border);
@@ -405,7 +405,7 @@
 .ladoBtn:hover { border-color: var(--accent); }
 .ladoBtnActive { border-color: var(--accent) !important; color: var(--accent) !important; background: rgba(var(--accent-rgb), 0.16) !important; }
 
-/* ── Salon grid ───────────────────────────────────── */
+
 .salonGrid { display: flex; gap: 7px; flex-wrap: wrap; }
 .salonBtn {
   background: var(--surface2); border: 1px solid var(--border);
@@ -416,20 +416,20 @@
 .salonBtn:hover { border-color: var(--accent); }
 .salonBtnActive { border-color: var(--accent) !important; color: var(--accent) !important; background: rgba(var(--accent-rgb), 0.08) !important; }
 
-/* ── Salon preview ────────────────────────────────── */
+
 .salonPreview {
   font-size: 13px; color: var(--accent); font-weight: 500;
   padding: 8px 12px; background: rgba(var(--accent-rgb), 0.08);
   border: 1px solid rgba(var(--accent-rgb), 0.25); border-radius: var(--radius-sm);
 }
 
-/* ── Salón "OTRO" (personalizado) ──────────────────── */
+
 .otroSalonRow {
   display: flex; gap: 8px; margin-top: 8px;
 }
 .otroSalonRow .input { flex: 1; }
 
-/* ── Modal buttons ────────────────────────────────── */
+
 .btnPrimary {
   background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #14101f;
   border: none; border-radius: var(--radius-sm);
@@ -446,7 +446,7 @@
 }
 .btnSecondary:hover { border-color: var(--text-muted); color: var(--text); }
 
-/* ── Delete ───────────────────────────────────────── */
+
 .deleteHint { position: fixed; bottom: 80px; right: 24px; z-index: 300; }
 .deleteBtn {
   background: rgba(224,112,112,0.1); border: 1px solid rgba(224,112,112,0.3);
@@ -519,10 +519,7 @@
   .claseProfesor, .claseHora, .claseSalon { font-size: 11px; }
 }
 
-/* ── Móvil: grid semanal con scroll horizontal y snap por día (Opción B) ──
-   En pantallas angostas el grid de 7 columnas es ilegible, así que cada día
-   tiene un ancho fijo y el usuario desliza horizontalmente. La columna de
-   hora queda pegada a la izquierda. */
+
 @media (max-width: 768px) {
   .modeBar { margin-bottom: 12px; }
   .modeToggleGroup { width: 100%; display: flex; }
@@ -539,7 +536,7 @@
 
   .gridWrap {
     scroll-snap-type: x mandatory;
-    scroll-padding-left: 42px; /* ancho de la columna de hora + separación */
+    scroll-padding-left: 42px; 
     overscroll-behavior-x: contain;
     -webkit-overflow-scrolling: touch;
   }
@@ -556,7 +553,7 @@
   .horaCell { font-size: 9px; padding: 5px 6px 0 0; }
   .diaCol { scroll-snap-align: start; }
 
-  /* ── Tarjetas de clase legibles en móvil ── */
+  
   .claseBloque { min-height: 44px; }
   .claseBloqueContent { padding: 8px 10px; }
   .claseId { font-size: 12px; }
@@ -574,14 +571,14 @@
   .claseHora { margin-top: auto; padding-top: 3px; }
   .claseIcon { display: inline-flex; flex-shrink: 0; }
 
-  /* ── Leyenda táctil: se mantiene el visual original (sin caja) ── */
+  
   .legendItemTap { cursor: pointer; touch-action: none; }
 
-  /* ── Planificador: reordenar con botones (sin drag en touch) ── */
+  
   .miniDragHandle { display: none; }
   .miniMoveBtn { display: inline-flex; }
 
-  /* ── Mini horario: snap por día y columnas legibles ── */
+  
   .miniGridWrap { scroll-snap-type: x mandatory; }
   .miniGridInner {
     min-width: 0;
@@ -590,11 +587,9 @@
   .miniDiaCol { scroll-snap-align: start; }
 }
 
-/* ═══════════════════════════════════════════════════
-   MODO PLANIFICADOR
-   ═══════════════════════════════════════════════════ */
 
-/* ── Top bar con botón de modo ────────────────────── */
+
+
 .modeBar {
   display: flex; align-items: center; gap: 8px; margin-bottom: 16px;
 }
@@ -616,10 +611,10 @@
   box-shadow: 0 1px 4px rgba(0,0,0,0.12);
 }
 
-/* ── Planificador wrap ────────────────────────────── */
+
 .planWrap { display: flex; flex-direction: column; gap: 14px; }
 
-/* ── Fila superior: opciones + acciones ───────────── */
+
 .planTopBar {
   display: flex; align-items: center; justify-content: space-between;
   flex-wrap: wrap; gap: 10px;
@@ -660,14 +655,14 @@
 }
 .planDeleteBtn:hover { background: rgba(224,112,112,0.08); }
 
-/* ── Grid de mini horarios ────────────────────────── */
+
 .planGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(440px, 1fr));
   gap: 14px;
 }
 
-/* ── Resumen de matrícula ─────────────────────────── */
+
 .planResumen {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -762,7 +757,7 @@
 .miniCardDragging { opacity: 0.4; }
 .miniCardDragOver { outline: 2px dashed var(--accent); outline-offset: 3px; border-radius: var(--radius-md); }
 
-/* ── Tarjeta mini horario ─────────────────────────── */
+
 .miniCard {
   background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius-md); overflow: hidden;
@@ -816,7 +811,7 @@
 .miniActionBtnDanger:hover { background: rgba(224,112,112,0.15); color: #e07070; }
 .miniMoveBtn { display: none; }
 
-/* ── Mini tabla ───────────────────────────────────── */
+
 .miniTableWrap { overflow-x: auto; }
 .miniTable {
   width: 100%; border-collapse: collapse;
@@ -843,7 +838,7 @@
 }
 .miniHoraRow { border-bottom: 1px solid rgba(var(--border), 0.5); }
 
-/* ── Mini bloque ──────────────────────────────────── */
+
 .miniBloque {
   border-radius: 4px; padding: 3px 5px; margin: 1px 1px;
   border-left: 2px solid var(--bloque-color);
@@ -855,7 +850,7 @@
 .miniBloqueId { font-weight: 700; color: var(--bloque-color); }
 .miniBloqueHora { color: var(--text-muted); font-size: 8px; }
 
-/* ── Mini horario grid (position-based like main) ─── */
+
 .miniGridWrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .miniGridInner {
   display: grid;
@@ -897,7 +892,7 @@
 .miniBloqueAbsHora { font-size: 8px; color: var(--text-muted); display: block; }
 .miniBloqueAbsProf { font-size: 8px; color: var(--text); font-weight: 500; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; margin-top: 1px; }
 
-/* ── Agregar clase al plan ────────────────────────── */
+
 .planClaseAddRow {
   display: flex; align-items: center; gap: 6px; padding: 8px 14px;
   border-top: 1px solid var(--border);
@@ -910,7 +905,7 @@
 }
 .planClaseAddBtn:hover { border-color: var(--accent); color: var(--accent); }
 
-/* ── Stats mini ───────────────────────────────────── */
+
 .miniStats {
   display: flex; gap: 10px; padding: 8px 14px;
   border-top: 1px solid var(--border);
@@ -918,7 +913,7 @@
 .miniStat { font-size: 10px; color: var(--text-muted); }
 .miniStat strong { color: var(--text); }
 
-/* ── Comparar overlay ─────────────────────────────── */
+
 .compareBar {
   display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
   padding: 10px 14px; margin-bottom: 12px;
@@ -946,7 +941,7 @@
 }
 .compareClearBtn:hover { border-color: var(--text-muted); color: var(--text); }
 
-/* ── Empty plan ───────────────────────────────────── */
+
 .planEmptyState {
   text-align: center; padding: 48px 20px;
   background: var(--surface); border: 1px dashed var(--border);
@@ -960,11 +955,9 @@
   .planGrid { grid-template-columns: 1fr; }
 }
 
-/* ═══════════════════════════════════════════════════
-   CONFLICTOS DE HORARIO EN TIEMPO REAL
-   ═══════════════════════════════════════════════════ */
 
-/* ── Banner de choques ────────────────────────────── */
+
+
 .conflictBanner {
   display: flex; align-items: center; gap: 8px;
   margin-bottom: 16px; padding: 10px 14px;
@@ -975,7 +968,7 @@
 }
 .conflictBanner strong { font-weight: 700; }
 
-/* ── Bloque en conflicto (rojo pulsante) ──────────── */
+
 .claseBloqueConflict {
   border-color: #e07070 !important;
   background: color-mix(in srgb, #e07070 28%, transparent) !important;
@@ -988,7 +981,7 @@
   50%      { box-shadow: 0 0 0 5px rgba(224,112,112,0); }
 }
 
-/* ── Drop preview mientras se arrastra ────────────── */
+
 .dropPreview {
   position: absolute; left: 3px; right: 3px;
   border: 2px dashed var(--accent);
@@ -1006,7 +999,7 @@
   box-shadow: var(--shadow-soft);
 }
 
-/* ── Panel de choques en el modal ─────────────────── */
+
 .conflictPanel {
   display: flex; flex-direction: column; gap: 6px;
   padding: 11px 13px;
@@ -1029,13 +1022,13 @@
 .conflictDetalle { color: var(--text-muted); font-size: 11.5px; }
 .conflictHint { font-size: 11px; color: var(--text-muted); }
 
-/* ── Botón primario con aviso de choque ───────────── */
+
 .btnPrimaryWarn {
   background: linear-gradient(135deg, #e07070, #a04040) !important;
   color: #fff !important;
 }
 
-/* ── Materia bloqueada por prerequisitos ──────────── */
+
 .blockedHint {
   display: flex; align-items: center; gap: 6px;
   font-size: 11.5px; color: #e0a060;
@@ -1045,7 +1038,7 @@
   border-radius: var(--radius-sm);
 }
 
-/* ── Mini horario: choques ────────────────────────── */
+
 .miniBloqueAbsConflict {
   border-color: #e07070 !important;
   border-left: 3px solid #e07070 !important;

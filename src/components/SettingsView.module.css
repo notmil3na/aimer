@@ -17,7 +17,7 @@
 .title { font-family: var(--font-display); font-size: 28px; font-weight: 400; color: var(--text); }
 .subtitle { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
 
-/* ── Internal section tabs ────────────────────────────── */
+
 .sectionTabs {
   position: relative;
   z-index: 1;
@@ -62,7 +62,7 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ── Career card ──────────────────────────────────────── */
+
 .careerCard {
   background: linear-gradient(135deg, color-mix(in srgb, var(--surface) 94%, transparent), color-mix(in srgb, var(--surface2) 90%, transparent));
   backdrop-filter: blur(var(--glass-blur));
@@ -127,7 +127,7 @@
   line-height: 1.4;
 }
 
-/* ── Two column layout ────────────────────────────────── */
+
 .twoCol {
   display: grid;
   grid-template-columns: 1fr 360px;
@@ -136,7 +136,7 @@
 }
 .twoCol > * { min-width: 0; }
 
-/* ── Card (datos personales) ──────────────────────────── */
+
 .card {
   background: linear-gradient(135deg, color-mix(in srgb, var(--surface) 94%, transparent), color-mix(in srgb, var(--surface2) 90%, transparent));
   border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
@@ -246,7 +246,7 @@
 }
 .autoSaveSaved { color: #6ec88a; }
 
-/* ── Cursando column ──────────────────────────────────── */
+
 .cursandoCol {
   background: linear-gradient(135deg, color-mix(in srgb, var(--surface) 94%, transparent), color-mix(in srgb, var(--surface2) 90%, transparent));
   border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
@@ -320,7 +320,7 @@
   color: var(--accent);
 }
 
-/* ── Fechas del semestre ──────────────────────────────── */
+
 .semDateToggle {
   display: flex; align-items: center; justify-content: center; gap: 8px;
   width: fit-content; margin: 14px auto 0; box-sizing: border-box;
@@ -381,9 +381,7 @@
   margin-bottom: 4px;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   APARIENCIA SECTION
-   ═══════════════════════════════════════════════════════════ */
+
 
 .section { margin-bottom: 32px; }
 
@@ -395,7 +393,7 @@
   border-bottom: 1px solid var(--border);
 }
 
-/* ── Mode buttons ─────────────────────────────────────── */
+
 .modeRow { display: flex; gap: 10px; }
 
 .modeBtn {
@@ -418,7 +416,7 @@
 }
 .modeIcon { font-size: 20px; }
 
-/* ── App theme grid ───────────────────────────────────── */
+
 .appThemeGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -445,7 +443,7 @@
 .appThemeDot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
 .appThemeCheck { margin-left: auto; font-size: 12px; color: var(--t-accent); font-weight: 700; }
 
-/* ── Font selector grid ───────────────────────────────── */
+
 .fontGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -479,7 +477,7 @@
   font-size: 12px; color: var(--accent); font-weight: 700;
 }
 
-/* ── Presets ──────────────────────────────────────────── */
+
 .presets { display: flex; gap: 10px; flex-wrap: wrap; }
 
 .presetBtn {
@@ -496,7 +494,7 @@
 .presetSwatches { display: flex; gap: 4px; }
 .swatch { width: 18px; height: 18px; display: block; }
 
-/* ── Color fields ─────────────────────────────────────── */
+
 .colorGrid { display: flex; flex-direction: column; gap: 14px; }
 .colorField { display: flex; flex-direction: column; gap: 7px; }
 .colorField label { font-size: 12px; font-weight: 500; color: var(--text-muted); }
@@ -505,28 +503,26 @@
 .colorHex { font-family: monospace; font-size: 13px; color: var(--text-muted); background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 5px 10px; }
 .colorPreviewCard { padding: 6px 14px; font-size: 12px; font-weight: 600; display: flex; align-items: center; }
 
-/* ── Borders ──────────────────────────────────────────── */
+
 .borderPreviewRow { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
 .borderBtn { background: var(--surface2); border: 1px solid var(--border); color: var(--text-muted); font-family: var(--font-body); font-size: 11px; padding: 8px 12px; cursor: pointer; transition: border-color 0.15s, color 0.15s; }
 .borderBtn:hover { border-color: var(--accent); color: var(--text); }
 .borderBtnActive { border-color: var(--accent) !important; color: var(--accent) !important; }
 .rangeInput { width: 100%; accent-color: var(--accent); }
 
-/* ── Font scale ───────────────────────────────────────── */
+
 .fontScaleRow { display: flex; gap: 8px; }
 .fontBtn { background: var(--surface2); border: 1px solid var(--border); color: var(--text-muted); font-family: var(--font-body); padding: 8px 16px; cursor: pointer; border-radius: var(--radius-sm); transition: border-color 0.15s, color 0.15s; }
 .fontBtn:hover { border-color: var(--accent); color: var(--text); }
 .fontBtnActive { border-color: var(--accent) !important; color: var(--accent) !important; }
 
-/* ── Preview cards ────────────────────────────────────── */
+
 .preview { display: flex; gap: 10px; flex-wrap: wrap; }
 .previewCard { width: 140px; background: var(--surface); border: 1px solid var(--card-color); overflow: hidden; }
 .previewBar { height: 3px; }
 .previewContent { padding: 8px 10px; display: flex; flex-direction: column; gap: 3px; }
 
-/* ═══════════════════════════════════════════════════════════
-   RESPONSIVE
-   ═══════════════════════════════════════════════════════════ */
+
 @media (max-width: 900px) {
   .wrap { padding: 18px 14px; }
   .title { font-size: 22px; }

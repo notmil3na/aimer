@@ -137,7 +137,7 @@
   line-height: 1.35;
 }
 
-/* ── Filters ──────────────────────────────────────── */
+
 .filters {
   position: relative;
   z-index: 1;
@@ -194,8 +194,43 @@
   cursor: pointer;
 }
 
-/* ── Cards ────────────────────────────────────────── */
+
 .cardsList { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 12px; }
+
+
+.completedSection {
+  position: relative;
+  z-index: 1;
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px dashed color-mix(in srgb, var(--border) 60%, transparent);
+}
+.completedToggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, color-mix(in srgb, #6ec88a 8%, var(--surface)), var(--surface));
+  border: 1px solid color-mix(in srgb, #6ec88a 20%, var(--border));
+  border-radius: 16px;
+  color: #6ec88a;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-bottom: 12px;
+}
+.completedToggle:hover {
+  background: linear-gradient(135deg, color-mix(in srgb, #6ec88a 12%, var(--surface)), var(--surface));
+  border-color: color-mix(in srgb, #6ec88a 34%, var(--border));
+  transform: translateY(-1px);
+}
+.completedChevron {
+  margin-left: auto;
+  color: var(--text-muted);
+}
 
 .card {
   position: relative;
@@ -294,7 +329,7 @@
 }
 .expandIcon { font-size: 10px; color: var(--text-muted); margin-top: 4px; }
 
-/* ── Expanded card ────────────────────────────────── */
+
 .cardExpanded {
   padding: 16px 18px;
   border-top: 1px solid var(--border);
@@ -305,7 +340,7 @@
 }
 .cardDesc { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
 
-/* ── Grade input ──────────────────────────────────── */
+
 .gradeRow {
   display: flex;
   align-items: center;
@@ -333,7 +368,7 @@
   border-radius: 999px;
 }
 
-/* ── Temas section ────────────────────────────────── */
+
 .temasSection { display: flex; flex-direction: column; gap: 8px; }
 .temasHeader { display: flex; align-items: center; justify-content: space-between; }
 .temasLabel { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); }
@@ -393,7 +428,7 @@
 }
 .deleteBtn:hover { background: color-mix(in srgb, #e07070 12%, transparent); }
 
-/* ── Empty state ──────────────────────────────────── */
+
 .emptyState {
   position: relative;
   z-index: 1;
@@ -408,7 +443,7 @@
 }
 .emptyIcon { display: block; font-size: 32px; margin-bottom: 12px; }
 
-/* ── Modal ────────────────────────────────────────── */
+
 .modalOverlay {
   position: fixed;
   inset: 0;
@@ -692,7 +727,7 @@
 }
 .btnSecondary:hover { border-color: var(--text-muted); color: var(--text); }
 
-/* ── Responsive ───────────────────────────────────── */
+
 @media (max-width: 900px) {
   .wrap { padding: 18px 14px; }
   .title { font-size: 22px; }

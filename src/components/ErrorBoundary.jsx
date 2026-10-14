@@ -24,10 +24,6 @@ export default class ErrorBoundary extends React.Component {
     return { error };
   }
 
-  componentDidCatch(error, info) {
-    console.error("ErrorBoundary capturó un error:", error, info);
-  }
-
   handleReload = async () => {
     try {
       if ("serviceWorker" in navigator) {

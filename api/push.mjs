@@ -7,8 +7,6 @@ const VAPID_SUBJECT = process.env.VAPID_SUBJECT || "https://mallaunimag.com";
 const CRON_SECRET = process.env.CRON_SECRET || "";
 
 const MAX_SENT_KEYS = 200;
-// Colombia (UTC-5, sin horario de verano). Desplazamos la fecha actual para
-// que los getters locales devuelvan el día en hora de Bogotá.
 const BOGOTA_OFFSET_MS = 5 * 60 * 60 * 1000;
 const DAY_MS = 86400000;
 const DEFAULT_REMINDER = 1;
@@ -46,7 +44,6 @@ function daysBetween(a, b) {
   return Math.round((dayStart(b) - dayStart(a)) / DAY_MS);
 }
 
-// Réplica servidor de src/utils/reminders.js (mantener en sincronía).
 function dueFrom(item, fecha, now) {
   if (item.notificar === false) return null;
   const offset = item.recordatorio ?? DEFAULT_REMINDER;
@@ -88,14 +85,12 @@ function computeDue(row, now) {
   return out;
 }
 
-// ── Cron diario (invocado por Vercel con header x-vercel-cron o con CRON_SECRET)
 async function runCron(res, req) {
   if (!VAPID_PUBLIC || !VAPID_PRIVATE) {
     return json(res, 503, { error: "VAPID no configurado" });
   }
   webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC, VAPID_PRIVATE);
 
-  // ?test=1 → envía un push de prueba a todos los suscritos (diagnóstico)
   const isTest = !!(req && req.query && req.query.test === "1");
   const now = new Date(Date.now() - BOGOTA_OFFSET_MS);
 
@@ -207,13 +202,11 @@ async function runCron(res, req) {
   });
 }
 
-// ── Handler principal ────────────────────────────────────────────────────────
 export default async function handler(req, res) {
   if (!envReady() || !admin) {
     return json(res, 500, { error: "Configuración del servidor incompleta" });
   }
 
-  // Cron (Vercel o con secret compartido)
   const fromCron = req.headers["x-vercel-cron"] === "1";
   const hasSecret =
     CRON_SECRET &&

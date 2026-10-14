@@ -1,18 +1,17 @@
 .cursor {
   position: fixed;
-  top: 0;
-  left: 0;
+  top: -7px;
+  left: -7px;
   pointer-events: none;
   z-index: 10000;
-  will-change: transform;
   border-radius: 50%;
   width: 14px;
   height: 14px;
-  margin: -7px 0 0 -7px;
   background: linear-gradient(135deg, var(--accent), var(--accent2));
   box-shadow:
     0 0 6px 2px rgba(var(--accent-rgb), 0.45),
     0 0 16px 4px rgba(var(--accent-rgb), 0.18);
+  will-change: translate;
 }
 
 .twinkle {

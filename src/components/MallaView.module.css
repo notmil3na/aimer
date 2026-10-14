@@ -246,7 +246,7 @@
   width: 10px; height: 10px; border-radius: 2px;
 }
 
-/* Grid horizontal de semestres */
+
 .grid {
   display: flex;
   gap: 12px;
@@ -309,7 +309,7 @@
   flex-shrink: 0;
 }
 
-/* Detail panel */
+
 .detailPanel {
   position: fixed;
   bottom: 24px; right: 24px;
@@ -727,7 +727,7 @@
   }
 }
 
-/* ── Confirm modal ─────────────────────────────────── */
+
 .confirmOverlay {
   position: fixed;
   inset: 0;

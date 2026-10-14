@@ -71,7 +71,7 @@
   50%      { box-shadow: 0 0 0 5px rgba(224,160,96,0); }
 }
 
-/* ÔöÇÔöÇ Hoy widget ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ */
+
 .hoyWidget {
   margin: 24px 28px 0;
   padding-bottom: 18px;
@@ -156,7 +156,7 @@
   text-align: center;
 }
 
-/* ── Onboarding checklist ────────────────────────── */
+
 .onboardingBar {
   padding: 16px 20px;
   margin-bottom: 4px;

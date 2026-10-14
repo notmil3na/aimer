@@ -4,7 +4,7 @@ import {
   IconUsers, IconSearch, IconUserPlus, IconCheck, IconClose, IconWarning,
   IconTrash, IconSchedule, IconStar, IconScale,
 } from "./Icons";
-import { ACCENT_COLORS } from "../utils/horarioHelpers.js";
+import { buildColorMap } from "../utils/horarioHelpers.js";
 import { usePhoto } from "../utils/photo";
 import {
   fetchUsersBrief, searchUsers, fetchFriendships, sendFriendRequest,
@@ -20,7 +20,6 @@ import { horaIdx, toViewHora } from "../utils/horarioHelpers.js";
 
 const STATUS_LABEL = { libre: "Libre en común", yo: "Solo tú", amigo: "Solo tu amigo", ambos: "Ambos ocupados" };
 
-// ── Disponibilidad en vivo ─────────────────────────────────────────────────
 const NOW_DIA = { 0: "D", 1: "L", 2: "M", 3: "X", 4: "J", 5: "V", 6: "S" };
 
 function currentHourIdx(now) {
@@ -125,7 +124,6 @@ function DisponiblesWidget({ amigos, horarios, loading }) {
   );
 }
 
-// ── Avatar ────────────────────────────────────────────────────────────────
 function Avatar({ u, size = 40 }) {
   const initial = ((u?.name || u?.username || "?").trim()[0] || "?").toUpperCase();
   const photo = usePhoto(u?.username, !!u?.hasPhoto);
@@ -143,7 +141,6 @@ function Avatar({ u, size = 40 }) {
   );
 }
 
-// ── Cuadrícula de comparación ─────────────────────────────────────────────
 function ComparadorGrid({ myHorario, frHorario }) {
   const myBusy = useMemo(() => buildBusyByDay(myHorario?.clases || []), [myHorario]);
   const frBusy = useMemo(() => buildBusyByDay(frHorario?.clases || []), [frHorario]);
@@ -235,8 +232,6 @@ function ComparadorGrid({ myHorario, frHorario }) {
   );
 }
 
-// ── Comparación de horarios ───────────────────────────────────────────────
-// Mini horario de solo lectura para la comparación lado a lado.
 function MiniSchedule({ title, subtitle, clases, dias, horas, colorMap, overlapHours }) {
   const CELL_H = 26;
   const esCoincidencia = (d, s, e) => {
@@ -290,7 +285,6 @@ function MiniSchedule({ title, subtitle, clases, dias, horas, colorMap, overlapH
   );
 }
 
-// Panel "Comparar horarios": ambos horarios lado a lado + coincidencias.
 function ComparadorHorarios({ myHorario, frHorario, myMalla, frMalla, myName = "Tú", frName }) {
   const myClases = myHorario?.clases || [];
   const frClases = frHorario?.clases || [];
@@ -303,10 +297,8 @@ function ComparadorHorarios({ myHorario, frHorario, myMalla, frMalla, myName = "
 
   const myMaterias = useMemo(() => cursandoMaterias(myMalla), [myMalla]);
   const frMaterias = useMemo(() => cursandoMaterias(frMalla), [frMalla]);
-  const myColorMap = {};
-  myMaterias.forEach((m, i) => { myColorMap[m.id] = ACCENT_COLORS[i % ACCENT_COLORS.length]; });
-  const frColorMap = {};
-  frMaterias.forEach((m, i) => { frColorMap[m.id] = ACCENT_COLORS[i % ACCENT_COLORS.length]; });
+  const myColorMap = useMemo(() => buildColorMap(myMaterias), [myMaterias]);
+  const frColorMap = useMemo(() => buildColorMap(frMaterias), [frMaterias]);
 
   const totalMismaMateria = overlaps.filter((o) => o.mismaMateria).length;
   const totalMismoSalon = overlaps.filter((o) => o.mismoSalon).length;
@@ -402,7 +394,6 @@ function ComparadorHorarios({ myHorario, frHorario, myMalla, frMalla, myName = "
   );
 }
 
-// ── Panel de comparación ──────────────────────────────────────────────────
 function ComparisonSection({ me, perfil, data, myHorario, myMalla, myName, onClose }) {
   const frHorario = data?.horario || { dias: [], clases: [] };
   const frMalla = data?.malla || [];
@@ -434,7 +425,7 @@ function ComparisonSection({ me, perfil, data, myHorario, myMalla, myName, onClo
       </div>
 
       <div className={styles.compareBody}>
-        {/* Columna izquierda: perfil académico */}
+        {}
         <div className={styles.profileCol}>
           <div className={styles.profileBlock}>
             <h4 className={styles.blockTitle}>Materias que comparten</h4>
@@ -488,7 +479,7 @@ function ComparisonSection({ me, perfil, data, myHorario, myMalla, myName, onClo
           </div>
         </div>
 
-        {/* Columna derecha: comparación de horarios */}
+        {}
         <div className={styles.comparadorCol}>
           <div className={styles.comparadorTabs}>
             <button
@@ -520,10 +511,8 @@ function ComparisonSection({ me, perfil, data, myHorario, myMalla, myName, onClo
   );
 }
 
-// ── Vista principal ───────────────────────────────────────────────────────
 export default function ColaboracionView({
   user, malla, horarioData, onNotify,
-  notas, cursandoData, notasClaseData, asignacionesData, semestre,
 }) {
   const [users, setUsers] = useState(null);
   const [friendships, setFriendships] = useState({});
@@ -730,12 +719,12 @@ export default function ColaboracionView({
       )}
 
       {!tableMissing && (<>
-        {/* Disponibilidad en vivo */}
+        {}
         <div className={styles.section}>
           <DisponiblesWidget amigos={amigos} horarios={friendHorarios} loading={dispLoading} />
         </div>
 
-        {/* Buscar personas */}
+        {}
         <section className={styles.section}>
           <div className={styles.sectionTitleRow}>
             <h3 className={styles.sectionTitle}>Buscar personas</h3>
@@ -803,7 +792,7 @@ export default function ColaboracionView({
           )}
         </section>
 
-        {/* Solicitudes entrantes */}
+        {}
         {incoming.length > 0 && (
           <section className={styles.section}>
             <div className={styles.sectionTitleRow}>
@@ -835,7 +824,7 @@ export default function ColaboracionView({
           </section>
         )}
 
-        {/* Mis amigos */}
+        {}
         <section className={styles.section}>
           <div className={styles.sectionTitleRow}>
             <h3 className={styles.sectionTitle}>Mis amigos</h3>
@@ -882,7 +871,7 @@ export default function ColaboracionView({
           )}
         </section>
 
-        {/* Comparación */}
+        {}
         {selectedUser && comparing && (
           <div className={styles.comparingCard}>
             <span className={styles.loadingSpinner} /> Cargando horario de {selectedUser}...

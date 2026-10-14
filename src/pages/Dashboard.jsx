@@ -15,8 +15,7 @@ import {
 } from "../components/Icons";
 
 function loadView(loader) {
-  return loader().catch((err) => {
-    console.warn("Chunk lazy falló, reintentando:", err);
+  return loader().catch(() => {
     return new Promise((resolve, reject) => {
       setTimeout(() => loader().then(resolve).catch(reject), 1200);
     });
@@ -75,13 +74,11 @@ function mergeMallaWithBase(baseMalla, savedMalla) {
   }));
 }
 
-// ── Backend helpers (Vercel Functions) ─────────────────────────────────────
 async function loadUserData() {
   try {
     const { data } = await api("/user_data");
     return data || null;
-  } catch (error) {
-    console.error("Error cargando datos de usuario:", error);
+  } catch {
     return null;
   }
 }
@@ -91,7 +88,6 @@ async function saveUserData(patch) {
     await api("/user_data", { method: "POST", body: { patch } });
     return { ok: true };
   } catch (error) {
-    console.error("Error guardando datos:", error);
     return { ok: false, error };
   }
 }

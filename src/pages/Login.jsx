@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { CORTES } from "../App";
 import { SEMESTER_CORTE } from "../utils/semesterCountdown";
+import { UNIVERSITIES, autoSemester } from "../utils/academic";
 import { api, prewarm } from "../api";
 import styles from "./Login.module.css";
 import { IconCheck, IconChevronRight, BrandStar, IconWarning } from "../components/Icons";
@@ -11,10 +12,6 @@ const DEFAULT_THEME_COLORS = {
   cursando: "#c8a96e",
   aprobada: "#6ec88a",
   faltante: "#7c8cff",
-};
-
-const UNIVERSITIES = {
-  "Universidad del Magdalena": ["Ingeniería de Sistemas", "Hotelería y Turismo", "Ingeniería Industrial", "Negocios Internacionales"],
 };
 
 function ForgotPasswordModal({ onClose }) {
@@ -185,13 +182,6 @@ export default function Login({ onLogin }) {
     }
   };
 
-  const autoSemester = (ingresoCorte) => {
-    const idx = CORTES.indexOf(ingresoCorte);
-    const cur = CORTES.indexOf(SEMESTER_CORTE);
-    if (idx === -1 || cur === -1) return 1;
-    return Math.max(1, cur - idx + 1);
-  };
-
   const newUserSemester = autoSemester(form.ingresoCorte);
 
   const handleRegister = async (e) => {
@@ -264,7 +254,7 @@ export default function Login({ onLogin }) {
           </button>
         </div>
 
-         {success && <p className={styles.successMsg}><IconCheck size={13} /> {success}</p>}
+        {success && <p className={styles.successMsg}><IconCheck size={13} /> {success}</p>}
         {error   && <p className={styles.error}>{error}</p>}
 
         {tab === "login" && (
@@ -281,7 +271,7 @@ export default function Login({ onLogin }) {
               ¿Olvidaste tu contraseña?
             </button>
             <button type="submit" className={styles.btn} disabled={loading} onMouseMove={handleBtnGlow}>
-               {loading ? "Cargando..." : <><IconChevronRight size={13} /> Entrar</>}
+              {loading ? "Cargando..." : <><IconChevronRight size={13} /> Entrar</>}
             </button>
           </form>
         )}

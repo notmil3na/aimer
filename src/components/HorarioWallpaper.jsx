@@ -5,7 +5,6 @@ import { IconClose, IconDownload, IconImage } from "./Icons";
 import styles from "./HorarioWallpaper.module.css";
 import useBodyScrollLock from "../hooks/useBodyScrollLock";
 
-// ── Formatos (resolución exacta del fondo) ───────────────────────────────
 const FORMATS = {
   iphone:  { label: "iPhone",  w: 1170, h: 2532 },
   android: { label: "Android", w: 1080, h: 2400 },
@@ -32,7 +31,6 @@ function loadSavedConfig() {
   catch { return null; }
 }
 
-// ── Utilidades de color ──────────────────────────────────────────────────
 function hexToRgb(hex) {
   let h = (hex || "#000000").replace("#", "");
   if (h.length === 3) h = h.split("").map((c) => c + c).join("");
@@ -99,14 +97,10 @@ function luminance(hex) {
   return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);
 }
 
-// Color de texto con contraste sobre el bloque sólido: luminancia perceptual
-// WCAG. Luminancia alta (color claro) → texto oscuro; baja (color oscuro) →
-// blanco cálido. Se aplica dinámicamente según el color base elegido.
 function getContrastColor(hexColor) {
   return luminance(hexColor) > 0.5 ? "#1a1a1a" : "#F5F0E8";
 }
 
-// Mismo tono, menor saturación y mayor luminosidad → tono pastel
 function buildPalette(solid) {
   const [h, s, l] = rgbToHsl(hexToRgb(solid));
   return {
@@ -117,7 +111,6 @@ function buildPalette(solid) {
   };
 }
 
-// Degradado sutil de fondo a partir del color elegido
 function buildBgGradient(bg) {
   const [h, s, l] = rgbToHsl(hexToRgb(bg));
   const top = hslToHex(h, s, Math.min(1, l + 0.05));
@@ -125,7 +118,6 @@ function buildBgGradient(bg) {
   return `linear-gradient(180deg, ${top} 0%, ${bg} 55%, ${bottom} 100%)`;
 }
 
-// Borde en zigzag como data-URI SVG (dientes del color sólido)
 function zigzagUri(color, w = 20, h = 40) {
   const svg =
     `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">` +
@@ -134,7 +126,6 @@ function zigzagUri(color, w = 20, h = 40) {
   return `data:image/svg+xml,${encodeURIComponent(svg)}`;
 }
 
-// ── Layout del fondo (px, escala relativa al iPhone) ─────────────────────
 function computeLayout(dias, W, H, s) {
   const padX = 96 * s;
   const gap = 30 * s;
@@ -150,7 +141,6 @@ function computeLayout(dias, W, H, s) {
   return { padX, gap, pillH, top, bottom };
 }
 
-// Ancho de un texto en px con la misma tipografía que la pastilla.
 function measureTextWidth(text, font) {
   if (!text) return 0;
   const canvas = document.createElement("canvas");
@@ -159,15 +149,12 @@ function measureTextWidth(text, font) {
   return ctx.measureText(text).width;
 }
 
-// Métricas del contenido: ancho FIJO de pastilla (todas iguales, la más
-// ancha) y ancho de la columna de horas ("HH:MM" con nowrap, nunca se parte).
 function computePillMetrics(dias, s, W, padX, fontFam) {
   const gap = 14 * s;
   const badgePad = 24 * s;
   const ghostW = 58 * s;
   const paddingX = 112 * s;
   const w = (t, size, weight) => measureTextWidth(t, `${weight} ${size}px ${fontFam}`);
-  // Columna de horas: ancho del texto más largo ("HH:MM") + pequeño margen.
   let horaColW = 0;
   for (const d of dias) {
     for (const c of d.clases) {
@@ -192,7 +179,6 @@ function computePillMetrics(dias, s, W, padX, fontFam) {
   return { pillW: Math.min(Math.round(pastelW / 0.68), avail), horaColW };
 }
 
-// ── Día (pastilla dividida por el borde en zigzag) ───────────────────────
 function DayPill({ day, pillH, zigUri, radius, shadow, pillW, horaColW }) {
   const solidLeft = day.side === "left";
   const solidHalf = (
@@ -256,7 +242,6 @@ function DayPill({ day, pillH, zigUri, radius, shadow, pillW, horaColW }) {
   );
 }
 
-// ── Modal principal ──────────────────────────────────────────────────────
 export default function HorarioWallpaper({ user, horarioData, malla, onClose, onNotify }) {
   useBodyScrollLock();
   const wallRef = useRef(null);
@@ -308,7 +293,7 @@ export default function HorarioWallpaper({ user, horarioData, malla, onClose, on
   }, []);
 
   const clases = horarioData?.clases || [];
-  const materias = malla.flatMap((s) => s.materias);
+  const materias = useMemo(() => malla.flatMap((s) => s.materias), [malla]);
   const materiaMap = useMemo(() => Object.fromEntries(materias.map((m) => [m.id, m])), [materias]);
 
   const dias = useMemo(() => {
@@ -335,21 +320,16 @@ export default function HorarioWallpaper({ user, horarioData, malla, onClose, on
   const format = FORMATS[formato];
   const W = format.w, H = format.h;
   const s = W / 1170;
-  const ps = 300 / W; // escala de la vista previa
+  const ps = 300 / W;
   const layout = useMemo(() => computeLayout(dias, W, H, s), [dias, W, H, s]);
   const radius = Math.round((layout.pillH * radiusPct) / 100);
   const dayShadow = rgba(shadowColor, 0.55);
 
-  // Posición y separación de las pastillas (centradas en X, Y libre).
   const gapX = gapPct * s;
   const nDays = Math.max(1, dias.length);
   const contentH = nDays * layout.pillH + (nDays - 1) * gapX;
   const topY = (posY / 100) * Math.max(0, H - contentH);
 
-  // Ancho FIJO en px para todas las pastillas (nunca auto/fit-content) y de
-  // la columna de horas (nowrap, nunca se parte). Se fijan inmediatamente con
-  // la fuente provisional y se recalculan cuando terminan de cargar las
-  // fuentes o cambian los días/formato.
   useLayoutEffect(() => {
     if (!dias.length) return;
     let alive = true;
@@ -380,9 +360,6 @@ export default function HorarioWallpaper({ user, horarioData, malla, onClose, on
     const node = wallRef.current;
     if (!node || busy || !dias.length) return;
     setBusy(true);
-    // Contenedor oculto de exportación: ancho fijo en px igual al ancho final
-    // del fondo y montado en el DOM (position:absolute; left:-9999px, no
-    // display:none) para que html-to-image mida el layout a resolución real.
     const holder = document.createElement("div");
     holder.style.cssText = `position:absolute; left:-9999px; top:0; width:${W}px;`;
     holder.setAttribute("aria-hidden", "true");
@@ -399,8 +376,7 @@ export default function HorarioWallpaper({ user, horarioData, malla, onClose, on
       link.href = dataUrl;
       link.click();
       onNotify?.("Fondo de pantalla descargado");
-    } catch (err) {
-      console.error(err);
+    } catch {
       onNotify?.("No se pudo generar el fondo de pantalla");
     } finally {
       holder.remove();
@@ -409,11 +385,11 @@ export default function HorarioWallpaper({ user, horarioData, malla, onClose, on
   };
 
   return (
-    <div className={styles.overlay} onClick={onClose}>
+    <div className={styles.overlay} onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="modal-wallpaper-title">
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.modalHeader}>
           <div>
-            <h3 className={styles.modalTitle}>Descargar fondo de pantalla</h3>
+            <h3 id="modal-wallpaper-title" className={styles.modalTitle}>Descargar fondo de pantalla</h3>
             <p className={styles.modalSub}>
               Tu horario semanal estilo widget de lock screen. Personaliza colores y formato.
             </p>
@@ -660,7 +636,7 @@ export default function HorarioWallpaper({ user, horarioData, malla, onClose, on
                       <div className={styles.checker} style={{ width: W * ps, height: H * ps }} />
                     )}
                     <div style={{ width: W, height: H, transform: `scale(${ps})`, transformOrigin: "top left", position: "relative", zIndex: 1 }}>
-                      {/* ── Componente exportable con las dimensiones exactas ── */}
+                      {}
                       <div
                         ref={wallRef}
                         className={styles.wall}

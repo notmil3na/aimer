@@ -2,10 +2,11 @@ import { useState, useMemo, useCallback, useEffect } from "react";
 import styles from "./CalendarioView.module.css";
 import { semesterDatesFor } from "../utils/semesterCountdown.js";
 import { REMINDER_OPTIONS } from "../utils/reminders";
+import { uuid } from "../utils/notasClase";
 import useBodyScrollLock from "../hooks/useBodyScrollLock";
 import {
   IconExamen, IconQuiz, IconTarea, IconProyecto, IconForo, IconLaboratorio, IconInforme, IconTaller, IconEvento,
-  IconInicio, IconFin, IconClose, IconEdit, IconChevronLeft, IconChevronRight, IconPlus
+  IconInicio, IconFin, IconClose, IconEdit, IconChevronLeft, IconChevronRight
 } from "./Icons";
 
 const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
@@ -23,10 +24,6 @@ const TIPO_EVENTO = [
   { id: "inicio_semestre", label: "Inicio semestre", Icon: IconInicio, color: "#6EC88A" },
   { id: "fin_semestre", label: "Fin semestre",  Icon: IconFin, color: "#e07070" },
 ];
-
-function uuid() {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-}
 
 function toISODate(y, m, d) {
   return `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
@@ -250,7 +247,7 @@ function EventoModal({ onClose, onSave, evento, materias, cortes }) {
   );
 }
 
-export default function CalendarioView({ malla, calendarioData, onSave, user, horarioData, asignacionesData, onSaveAsignaciones }) {
+export default function CalendarioView({ malla, calendarioData, onSave, asignacionesData, onSaveAsignaciones }) {
   const [year, setYear] = useState(() => new Date().getFullYear());
   const [month, setMonth] = useState(() => new Date().getMonth());
   const [selectedDay, setSelectedDay] = useState(null);
@@ -471,7 +468,8 @@ export default function CalendarioView({ malla, calendarioData, onSave, user, ho
                 }}>+ Agregar</button>
               </div>
               {eventosSeleccionados.length === 0 && (
-                <p className={styles.noEvents}>Sin eventos este día</p>              )}
+                <p className={styles.noEvents}>Sin eventos este día</p>
+              )}
               {eventosSeleccionados.map(ev => (
                 <div key={ev.id} className={styles.selectedEvento}>
                   <EventoBadge evento={ev} materias={allMaterias} />
@@ -518,7 +516,7 @@ export default function CalendarioView({ malla, calendarioData, onSave, user, ho
         <EventoModal
           onClose={() => { setShowModal(false); setModalEvent(null); }}
           onSave={handleSaveEvento}
-          evento={modalEvent?.id && eventos.find(e => e.id === modalEvent.id) ? modalEvent : modalEvent}
+          evento={modalEvent}
           materias={cortesMaterias}
           cortes={cortesMaterias.length > 0 ? [{ nombre: "Corte 1", peso: 33 }, { nombre: "Corte 2", peso: 33 }, { nombre: "Corte 3", peso: 34 }] : []}
         />

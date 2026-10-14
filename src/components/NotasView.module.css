@@ -1,4 +1,4 @@
-/* ── Layout ───────────────────────────────────────── */
+
 .wrap {
   position: relative;
   padding: 28px 32px 36px;
@@ -65,7 +65,7 @@
 
 .headerActions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 
-/* View toggle */
+
 .viewToggle {
   display: flex;
   background: color-mix(in srgb, var(--surface2) 90%, transparent);
@@ -90,7 +90,7 @@
 .toggleBtn:hover { color: var(--text); }
 .toggleActive { background: var(--surface) !important; color: var(--accent) !important; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
 
-/* Save button */
+
 .saveBtn {
   background: linear-gradient(135deg, var(--accent), var(--accent2));
   color: #14101f;
@@ -124,7 +124,7 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ── Global banner ────────────────────────────────── */
+
 .globalBanner {
   position: relative;
   z-index: 1;
@@ -306,7 +306,7 @@
   text-align: right;
 }
 
-/* ── Semester card ────────────────────────────────── */
+
 .semCard {
   position: relative;
   z-index: 1;
@@ -350,7 +350,7 @@
 }
 .semFooterResult { font-size: 16px; margin-left: 4px; }
 
-/* ── Materia row ──────────────────────────────────── */
+
 .materiaRow {
   display: flex;
   align-items: stretch;
@@ -406,7 +406,7 @@
 }
 .letterSelect:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.12); }
 
-/* ── Field groups ─────────────────────────────────── */
+
 .cursandoFields,
 .aprobadaFields {
   display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: flex-end;
@@ -461,7 +461,7 @@
 .gradeBadgePass { background: color-mix(in srgb, #6ec88a 16%, transparent); color: #6ec88a; }
 .gradeBadgeFail { background: color-mix(in srgb, #e07070 16%, transparent); color: #e07070; }
 
-/* ── Repetición ───────────────────────────────────── */
+
 .repeticionSection {
   width: 100%;
   border: 1px solid color-mix(in srgb, #e07070 24%, var(--border));
@@ -503,7 +503,7 @@
 }
 .removeBtn:hover { color: #e07070; background: rgba(224,112,112,0.08); }
 
-/* ── Resumen global ───────────────────────────────── */
+
 .resumenWrap { display: flex; flex-direction: column; gap: 14px; }
 
 .resumenRow {
@@ -611,7 +611,7 @@
   margin-top: 2px;
 }
 
-/* ── Empty state ──────────────────────────────────── */
+
 .emptyState {
   position: relative;
   z-index: 1;
@@ -676,7 +676,7 @@
   .failSimWrap .desiredInput { width: 100%; }
 }
 
-/* ── Simulador: ¿qué pasa si repruebo? ───────────────── */
+
 .failSimWrap {
   display: flex;
   align-items: center;

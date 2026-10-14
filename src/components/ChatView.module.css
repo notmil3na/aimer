@@ -1,4 +1,4 @@
-/* ══ Chats (estética iMessage, 3 columnas desktop) ══════════════════════════ */
+
 
 .wrap {
   height: 100%;
@@ -8,7 +8,7 @@
   flex-direction: column;
 }
 
-/* Cabecera del sidebar (estilo WhatsApp): "Chats" + búsqueda */
+
 .sidebarHeader {
   flex-shrink: 0;
   padding: 14px 14px 12px;
@@ -83,7 +83,7 @@
   flex-shrink: 0;
 }
 
-/* ══ Shell de 3 columnas ═══════════════════════════════════════════════════ */
+
 .chatWrap {
   position: relative;
   display: flex;
@@ -124,7 +124,7 @@
 
 .hasInfo .chatInfo { display: flex; }
 
-/* ══ Lista de conversaciones ═══════════════════════════════════════════════ */
+
 .convList {
   flex: 1;
   overflow-y: auto;
@@ -192,7 +192,7 @@
 .convPreview { font-size: 12.5px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .convChevron { font-size: 20px; color: var(--text-muted); flex-shrink: 0; }
 
-/* ══ Estados vacíos ════════════════════════════════════════════════════════ */
+
 .chatEmpty {
   flex: 1;
   display: flex;
@@ -268,7 +268,7 @@
 }
 @keyframes chatSpin { to { transform: rotate(360deg); } }
 
-/* ══ Cabecera del thread ═══════════════════════════════════════════════════ */
+
 .thread { flex: 1; display: flex; flex-direction: column; min-height: 0; position: relative; }
 
 .threadHeader {
@@ -325,7 +325,7 @@
 .infoToggle:hover { border-color: var(--accent); color: var(--accent); }
 .infoToggleOn { border-color: var(--accent); color: var(--accent); background: rgba(var(--accent-rgb), 0.12); }
 
-/* ══ Cuerpo de mensajes ════════════════════════════════════════════════════ */
+
 .threadBody {
   flex: 1;
   min-height: 0;
@@ -386,7 +386,7 @@
 .check { letter-spacing: -2px; }
 .checkRead { color: #1f8ecd; }
 
-/* Imagen adjunta */
+
 .bubbleImgWrap { display: flex; flex-direction: column; gap: 6px; }
 .bubbleImg {
   max-width: 260px;
@@ -400,7 +400,7 @@
 .bubbleImgMissing { font-size: 12px; opacity: 0.7; padding: 8px 4px; }
 .bubbleImgName { font-size: 11px; opacity: 0.8; padding: 0 4px; }
 
-/* Archivo adjunto */
+
 .fileCard {
   display: flex;
   align-items: center;
@@ -437,7 +437,7 @@
 .fileSize { font-size: 10.5px; opacity: 0.7; }
 .fileDl { flex-shrink: 0; opacity: 0.7; }
 
-/* Tarjetas académicas (asignaciones y apuntes) */
+
 .academicCard {
   border-radius: 12px;
   padding: 10px 11px;
@@ -518,7 +518,7 @@
 }
 .academicAdd:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(var(--accent-rgb), 0.35); }
 
-/* ══ Composer ══════════════════════════════════════════════════════════════ */
+
 .composer {
   display: flex;
   align-items: flex-end;
@@ -616,7 +616,7 @@
   z-index: 5;
 }
 
-/* ══ Popover de compartir ══════════════════════════════════════════════════ */
+
 .shareBackdrop { position: fixed; inset: 0; background: transparent; z-index: 10; }
 
 .sharePopover {
@@ -776,7 +776,7 @@
 .shareFileBtn:hover { border-color: var(--accent); color: var(--accent); }
 .shareFileBtn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-/* ══ Avatar ════════════════════════════════════════════════════════════════ */
+
 .avatar {
   display: flex;
   align-items: center;
@@ -792,7 +792,7 @@
 }
 .avatarImg { width: 100%; height: 100%; object-fit: cover; }
 
-/* ══ Panel de detalles ═════════════════════════════════════════════════════ */
+
 .infoPanel {
   flex: 1;
   min-width: 0;
@@ -900,7 +900,7 @@
 .infoAcademicType { font-size: 11px; font-weight: 700; color: var(--accent); }
 .infoAcademicTxt { font-size: 12.5px; color: var(--text); word-break: break-word; }
 
-/* ══ Responsive ════════════════════════════════════════════════════════════ */
+
 @media (max-width: 900px) {
   .chatSidebar { width: 290px; }
 }
@@ -922,11 +922,11 @@
   }
   .chatMain { flex: 1; min-height: 0; overflow: hidden; }
 
-  /* Solo se muestra una de las dos columnas en estrecho */
+  
   .chatWrap.hasActive .chatSidebar { display: none; }
   .chatWrap:not(.hasActive) .chatMain { display: none; }
 
-  /* Hilo a pantalla completa: borde a borde bajo notch; alto ajustado al teclado */
+  
   .chatWrap.hasActive {
     position: fixed;
     top: 0;
@@ -960,7 +960,7 @@
     padding-bottom: calc(10px + env(safe-area-inset-bottom));
   }
 
-  /* iOS no hace zoom ni pierde el encabezado si la fuente del input es ≥ 16px */
+  
   .composerInput, .searchInput { font-size: 16px; }
 
   .chatInfo {

@@ -1,9 +1,5 @@
 import { uuid } from "./notasClase";
 
-// ── Helpers para compartir contenido de la malla en el chat ────────────────
-// Los "snapshots" se serializan a JSON dentro de messages.content, de modo que
-// el receptor puede guardarlos ("Añadir a mis asignaciones / apuntes") sin que
-// nadie tenga que leer el user_data del remitente.
 
 export function subjectName(malla, subjectId) {
   if (!malla) return subjectId || "";
@@ -14,7 +10,6 @@ export function subjectName(malla, subjectId) {
   return subjectId || "";
 }
 
-// Snapshot de una asignación: copia los campos útiles y quita los volátiles.
 export function buildAssignmentPayload(malla, item, subjectId) {
   const clean = { ...item };
   delete clean.id;
@@ -39,7 +34,6 @@ export function buildAssignmentPayload(malla, item, subjectId) {
   };
 }
 
-// Convierte un snapshot de asignación en un item listo para "mis asignaciones".
 export function assignmentToAddable(payload) {
   const item = payload && payload.item ? { ...payload.item } : {};
   item.id = uuid();
@@ -49,7 +43,6 @@ export function assignmentToAddable(payload) {
   return item;
 }
 
-// Snapshot de un apunte (notas de clase).
 export function buildNotePayload(malla, subjectId, note) {
   return {
     kind: "note",
@@ -59,13 +52,11 @@ export function buildNotePayload(malla, subjectId, note) {
   };
 }
 
-// Convierte un snapshot de apunte en un registro listo para "mis apuntes".
 export function noteToAddable(payload) {
   const n = payload && payload.item ? payload.item : {};
   return { id: uuid(), texto: n.texto || "", fecha: n.fecha || "" };
 }
 
-// ── Imágenes: reescalado y compresión a data URL JPEG ──────────────────────
 export function compressImageForChat(dataUrl, maxDim = 1200, quality = 0.82) {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -104,7 +95,6 @@ export function dataUrlToBlob(dataUrl) {
   return new Blob([arr], { type: mime });
 }
 
-// ── Descarga de texto como archivo ─────────────────────────────────────────
 export function downloadText(filename, text) {
   const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
   const url = URL.createObjectURL(blob);
@@ -117,7 +107,6 @@ export function downloadText(filename, text) {
   URL.revokeObjectURL(url);
 }
 
-// ── Fechas comunes del chat ────────────────────────────────────────────────
 export function fmtTimeFull(iso) {
   if (!iso) return "";
   try {

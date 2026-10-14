@@ -12,7 +12,6 @@ function isTableMissing(err) {
   return code === "42P01" || code === "PGRST205" || msg.includes("does not exist") || msg.includes("no existe");
 }
 
-// ── Chat: helpers ──────────────────────────────────────────────────────────
 const CHAT_BUCKET = "chat-attachments";
 const MAX_FILE_BYTES = 8 * 1024 * 1024;
 const MAX_TEXT = 8000;
@@ -97,7 +96,6 @@ async function ensureConversation(me, other) {
     .from("conversation_pairs")
     .insert({ conversation_id: conv.id, user_a: a, user_b: b });
 
-  // Carrera: si otro request creó la misma pareja mientras tanto, reusar esa.
   if (pairErr && pairErr.code === "23505") {
     await admin.from("conversation_members").delete().eq("conversation_id", conv.id);
     await admin.from("conversations").delete().eq("id", conv.id);
@@ -165,7 +163,6 @@ async function signedUrlFor(absPath) {
   return { url: data.signedUrl, name: parts };
 }
 
-// ── GET: listado (view=chat) ───────────────────────────────────────────────
 async function handleChatList(me) {
   const { data: mine, error: mineErr } = await admin
     .from("conversation_members")
@@ -248,7 +245,6 @@ async function handleChatList(me) {
   return { data: list };
 }
 
-// ── GET: thread (view=chat&other=X) ────────────────────────────────────────
 async function handleChatThread(me, other) {
   const friend = await sonAmigos(me, other);
   if (friend.tableMissing) return { needsMigration: true };
@@ -347,7 +343,6 @@ async function handleChatThread(me, other) {
   };
 }
 
-// ── POST: acciones del chat ────────────────────────────────────────────────
 async function actionChatOpen(me, other) {
   const friend = await sonAmigos(me, other);
   if (friend.tableMissing) return { needsMigration: true };
@@ -506,7 +501,6 @@ async function actionChatUploadURL(me, other, body) {
       fileSizeLimit: MAX_FILE_BYTES,
     });
     if (createErr && String(createErr.message || "").includes("already")) {
-      // El bucket existe aunque el get falló (propagación eventual): seguir.
     } else if (createErr) {
       return { error: "No se pudo preparar el almacenamiento de adjuntos" };
     }
@@ -538,7 +532,6 @@ async function actionChatUploadURL(me, other, body) {
   };
 }
 
-// ── Handler principal ──────────────────────────────────────────────────────
 export default async function handler(req, res) {
   if (!envReady() || !admin) return json(res, 500, { error: "Configuración del servidor incompleta" });
   const me = requireUser(req);
@@ -547,7 +540,6 @@ export default async function handler(req, res) {
 
   const url = new URL(req.url, `http://${req.headers.host}`);
 
-  // ── GET ────────────────────────────────────────────────────────────────
   if (req.method === "GET") {
     const view = url.searchParams.get("view");
     const other = url.searchParams.get("other");
@@ -564,7 +556,6 @@ export default async function handler(req, res) {
       return json(res, 200, { data: r.data || [] });
     }
 
-    // Lista de amistades.
     const { data, error } = await admin
       .from("friendships")
       .select("*")
@@ -579,7 +570,6 @@ export default async function handler(req, res) {
     return json(res, 200, { data: map });
   }
 
-  // ── POST ───────────────────────────────────────────────────────────────
   if (req.method === "POST") {
     const body = await readBody(req);
     const { action, other } = body;
@@ -599,7 +589,6 @@ export default async function handler(req, res) {
       return json(res, 200, r);
     }
 
-    // Amistades.
     if (!other || typeof other !== "string") return json(res, 400, { error: "Falta el usuario" });
     if (other === username) return json(res, 400, { error: "No puedes ser tu propio amigo" });
 

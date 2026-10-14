@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { CORTES } from "../App";
-import { APP_THEMES } from "../App";
+import { CORTES, APP_THEMES } from "../App";
 import { SEMESTER_CORTE } from "../utils/semesterCountdown";
+import { UNIVERSITIES, autoSemester } from "../utils/academic";
 import { calcCareerTime, estimateGraduation } from "../utils/careerProgress.js";
 import { semesterDatesFor, semesterCorteFor } from "../utils/semesterCountdown.js";
 import { getPhoto, compressPhoto, setPhotoCache } from "../utils/photo";
@@ -11,10 +11,6 @@ import {
   IconCamera, IconWarning, IconSemester, IconCalendar, IconCheck, IconChevronDown, IconChevronUp,
   IconSun, IconMoon, IconPaint, IconUser
 } from "./Icons";
-
-const UNIVERSITIES = {
-  "Universidad del Magdalena": ["Ingeniería de Sistemas", "Hotelería y Turismo", "Ingeniería Industrial", "Negocios Internacionales"],
-};
 
 const MALLA_PRESETS = [
   { name: "Aurora",          colors: { cursando: "#B882E8", aprobada: "#6EC8A8", faltante: "#7C8CFF" }, borderRadius: 12 },
@@ -35,13 +31,6 @@ function toISO(d) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-function autoSemester(ingresoCorte) {
-  const idx = CORTES.indexOf(ingresoCorte);
-  const cur = CORTES.indexOf(SEMESTER_CORTE);
-  if (idx === -1 || cur === -1) return 1;
-  return Math.max(1, cur - idx + 1);
-}
-
 const INTERNAL_TABS = [
   { id: "cuenta",      label: "Cuenta",      Icon: IconUser },
   { id: "apariencia",  label: "Apariencia",  Icon: IconPaint },
@@ -52,7 +41,6 @@ export default function SettingsView({ user, onUpdate, onMallaReset, malla, seme
 
   useEffect(() => { ensureFont(user.fontBody); }, [user.fontBody]);
 
-  // ── Cuenta state ──────────────────────────────────────
   const [form, setForm] = useState({
     name:         user.name         || "",
     university:   user.university   || "",
@@ -145,7 +133,6 @@ export default function SettingsView({ user, onUpdate, onMallaReset, malla, seme
   const initial = form.name ? form.name[0].toUpperCase() : "?";
   const availableCareers = form.university ? (UNIVERSITIES[form.university] || []) : [];
 
-  // ── Apariencia state ──────────────────────────────────
   const [colors, setColors]             = useState(user.themeColors || MALLA_PRESETS[0].colors);
   const [borderRadius, setBorderRadius] = useState(user.borderRadius ?? 12);
   const [fontScale, setFontScale]       = useState(user.fontScale ?? 1);
@@ -189,7 +176,7 @@ export default function SettingsView({ user, onUpdate, onMallaReset, malla, seme
         <p className={styles.subtitle}>Tu perfil, cuenta y apariencia</p>
       </div>
 
-      {/* ── Internal tabs ────────────────────────────── */}
+      {}
       <div className={styles.sectionTabs}>
         {INTERNAL_TABS.map(t => (
           <button
@@ -203,11 +190,11 @@ export default function SettingsView({ user, onUpdate, onMallaReset, malla, seme
         ))}
       </div>
 
-      {/* ═══════════════════════════════════════════════ CUENTA */}
+      {}
       {activeSection === "cuenta" && (
         <div className={styles.sectionContent}>
 
-          {/* Career card */}
+          {}
           <div className={styles.careerCard}>
             <h3 className={styles.careerTitle}>Trayectoria académica</h3>
             <div className={styles.careerGrid}>
@@ -246,7 +233,7 @@ export default function SettingsView({ user, onUpdate, onMallaReset, malla, seme
           </div>
 
           <div className={styles.twoCol}>
-            {/* Left: personal data */}
+            {}
             <div className={styles.card}>
               <div className={styles.avatarSection}>
                 <div className={styles.avatar}>
@@ -357,7 +344,7 @@ export default function SettingsView({ user, onUpdate, onMallaReset, malla, seme
               </div>
             </div>
 
-            {/* Right: materias cursando */}
+            {}
             <div className={styles.cursandoCol}>
               <div className={styles.cursandoHeader}>
                 <span className={styles.cursandoTitle}>Materias cursando</span>
@@ -429,11 +416,11 @@ export default function SettingsView({ user, onUpdate, onMallaReset, malla, seme
         </div>
       )}
 
-      {/* ═══════════════════════════════════════════════ APARIENCIA */}
+      {}
       {activeSection === "apariencia" && (
         <div className={styles.sectionContent}>
 
-          {/* ── Modo oscuro / claro */}
+          {}
           <section className={styles.section}>
             <h3 className={styles.sectionTitle}>Modo de pantalla</h3>
             <div className={styles.modeRow}>
@@ -451,7 +438,7 @@ export default function SettingsView({ user, onUpdate, onMallaReset, malla, seme
             </div>
           </section>
 
-          {/* ── Tema de color de la app */}
+          {}
           <section className={styles.section}>
             <h3 className={styles.sectionTitle}>Tema de la aplicación</h3>
             <div className={styles.appThemeGrid}>
@@ -468,7 +455,7 @@ export default function SettingsView({ user, onUpdate, onMallaReset, malla, seme
             </div>
           </section>
 
-          {/* ── Fuente de texto */}
+          {}
           <section className={styles.section}>
             <h3 className={styles.sectionTitle}>Fuente de texto</h3>
             <div className={styles.fontGrid}>
@@ -485,7 +472,7 @@ export default function SettingsView({ user, onUpdate, onMallaReset, malla, seme
             </div>
           </section>
 
-          {/* ── Presets malla */}
+          {}
           <section className={styles.section}>
             <h3 className={styles.sectionTitle}>Presets de la malla</h3>
             <div className={styles.presets}>
@@ -502,7 +489,7 @@ export default function SettingsView({ user, onUpdate, onMallaReset, malla, seme
             </div>
           </section>
 
-          {/* ── Colores malla */}
+          {}
           <section className={styles.section}>
             <h3 className={styles.sectionTitle}>Colores de estado en la malla</h3>
             <div className={styles.colorGrid}>
@@ -523,7 +510,7 @@ export default function SettingsView({ user, onUpdate, onMallaReset, malla, seme
             </div>
           </section>
 
-          {/* ── Bordes */}
+          {}
           <section className={styles.section}>
             <h3 className={styles.sectionTitle}>Radio de bordes</h3>
             <div className={styles.borderPreviewRow}>
@@ -541,7 +528,7 @@ export default function SettingsView({ user, onUpdate, onMallaReset, malla, seme
               className={styles.rangeInput} />
           </section>
 
-          {/* ── Escala de texto */}
+          {}
           <section className={styles.section}>
             <h3 className={styles.sectionTitle}>Tamaño de texto</h3>
             <div className={styles.fontScaleRow}>
@@ -556,7 +543,7 @@ export default function SettingsView({ user, onUpdate, onMallaReset, malla, seme
             </div>
           </section>
 
-          {/* ── Vista previa tarjetas */}
+          {}
           <section className={styles.section}>
             <h3 className={styles.sectionTitle}>Vista previa de tarjetas</h3>
             <div className={styles.preview}>

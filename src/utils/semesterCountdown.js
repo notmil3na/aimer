@@ -19,8 +19,6 @@ function endOfDay(d) {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
 }
 
-// ── Semestre configurable por usuario ─────────────────────────────────────
-// `semestre` = { inicio: "YYYY-MM-DD", fin: "YYYY-MM-DD" } o null/undefined.
 export function semesterDatesFor(semestre) {
   const start = parseISODate(semestre?.inicio) || new Date(SEMESTER_START);
   const end = endOfDay(parseISODate(semestre?.fin)) || new Date(SEMESTER_END.getTime());

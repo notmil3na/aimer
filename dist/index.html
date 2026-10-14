@@ -4,10 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content" />
     <meta name="description" content="MiMalla – Plan de estudios, horarios, notas, asignaciones y colaboración de tu semestre." />
+    <meta name="theme-color" id="theme-color-meta" content="#0e0a18" />
     <title>MiMalla</title>
     <script>
       (function () {
         try {
+          var BG = { dark: "#0e0a18", light: "#f8f4fc" };
           var THEMES = {
             rojo:      ["#FF3B4D", "#D1212F", "255,59,77"],
             naranja:   ["#FF7A1A", "#E35E00", "255,122,26"],
@@ -29,6 +31,8 @@
           r.style.setProperty("--accent2", c[1]);
           r.style.setProperty("--accent-rgb", c[2]);
           if (u && u.fontBody) r.style.setProperty("--font-body", "'" + u.fontBody + "', system-ui, sans-serif");
+          var tc = document.getElementById("theme-color-meta");
+          if (tc) tc.setAttribute("content", BG[mode] || BG.dark);
         } catch (e) {}
       })();
     </script>
@@ -53,20 +57,12 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="MiMalla" />
-    <script type="module" crossorigin src="/assets/index-56874985.js"></script>
+    <script type="module" crossorigin src="/assets/index-eb63b814.js"></script>
     <link rel="modulepreload" crossorigin href="/assets/vendor-27d6d7f2.js">
-    <link rel="stylesheet" href="/assets/index-dbb9e88a.css">
+    <link rel="stylesheet" href="/assets/index-eb93115c.css">
   </head>
   <body>
-    <!--
-DIRECTION: la-malla-en-el-cielo (seed 7c68d756)
-THESIS: The login is the whole aurora sky with the semester malla drawn as a gold constellation and the form as a glass observatory console; it refuses the isolated-centered-card auth default.
-OWN-WORLD: Full-bleed aurora sky; five real first-semester subjects as constellation nodes in gold hairlines; MiMalla brand as engraved serif plaque with the rotating star; the form is a frosted-glass dock that lands at the bottom, gold reserved for focus, active tab, button and stars.
-STORY: The student re-enters their plan from the sky: recognizes their malla in the stars, each filled field joins a star to the constellation, and signing in drops them into their observatory.
-FIRST VIEWPORT: gold constellation and brand plaque above, glass dock below with segmented tabs and fields; primary gold button at the base.
-FORM: candidate 4 of the grounded list, full-sky dock; seed 7c68d756.
-FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
--->
+    
     <div class="aurora" aria-hidden="true"></div>
     <div id="root"></div>
     

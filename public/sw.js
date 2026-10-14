@@ -1,4 +1,3 @@
-/* MiMalla – Service Worker */
 const CACHE = "mimalla-v12";
 const CORE = [
   "/",
@@ -8,15 +7,11 @@ const CORE = [
   "/icons/icon-512-maskable.png",
   "/icons/apple-touch-icon.png",
 ];
-// PRECACHE se llena en cada build (vite.config.js) con todos los .js/.css con
-// hash de este release. Así el SW nuevo descarga la versión completa en segundo
-// plano y, al pulsar "Recargar ahora", la app abre al instante desde el caché.
 const PRECACHE = [];
 
 const isSwVersion = (key) => key.startsWith("mimalla-v");
 const toNumber = (key) => Number(key.replace(/^mimalla-v/, "")) || 0;
 
-// Busca primero en el caché actual; si falta, en versiones anteriores (aún válidas).
 function findInCaches(req) {
   return caches
     .keys()
@@ -46,9 +41,6 @@ function networkFirst(req) {
   });
 }
 
-// HTML stale-while-revalidate: sirve la copia en caché al instante y la
-// refresca en segundo plano. Solo el recargo post-actualización (?_sw=) va
-// primero a la red. La versión nueva se aplica con el aviso de recarga.
 const HTML_NETWORK_TIMEOUT = 1500;
 
 function fetchWithTimeout(req, ms) {
@@ -82,7 +74,6 @@ async function serveHtml(req, url) {
   const cached = await findInCaches(key).catch(() => undefined);
 
   if (url.searchParams.has("_sw")) {
-    // Recargo tras la actualización: siempre a la red primero.
     let res;
     try { res = await fetch(req); } catch (_) {}
     putHtml(key, res);
@@ -91,7 +82,6 @@ async function serveHtml(req, url) {
   }
 
   if (cached) {
-    // Pintar al instante y refrescar el caché en segundo plano.
     fetch(req).then((res) => putHtml(key, res)).catch(() => {});
     return cached;
   }
@@ -109,9 +99,6 @@ self.addEventListener("install", (e) => {
     caches
       .open(CACHE)
       .then(async (c) => {
-        // En la primera visita precachea solo lo esencial (sin duplicar las
-        // descargas de la página). Al actualizar (ya hay SW activo) precachea
-        // la versión completa → el recargo tras el aviso es instantáneo.
         const list = self.registration.active ? [...CORE, ...PRECACHE] : CORE;
         const jobs = [...new Set(list)].map(async (url) => {
           try {
@@ -147,7 +134,6 @@ self.addEventListener("message", (e) => {
   if (e.data && e.data.type === "SKIP_WAITING") self.skipWaiting();
 });
 
-// ── Push (notificaciones con la app cerrada) ────────────────────────────────
 self.addEventListener("push", (e) => {
   let payload = {};
   try {
@@ -192,12 +178,10 @@ self.addEventListener("fetch", (e) => {
   const url = new URL(req.url);
   if (url.pathname === "/sw.js") return;
 
-  // HTML (navegación) y raíz: caché al instante, refresco en segundo plano.
   if (req.mode === "navigate" || url.pathname === "/" || url.pathname.endsWith(".html")) {
     e.respondWith(serveHtml(req, url));
     return;
   }
 
-  // JS/CSS con hash (inmutables), iconos, fuentes y manifest: caché primero.
   e.respondWith(cacheFirst(req));
 });

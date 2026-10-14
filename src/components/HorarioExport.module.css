@@ -1,4 +1,4 @@
-/* ── Overlay ───────────────────────────────────────── */
+
 .overlay {
   position: fixed; inset: 0; z-index: 300;
   background: rgba(0, 0, 0, 0.5);
@@ -65,7 +65,7 @@
 .modalClose:hover { background: rgba(255,255,255,0.08); }
 [data-theme="light"] .modalClose:hover { background: rgba(0,0,0,0.06); }
 
-/* ── Preview area ─────────────────────────────────── */
+
 .preview {
   overflow: auto; padding: 20px;
   display: flex; justify-content: center;
@@ -73,7 +73,7 @@
 }
 .sheetWrap { transform-origin: top center; }
 
-/* ═══ Hoja exportable (diseño con colores sólidos) ═══ */
+
 .sheet {
   width: 1000px; max-width: none;
   background: var(--bg);
@@ -151,7 +151,7 @@
 .bloqueHora { font-size: 9px; opacity: 0.85; margin-top: auto; }
 .bloqueSalon { font-size: 9px; opacity: 0.8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-/* ── Leyenda ──────────────────────────────────────── */
+
 .sheetLegend {
   display: flex; flex-wrap: wrap; gap: 8px 18px;
   padding: 12px 22px 4px;
@@ -161,7 +161,7 @@
 .legendId { font-size: 10px; font-weight: 700; color: var(--text); }
 .legendNombre { font-size: 10px; color: var(--text-muted); }
 
-/* ── Footer ───────────────────────────────────────── */
+
 .sheetFooter {
   display: flex; align-items: center; justify-content: space-between;
   gap: 12px; flex-wrap: wrap;

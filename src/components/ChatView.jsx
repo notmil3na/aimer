@@ -20,24 +20,7 @@ import { uuid } from "../utils/notasClase";
 
 const POLL_MS = 15000;
 
-// En dispositivos estrechos el chat a pantalla completa mide exactamente el
-// área visible (visualViewport): si el teclado se abre o la barra del navegador
-// se contrae, el alto se ajusta sin acortar el header ni esconderlo.
-function useIsNarrow() {
-  const [narrow, setNarrow] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return window.matchMedia("(max-width: 800px)").matches;
-  });
-  useEffect(() => {
-    const mq = window.matchMedia("(max-width: 800px)");
-    const onChange = (e) => setNarrow(e.matches);
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
-  }, []);
-  return narrow;
-}
 
-// ── Avatar ─────────────────────────────────────────────────────────────────
 function Avatar({ u, size = 40 }) {
   const username = (u && u.username) || "";
   const initial = (((u && (u.name || username)) || "?").trim()[0] || "?").toUpperCase();
@@ -57,7 +40,6 @@ function Avatar({ u, size = 40 }) {
   );
 }
 
-// ── Tarjetas de contenido compartido ───────────────────────────────────────
 function AssignmentCard({ msg, mine, onAdd }) {
   const p = msg.payload || {};
   const item = p.item || {};
@@ -105,7 +87,6 @@ function NoteCard({ msg, mine, onAdd }) {
   );
 }
 
-// ── Burbuja de mensaje ─────────────────────────────────────────────────────
 function MessageBubble({ msg, mine, sender, onAddAssignment, onAddNote }) {
   const t = msg.message_type;
   const att = msg.attachment || {};
@@ -163,7 +144,6 @@ function MessageBubble({ msg, mine, sender, onAddAssignment, onAddNote }) {
   );
 }
 
-// ── Popover de compartir / adjuntar ────────────────────────────────────────
 function SharePopover({ open, onClose, myName, shareData, onSendShare, onPickImage, onPickFile, busy }) {
   const { malla, notasClaseData, asignacionesData } = shareData;
   const [tab, setTab] = useState("asignacion");
@@ -185,16 +165,14 @@ function SharePopover({ open, onClose, myName, shareData, onSendShare, onPickIma
     setSubjectId(assignmentSubjects[0] || "");
   }, [open, assignmentSubjects]);
 
-  // El subjectId siempre debe ser válido para la pestaña activa; si el popover
-  // arranca con la materia de Asignaciones (o la cambian de tab), resincroniza
-  // para que el select y el listado muestren los mismos apuntes.
   const subjectsForTab = useMemo(
     () => (tab === "asignacion" ? assignmentSubjects : noteSubjects),
     [tab, assignmentSubjects, noteSubjects]
   );
+  const validSubject = (s) => (tab === "asignacion" ? s === "" || subjectsForTab.includes(s) : subjectsForTab.includes(s));
   useEffect(() => {
     if (!open) return;
-    if (!subjectsForTab.includes(subjectId)) {
+    if (!validSubject(subjectId)) {
       setSubjectId(subjectsForTab[0] || "");
       setSelected(null);
     }
@@ -296,7 +274,6 @@ function SharePopover({ open, onClose, myName, shareData, onSendShare, onPickIma
   );
 }
 
-// ── Hilo (conversación activa) ─────────────────────────────────────────────
 function ThreadView({ user, friend, onBack, onNotify, onToggleInfo, infoOpen, shareData, onSaveAsignaciones, onSaveNotasClase, onMessages }) {
   const { malla, notasClaseData, asignacionesData } = shareData;
   const me = user.username;
@@ -357,7 +334,6 @@ function ThreadView({ user, friend, onBack, onNotify, onToggleInfo, infoOpen, sh
     return () => clearInterval(id);
   }, [other, refresh]);
 
-  // Realtime: escuchar broadcasts en el canal de la conversación.
   useEffect(() => {
     if (!channelToken) return undefined;
     const stream = createConversationStream(channelToken, () => refresh());
@@ -365,7 +341,6 @@ function ThreadView({ user, friend, onBack, onNotify, onToggleInfo, infoOpen, sh
     return () => { stream.close(); streamRef.current = null; };
   }, [channelToken, refresh]);
 
-  // Autoscroll al final (mensajes nuevos o teclado abierto).
   useEffect(() => {
     scrollToBottom();
   }, [messages.length, scrollToBottom]);
@@ -382,7 +357,6 @@ function ThreadView({ user, friend, onBack, onNotify, onToggleInfo, infoOpen, sh
     };
   }, [scrollToBottom]);
 
-  // Marcar como leídos los mensajes del amigo (una vez por lote).
   useEffect(() => {
     const unread = messages.filter((m) => m.sender === other && !m.read);
     if (unread.length === 0) return;
@@ -617,7 +591,6 @@ function ThreadView({ user, friend, onBack, onNotify, onToggleInfo, infoOpen, sh
   );
 }
 
-// ── Panel de detalles (columna derecha) ────────────────────────────────────
 function InfoPanel({ friend, messages, onClose }) {
   const shared = (messages || []).filter((m) => m.message_type === "image" || m.message_type === "file");
   const academic = (messages || []).filter((m) => m.message_type === "assignment" || m.message_type === "note");
@@ -689,7 +662,6 @@ function InfoPanel({ friend, messages, onClose }) {
   );
 }
 
-// ── Vista principal: Chats ─────────────────────────────────────────────────
 export default function ChatView({ user, malla, notasClaseData, asignacionesData, onSaveAsignaciones, onSaveNotasClase, onNotify }) {
   const [users, setUsers] = useState([]);
   const [friendships, setFriendships] = useState({});
@@ -767,8 +739,6 @@ export default function ChatView({ user, malla, notasClaseData, asignacionesData
   const activeFriend = amigos.find((u) => u.username === activeOther) || null;
   const totalUnread = list.reduce((a, r) => a + r.unread, 0);
 
-  const isNarrow = useIsNarrow();
-  const chatFullscreen = isNarrow && !!activeOther;
 
   const previewOf = (row) => {
     if (!row.last) return "Inicia una conversación";
@@ -786,7 +756,7 @@ export default function ChatView({ user, malla, notasClaseData, asignacionesData
       <div
         className={`${styles.chatWrap} ${activeOther ? styles.hasActive : ""} ${infoOpen ? styles.hasInfo : ""}`}
       >
-        {/* Lista de conversaciones */}
+        {}
         <div className={styles.chatSidebar}>
           <div className={styles.sidebarHeader}>
             <div className={styles.sidebarTitleRow}>
@@ -855,7 +825,7 @@ export default function ChatView({ user, malla, notasClaseData, asignacionesData
           )}
         </div>
 
-        {/* Thread */}
+        {}
         <div className={styles.chatMain}>
           {activeOther && activeFriend ? (
             <ThreadView
@@ -880,7 +850,7 @@ export default function ChatView({ user, malla, notasClaseData, asignacionesData
           )}
         </div>
 
-        {/* Detalles */}
+        {}
         <div className={styles.chatInfo}>
           {activeOther && activeFriend && infoOpen ? (
             <InfoPanel

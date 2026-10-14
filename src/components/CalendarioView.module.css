@@ -18,7 +18,7 @@
   display: grid; grid-template-columns: 1fr 320px; gap: 20px; align-items: start;
 }
 
-/* ── Calendar panel ───────────────────────────────── */
+
 .calendarPanel {
   background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius-md); overflow: hidden;
@@ -85,7 +85,7 @@
 .calDots { display: flex; gap: 3px; }
 .calDot { width: 5px; height: 5px; border-radius: 50%; }
 
-/* ── Selected day panel ───────────────────────────── */
+
 .selectedDayPanel {
   padding: 14px 18px; border-top: 1px solid var(--border);
 }
@@ -116,7 +116,7 @@
 .editBtn:hover { background: var(--surface2); }
 .deleteBtn:hover { background: rgba(224,112,112,0.1); }
 
-/* ── Event badge ──────────────────────────────────── */
+
 .eventoBadge {
   display: flex; align-items: flex-start; gap: 8px; flex: 1;
 }
@@ -127,7 +127,7 @@
 .eventoBadgeHora { font-size: 10px; color: var(--text-muted); }
 .eventoBadgeLugar { font-size: 10px; color: var(--text-muted); }
 
-/* ── Sidebar ──────────────────────────────────────── */
+
 .sidebar {
   background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius-md); overflow: hidden;
@@ -156,7 +156,7 @@
 .sidebarItemDate { font-size: 10px; color: var(--text-muted); }
 .sidebarItemIcon { font-size: 13px; flex-shrink: 0; }
 
-/* ── Modal ────────────────────────────────────────── */
+
 .modalOverlay {
   position: fixed; inset: 0; z-index: 200;
   background: rgba(0, 0, 0, 0.42);
@@ -244,7 +244,7 @@
   position: relative; z-index: 1; background: var(--modal-bg);
 }
 
-/* ── Form ─────────────────────────────────────────── */
+
 .formRow { display: flex; flex-direction: column; gap: 12px; }
 .formRow2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .formField { display: flex; flex-direction: column; gap: 7px; min-width: 0; overflow: hidden; }
@@ -293,7 +293,7 @@
 .textInput[aria-invalid="true"], .select[aria-invalid="true"] { border-color: #e07070; }
 .formError { color: #e07070; font-size: 11px; font-weight: 600; }
 
-/* ── Tipo grid ────────────────────────────────────── */
+
 .tipoGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
 .tipoBtn {
   display: flex; align-items: center; justify-content: center; gap: 6px;
@@ -359,7 +359,7 @@
 }
 .btnSecondary:hover { border-color: var(--text-muted); color: var(--text); }
 
-/* ── Responsive ───────────────────────────────────── */
+
 @media (max-width: 900px) {
   .wrap { padding: 18px 14px; }
   .title { font-size: 22px; }

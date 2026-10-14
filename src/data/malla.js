@@ -1,5 +1,3 @@
-// Malla curricular — Ingeniería de Sistemas
-// Acuerdo Académico N° 21 de 2024
 export const MALLA_SISTEMAS = [
   {
     semestre: 1,
@@ -124,7 +122,6 @@ export const MALLA_SISTEMAS = [
   },
 ];
 
-// Malla curricular — Hotelería y Turismo
 export const MALLA_HOTELERIA_TURISMO = [
   {
     semestre: 1,
@@ -241,8 +238,6 @@ export const MALLA_HOTELERIA_TURISMO = [
   },
 ];
 
-// Malla curricular — Ingeniería Industrial
-// Acuerdo N° 26 de 2024
 export const MALLA_INDUSTRIAL = [
   {
     semestre: 1,
@@ -349,8 +344,6 @@ export const MALLA_INDUSTRIAL = [
   },
 ];
 
-// Malla curricular — Negocios Internacionales
-// Acuerdo Académico N° 07 de 2025
 export const MALLA_NEGOCIOS = [
   {
     semestre: 1,

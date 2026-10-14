@@ -188,12 +188,15 @@ function CorteRow({ corte, idx, onChange, onRemove, canRemove }) {
 
 function MateriaCard({ materia, data, onChange, colors, borderRadius, horarioClase }) {
   const [expanded, setExpanded] = useState(false);
-  const d = data || {
+  const rawData = data || {
     profesor: "", grupo: "", salon: "",
-    cortes: migrateCortes([]),
+    cortes: [],
     repeticiones: [],
   };
-  d.cortes = migrateCortes(d.cortes);
+  const d = {
+    ...rawData,
+    cortes: migrateCortes(rawData.cortes),
+  };
 
   const notaFinal = calcNotaFinal(d.cortes);
   const perdio = notaFinal !== null && Number(notaFinal) < NOTA_PASS;

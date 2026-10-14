@@ -1,13 +1,11 @@
 import { api } from "../api";
 
-// ── Relación canónica ─────────────────────────────────────────────────────
 export function canonicalPair(a, b) {
   return a < b ? [a, b] : [b, a];
 }
 
 export const FRIENDSHIP_TABLE_MISSING = "42P01";
 
-// ── Caché en memoria (evita re-pedir en cada visita a la pestaña) ────────
 const cache = new Map();
 const CACHE_TTL = 60 * 1000;
 
@@ -31,7 +29,6 @@ function wrap(promise) {
   );
 }
 
-// ── Consultas ─────────────────────────────────────────────────────────────
 export function fetchFriendships(username) {
   return cached(`friendships:${username}`, () => wrap(api("/friendships")));
 }
@@ -51,7 +48,6 @@ export function removeFriendship(me, other) {
   return wrap(api("/friendships", { method: "POST", body: { action: "remove", other } }));
 }
 
-// ── Usuarios ──────────────────────────────────────────────────────────────
 export function fetchUsersBrief() {
   return cached("users", () => wrap(api("/users")));
 }
@@ -61,7 +57,6 @@ export function searchUsers(q) {
   return wrap(api(`/users?q=${encodeURIComponent(q.trim())}`));
 }
 
-// ── Datos del amigo (horario + malla para progreso) ───────────────────────
 export function fetchFriendData(username) {
   return wrap(api(`/user_data/${encodeURIComponent(username)}`));
 }
