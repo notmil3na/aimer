@@ -64,7 +64,7 @@
 
 .logoText {
   font-family: 'Sentient-MediumItalic';
-  font-size: 30px; font-weight: 500; color: var(--text);
+  font-size: 38px; font-weight: 500; color: var(--text);
   letter-spacing: 0.01em;
 }
 .logoText em { color: var(--accent); font-style: italic; font-weight: 500; }
@@ -259,12 +259,12 @@
     padding: calc(env(safe-area-inset-top) + 14px) 14px calc(env(safe-area-inset-bottom) + 14px);
   }
   .card { margin: auto; border-radius: 14px; padding: 24px 18px 20px; max-width: 100%; }
-  .logoText { font-size: 26px; }
+  .logoText { font-size: 33px; }
   .sub { margin-bottom: 16px; }
   .row2 { grid-template-columns: 1fr; gap: 10px; }
 }
 
 @media (max-width: 360px) {
   .card { padding: 20px 14px 16px; }
-  .logoText { font-size: 24px; }
+  .logoText { font-size: 30px; }
 }

@@ -92,10 +92,10 @@
 }
 .sheetBrand {
   display: flex; align-items: center; gap: 7px;
-  font-family: 'Sentient-MediumItalic'; font-weight: 500; font-size: 15px; letter-spacing: 0.02em;
+  font-family: 'Sentient-MediumItalic'; font-weight: 500; font-size: 18px; letter-spacing: 0.02em;
   margin-bottom: 14px;
 }
-.sheetBrandStar { font-size: 15px; }
+.sheetBrandStar { font-size: 18px; }
 .sheetTitle {
   font-family: var(--font-display);
   font-size: 38px; font-weight: 500; line-height: 1;
