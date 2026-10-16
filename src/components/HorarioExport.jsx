@@ -149,7 +149,7 @@ export default function HorarioExport({ user, horarioData, malla, onClose, onNot
               <div className={styles.sheetHeader}>
                 <div className={styles.sheetBrand}>
                   <span className={styles.sheetBrandStar}>✦</span>
-                  <span>MiMalla</span>
+                  <span>Aimer</span>
                 </div>
                 <h1 className={styles.sheetTitle}>Mi Horario</h1>
                 <p className={styles.sheetMeta}>
@@ -234,7 +234,7 @@ export default function HorarioExport({ user, horarioData, malla, onClose, onNot
                   <span className={styles.stat}><strong>{totalCred}</strong> créditos</span>
                   <span className={styles.stat}><strong>{diasMostrar.length}</strong> días</span>
                 </div>
-                <span className={styles.sheetCredit}>Generado con MiMalla ✦</span>
+                <span className={styles.sheetCredit}>Generado con Aimer ✦</span>
               </div>
             </div>
           </div>

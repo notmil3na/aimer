@@ -1,5 +1,5 @@
 import webpush from "web-push";
-import { admin, envReady, json, readBody, requireUser } from "./_lib.mjs";
+import { admin, envReady, json, readBody, requireUser, writesFrozen, maintenance } from "./_lib.mjs";
 
 const VAPID_PUBLIC = process.env.VAPID_PUBLIC_KEY || "";
 const VAPID_PRIVATE = process.env.VAPID_PRIVATE_KEY || "";
@@ -111,9 +111,9 @@ async function runCron(res, req) {
 
     if (isTest) {
       const payload = JSON.stringify({
-        title: "MiMalla · Prueba",
+        title: "Aimer · Prueba",
         body: "¡Las notificaciones push funcionan!",
-        tag: "mimalla-test-" + Date.now(),
+        tag: "aimer-test-" + Date.now(),
         url: "/",
       });
       const results = await Promise.all(
@@ -155,9 +155,9 @@ async function runCron(res, req) {
     if (fresh.length === 0) continue;
 
     const payload = JSON.stringify({
-      title: "MiMalla · Recordatorio",
+      title: "Aimer · Recordatorio",
       body: `${fresh[0].titulo} · ${fresh[0].fecha}${fresh[0].atrasado ? " (con retraso)" : ""}`,
-      tag: `mimalla-${fresh[0].key}`,
+      tag: `aimer-${fresh[0].key}`,
       url: "/",
     });
 
@@ -203,6 +203,7 @@ async function runCron(res, req) {
 }
 
 export default async function handler(req, res) {
+  if (writesFrozen(req)) return maintenance(res);
   if (!envReady() || !admin) {
     return json(res, 500, { error: "Configuración del servidor incompleta" });
   }
@@ -211,7 +212,10 @@ export default async function handler(req, res) {
   const hasSecret =
     CRON_SECRET &&
     (req.headers["x-cron-secret"] === CRON_SECRET || req.query?.secret === CRON_SECRET);
-  if (fromCron || hasSecret) return runCron(res, req);
+  if (fromCron || hasSecret) {
+    if (process.env.MAINTENANCE === "1") return json(res, 200, { skipped: "maintenance" });
+    return runCron(res, req);
+  }
 
   const me = requireUser(req);
 
@@ -271,9 +275,9 @@ export default async function handler(req, res) {
       }
       webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC, VAPID_PRIVATE);
       const payload = JSON.stringify({
-        title: "MiMalla · Prueba",
+        title: "Aimer · Prueba",
         body: "¡Las notificaciones funcionan! Esta es una prueba.",
-        tag: "mimalla-test-" + Date.now(),
+        tag: "aimer-test-" + Date.now(),
         url: "/",
       });
       const results = await Promise.all(

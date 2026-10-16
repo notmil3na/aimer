@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { admin, envReady, json, readBody, requireUser } from "./_lib.mjs";
+import { admin, envReady, json, readBody, requireUser, writesFrozen, maintenance } from "./_lib.mjs";
 
 function canonicalPair(a, b) {
   return a < b ? [a, b] : [b, a];
@@ -619,6 +619,7 @@ async function actionChatUploadURL(me, other, body) {
 }
 
 export default async function handler(req, res) {
+  if (writesFrozen(req)) return maintenance(res);
   if (!envReady() || !admin) return json(res, 500, { error: "Configuración del servidor incompleta" });
   const me = requireUser(req);
   if (!me) return json(res, 401, { error: "Sesión inválida" });

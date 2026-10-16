@@ -1,8 +1,9 @@
-import { admin, envReady, isColumnMissing, json, readBody, requireUser, toUserRow } from "./_lib.mjs";
+import { admin, envReady, isColumnMissing, json, readBody, requireUser, toUserRow, writesFrozen, maintenance } from "./_lib.mjs";
 
 const USERNAME_RE = /^[a-zA-Z0-9._-]{2,20}$/;
 
 export default async function handler(req, res) {
+  if (writesFrozen(req)) return maintenance(res);
   if (!envReady() || !admin) return json(res, 500, { error: "Configuración del servidor incompleta" });
 
   if (req.method === "GET") {

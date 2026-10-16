@@ -1,0 +1,53 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "aimer-project",
+  "main": "worker/index.js",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat"],
+
+  // el frontend: vite compila a ./dist y cloudflare lo sirve sin cobrar por request.
+  // single-page-application = cualquier ruta que no sea un archivo devuelve index.html.
+  // run_worker_first = las rutas /api/* pasan por el worker antes que por los assets.
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
+  },
+
+  // recordatorios push, una vez al día. cloudflare usa utc (igual que el cron de vercel:
+  // 13:00 utc = 8:00 a. m. en bogotá). está a las 13:05 para que, mientras vercel siga
+  // con su cron de las 13:00, no corran a la vez; los recordatorios ya enviados se
+  // guardan en `sentKeys`, así que correr dos veces no duplica notificaciones.
+  "triggers": { "crons": ["5 13 * * *"] },
+
+  "observability": { "enabled": true },
+
+  "vars": {
+    "VAPID_SUBJECT": "https://mallaunimag.com",
+    // desactivado a propósito: evita el bucle Vercel <-> Worker al redirigir
+    // vercel al worker. deben quedar vacíos para que worker/index.js no reenvíe.
+    "LEGACY_ORIGIN": "",
+    "LEGACY_PREFIXES": ""
+  },
+
+  // base de datos sql. se aplican las migraciones de ./migrations con
+  // `npx wrangler d1 migrations apply aimer --local` (o --remote).
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "aimer",
+      "database_id": "4e9fba5b-e7d9-4d8c-a1ed-050b9dddd13c"
+    }
+  ],
+
+  "r2_buckets": [
+    {
+      "binding": "R2_BUCKET",
+      "bucket_name": "chat-attachments"
+    }
+  ]
+
+  // secretos (no van aquí, se cargan con `npx wrangler secret put NOMBRE`):
+  // SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, SESSION_SECRET,
+  // VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, CRON_SECRET
+}

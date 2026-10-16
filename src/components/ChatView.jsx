@@ -19,7 +19,39 @@ import {
 } from "../utils/chatShare";
 import { uuid } from "../utils/notasClase";
 
-const POLL_MS = 15000;
+const POLL_ACTIVE_MS = 15000; // con el broadcast caído: red de seguridad a 15 s
+const POLL_IDLE_MS = 90000;   // con el broadcast conectado: red de seguridad a 90 s
+const POLL_LIST_MS = 60000;   // lista de chats (no tiene broadcast)
+
+// consulta solo con la pestaña visible y refresca al volver a ella
+function usePollingWhileVisible(fn, delay) {
+  useEffect(() => {
+    if (typeof document === "undefined") return undefined;
+    let timer = null;
+    const schedule = () => {
+      clearTimeout(timer);
+      if (document.visibilityState !== "visible") return;
+      timer = setTimeout(async () => {
+        await fn();
+        schedule();
+      }, delay);
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") {
+        fn();
+        schedule();
+      } else {
+        clearTimeout(timer);
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    schedule();
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [fn, delay]);
+}
 
 
 function Avatar({ u, size = 40 }) {
@@ -330,6 +362,7 @@ function ThreadView({ user, friend, onBack, onNotify, onToggleInfo, infoOpen, sh
   const [error, setError] = useState("");
   const [shareOpen, setShareOpen] = useState(false);
   const [addingMsg, setAddingMsg] = useState(null);
+  const [broadcastUp, setBroadcastUp] = useState(false);
 
   const scrollRef = useRef(null);
   const streamRef = useRef(null);
@@ -373,15 +406,25 @@ function ThreadView({ user, friend, onBack, onNotify, onToggleInfo, infoOpen, sh
     setError("");
     setInput("");
     refresh();
-    const id = setInterval(refresh, POLL_MS);
-    return () => clearInterval(id);
   }, [other, refresh]);
 
+  // con el broadcast conectado se consulta cada 90 s; si cae, cada 15 s.
+  // en ambos casos solo con la pestaña visible (y se refresca al volver).
+  usePollingWhileVisible(refresh, broadcastUp ? POLL_IDLE_MS : POLL_ACTIVE_MS);
+
   useEffect(() => {
-    if (!channelToken) return undefined;
-    const stream = createConversationStream(channelToken, () => refresh());
+    if (!channelToken) { setBroadcastUp(false); return undefined; }
+    const stream = createConversationStream(
+      channelToken,
+      () => refresh(),
+      (status) => {
+        const up = status === "SUBSCRIBED";
+        setBroadcastUp(up);
+        if (up) refresh();
+      }
+    );
     streamRef.current = stream;
-    return () => { stream.close(); streamRef.current = null; };
+    return () => { stream.close(); streamRef.current = null; setBroadcastUp(false); };
   }, [channelToken, refresh]);
 
   useEffect(() => {
@@ -740,9 +783,9 @@ export default function ChatView({ user, malla, notasClaseData, asignacionesData
 
   useEffect(() => {
     loadOverview();
-    const id = setInterval(loadOverview, POLL_MS);
-    return () => clearInterval(id);
   }, [loadOverview]);
+
+  usePollingWhileVisible(loadOverview, POLL_LIST_MS);
 
   const amigos = useMemo(
     () => (users || []).filter((u) => friendships[u.username] && friendships[u.username].status === "aceptado"),

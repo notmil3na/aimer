@@ -1,4 +1,4 @@
-const CACHE = "mimalla-v1791956990253";
+const CACHE = "aimer-v1792176892515";
 const CORE = [
   "/",
   "/manifest.webmanifest",
@@ -7,10 +7,10 @@ const CORE = [
   "/icons/icon-512-maskable.png",
   "/icons/apple-touch-icon.png",
 ];
-const PRECACHE = ["/assets/AsignacionesView-1812742b.js","/assets/AsignacionesView-7b51041b.css","/assets/CalendarioView-220bfe1c.css","/assets/CalendarioView-f5a86740.js","/assets/ChatView-665c95b9.css","/assets/ChatView-a866a252.js","/assets/ColaboracionView-2eb3e26e.css","/assets/ColaboracionView-503c7405.js","/assets/CursandoView-d3de19ba.js","/assets/CursandoView-d9992b55.css","/assets/CustomCursor-414bbb10.css","/assets/CustomCursor-669a8e48.js","/assets/Dashboard-b107d519.js","/assets/Dashboard-b329c188.css","/assets/HorarioExport-4441eb03.css","/assets/HorarioExport-a05ae5e1.js","/assets/HorarioView-09405986.css","/assets/HorarioView-1fad8847.js","/assets/HorarioWallpaper-05e5c4bb.css","/assets/HorarioWallpaper-5963d349.js","/assets/Login-1dea8ddd.css","/assets/Login-6c990f3d.js","/assets/MallaView-a06c7cbe.css","/assets/MallaView-c74a6f71.js","/assets/NotasView-05d5481e.js","/assets/NotasView-80ba163b.css","/assets/SettingsView-656c58df.js","/assets/SettingsView-f9305d00.css","/assets/UpdatePrompt-90a3fafd.css","/assets/UpdatePrompt-b8dbf392.js","/assets/academic-4c78966e.js","/assets/careerProgress-4497761c.js","/assets/friendsApi-e50cfd92.js","/assets/horarioHelpers-6d83de28.js","/assets/html2canvas.esm-f16e60ff.js","/assets/index-1b1ae201.js","/assets/index-a7cba66d.js","/assets/index-eb63b814.js","/assets/index-eb93115c.css","/assets/index.es-650d34a6.js","/assets/jspdf.es.min-b475143f.js","/assets/notasClase-34006f8a.js","/assets/purify.es-541be1bb.js","/assets/semesterCountdown-a51eb9e3.js","/assets/useBodyScrollLock-93de64dc.js","/assets/vendor-27d6d7f2.js","/icons/apple-touch-icon.png","/icons/icon-192.png","/icons/icon-512-maskable.png","/icons/icon-512.png","/manifest.webmanifest"];
+const PRECACHE = ["/_headers","/assets/AsignacionesView-047e354b.js","/assets/AsignacionesView-7bcc0fc2.css","/assets/CalendarioView-4afae69e.js","/assets/CalendarioView-ac11f1ee.css","/assets/ChatView-4f9d6f2a.js","/assets/ChatView-e53a3ceb.css","/assets/ColaboracionView-4fcf4b57.css","/assets/ColaboracionView-e74919a8.js","/assets/CursandoView-088e1a17.js","/assets/CursandoView-af952183.css","/assets/CustomCursor-076f71c1.css","/assets/CustomCursor-10edd728.js","/assets/Dashboard-8da06590.js","/assets/Dashboard-b329c188.css","/assets/HorarioExport-34102a77.js","/assets/HorarioExport-96779359.css","/assets/HorarioView-09405986.css","/assets/HorarioView-2374746b.js","/assets/HorarioWallpaper-7b991463.js","/assets/HorarioWallpaper-8e427b70.css","/assets/Login-1dea8ddd.css","/assets/Login-b72286af.js","/assets/MallaView-4619d62a.js","/assets/MallaView-ca3d52a7.css","/assets/NotasView-b1c8014b.js","/assets/NotasView-c0093aef.css","/assets/SettingsView-a014f096.js","/assets/SettingsView-b7901c61.css","/assets/UpdatePrompt-5f133d84.css","/assets/UpdatePrompt-7d7df163.js","/assets/academic-baaf8851.js","/assets/careerProgress-4d524510.js","/assets/friendsApi-a845863c.js","/assets/horarioHelpers-6d83de28.js","/assets/html2canvas.esm-f16e60ff.js","/assets/index-1b1ae201.js","/assets/index-218387e7.js","/assets/index-a7cba66d.js","/assets/index-eb93115c.css","/assets/index.es-4e0d954a.js","/assets/jspdf.es.min-dcfc3fea.js","/assets/notasClase-34006f8a.js","/assets/purify.es-541be1bb.js","/assets/semesterCountdown-a51eb9e3.js","/assets/useBodyScrollLock-411d9e43.js","/assets/vendor-27d6d7f2.js","/icons/apple-touch-icon.png","/icons/icon-192.png","/icons/icon-512-maskable.png","/icons/icon-512.png","/manifest.webmanifest"];
 
-const isSwVersion = (key) => key.startsWith("mimalla-v");
-const toNumber = (key) => Number(key.replace(/^mimalla-v/, "")) || 0;
+const isSwVersion = (key) => key.startsWith("aimer-v");
+const toNumber = (key) => Number(key.replace(/^aimer-v/, "")) || 0;
 
 function findInCaches(req) {
   return caches
@@ -139,12 +139,12 @@ self.addEventListener("push", (e) => {
   try {
     payload = e.data ? e.data.json() : {};
   } catch (_) {}
-  const title = payload.title || "MiMalla · Recordatorio";
+  const title = payload.title || "Aimer · Recordatorio";
   const opts = {
     body: payload.body || "Tienes un recordatorio pendiente.",
     icon: "/icons/icon-192.png",
     badge: "/icons/icon-192.png",
-    tag: payload.tag || "mimalla-" + Date.now(),
+    tag: payload.tag || "aimer-" + Date.now(),
     data: { url: payload.url || "/" },
   };
   e.waitUntil(self.registration.showNotification(title, opts));

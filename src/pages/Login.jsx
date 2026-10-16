@@ -239,7 +239,7 @@ export default function Login({ onLogin }) {
       <div className={`${styles.card} ${shake ? styles.shake : ""}`}>
         <div className={styles.logo}>
           <span className={styles.logoIcon}><BrandStar size={26} /></span>
-          <h1 className={styles.logoText}>Mi<em>Malla</em></h1>
+          <h1 className={styles.logoText}>Aimer</h1>
         </div>
         <p className={styles.sub}>Mi plan de <em>estudio</em> {"<3"}.</p>
 

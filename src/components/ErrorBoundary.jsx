@@ -68,18 +68,18 @@ export default class ErrorBoundary extends React.Component {
           style={{
             fontSize: isChunk ? "30px" : "32px",
             color: "var(--accent)",
-            animation: isChunk ? "mimallaSpin 2.4s linear infinite" : undefined,
+            animation: isChunk ? "aimerSpin 2.4s linear infinite" : undefined,
           }}
         >
           ✦
         </span>
-        <style>{`@keyframes mimallaSpin { to { transform: rotate(360deg); } }`}</style>
+        <style>{`@keyframes aimerSpin { to { transform: rotate(360deg); } }`}</style>
         <h2 style={{ margin: 0, fontSize: "18px", fontWeight: 700 }}>
           {isChunk ? "Actualización disponible" : (this.props.title || "Algo salió mal")}
         </h2>
         <p style={{ margin: 0, fontSize: "13.5px", maxWidth: "340px", color: "var(--text-muted)", lineHeight: 1.5 }}>
           {isChunk
-            ? "Se desplegó una versión nueva de MiMalla. Recarga la página para cargar los últimos cambios."
+            ? "Se desplegó una versión nueva de Aimer. Recarga la página para cargar los últimos cambios."
             : (this.props.message ||
               "Ocurrió un error inesperado. Tus datos están guardados; recarga la página para continuar.")}
         </p>

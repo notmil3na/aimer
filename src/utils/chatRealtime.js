@@ -14,13 +14,25 @@ function getClient() {
   return clientPromise;
 }
 
-export function createConversationStream(token, onMessage) {
+export function createConversationStream(token, onMessage, onStatus) {
   let client = null;
   let channel = null;
   let closed = false;
+  let connected = false;
+
+  const report = (status) => {
+    if (onStatus && !closed) {
+      try {
+        onStatus(status);
+      } catch (_) {}
+    }
+  };
 
   const ready = getClient().then((c) => {
-    if (!c || !token || closed) return "NO_CLIENT";
+    if (!c || !token || closed) {
+      report("NO_CLIENT");
+      return "NO_CLIENT";
+    }
     client = c;
     channel = c.channel(`chat:${token}`);
     channel.on("broadcast", { event: "message" }, (payload) => {
@@ -31,14 +43,18 @@ export function createConversationStream(token, onMessage) {
       }
     });
     return new Promise((resolve) => {
-      channel.subscribe((status) => resolve(status));
+      channel.subscribe((status) => {
+        connected = status === "SUBSCRIBED";
+        report(status);
+        resolve(status);
+      });
     });
   });
 
   return {
     send(payload) {
-      ready.then(async (status) => {
-        if (!channel || closed || status !== "SUBSCRIBED") return;
+      ready.then(async () => {
+        if (!channel || closed || !connected) return;
         try {
           await channel.send({ type: "broadcast", event: "message", payload });
         } catch (_) {}

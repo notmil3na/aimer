@@ -26,7 +26,11 @@ export default async function handler(req, res) {
   const ok = await verifyPassword(String(password), data.password);
   if (!ok) return json(res, 401, { error: "Contraseña incorrecta" });
 
-  if (typeof data.password === "string" && !data.password.startsWith("scrypt:")) {
+  if (
+    typeof data.password === "string" &&
+    !data.password.startsWith("scrypt:") &&
+    process.env.MAINTENANCE !== "1"
+  ) {
     const hashed = await hashPassword(String(password));
     await admin.from("users").update({ password: hashed }).eq("username", data.username);
   }

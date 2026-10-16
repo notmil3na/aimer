@@ -133,6 +133,23 @@ export function isColumnMissing(err) {
   );
 }
 
+// ---- congelado de escrituras para el corte a Cloudflare/D1 ----------------
+// activo solo con MAINTENANCE=1 en el entorno de Vercel (requiere redeploy).
+// deja pasar las lecturas (GET/HEAD/OPTIONS) y el login; bloquea el resto.
+export function writesFrozen(req) {
+  if (process.env.MAINTENANCE !== "1") return false;
+  const method = String((req && req.method) || "").toUpperCase();
+  return !(method === "GET" || method === "HEAD" || method === "OPTIONS");
+}
+
+export function maintenance(res) {
+  res.setHeader("Retry-After", "120");
+  return json(res, 503, {
+    error: "Estamos en mantenimiento. La app está en solo lectura por unos minutos.",
+    maintenance: true,
+  });
+}
+
 export function publicUser(row) {
   if (!row) return null;
   return {

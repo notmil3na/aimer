@@ -34,7 +34,7 @@ function swCacheVersion() {
           'const PRECACHE = [];',
           `const PRECACHE = ${JSON.stringify(assets)};`
         )
-        code = code.replace(/mimalla-v[\w-]+/, `mimalla-v${Date.now()}`)
+        code = code.replace(/aimer-v[\w-]+/, `aimer-v${Date.now()}`)
         writeFileSync(file, code)
         console.log(`[sw-cache-version] cache del SW actualizado · ${assets.length} assets en precache`)
       } catch (err) {

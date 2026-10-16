@@ -100,7 +100,7 @@ export default function useReminders({ items, eventos }) {
           lastKeyRef.current = first.key;
           if (permission === "granted" && typeof Notification !== "undefined") {
             try {
-              new Notification("MiMalla · Recordatorio", {
+              new Notification("Aimer · Recordatorio", {
                 body: `${first.titulo} · ${formatDue(first)}`,
                 tag: first.key,
               });
@@ -139,7 +139,7 @@ export default function useReminders({ items, eventos }) {
       return;
     }
     try {
-      new Notification("MiMalla · Prueba", {
+      new Notification("Aimer · Prueba", {
         body: "¡Las notificaciones funcionan! Esta es una prueba.",
         tag: "malla-test-" + Date.now(),
       });

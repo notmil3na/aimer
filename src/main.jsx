@@ -13,7 +13,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 )
 
 if ("serviceWorker" in navigator && import.meta.env.PROD) {
-  const dispatchUpdate = () => window.dispatchEvent(new Event("mimalla:swupdate"));
+  const dispatchUpdate = () => window.dispatchEvent(new Event("aimer:swupdate"));
 
   const shouldPromptUpdate = (reg) =>
     !!(reg?.waiting && navigator.serviceWorker.controller);

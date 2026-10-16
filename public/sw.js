@@ -1,4 +1,4 @@
-const CACHE = "mimalla-v12";
+const CACHE = "aimer-v12";
 const CORE = [
   "/",
   "/manifest.webmanifest",
@@ -9,8 +9,8 @@ const CORE = [
 ];
 const PRECACHE = [];
 
-const isSwVersion = (key) => key.startsWith("mimalla-v");
-const toNumber = (key) => Number(key.replace(/^mimalla-v/, "")) || 0;
+const isSwVersion = (key) => key.startsWith("aimer-v");
+const toNumber = (key) => Number(key.replace(/^aimer-v/, "")) || 0;
 
 function findInCaches(req) {
   return caches
@@ -139,12 +139,12 @@ self.addEventListener("push", (e) => {
   try {
     payload = e.data ? e.data.json() : {};
   } catch (_) {}
-  const title = payload.title || "MiMalla · Recordatorio";
+  const title = payload.title || "Aimer · Recordatorio";
   const opts = {
     body: payload.body || "Tienes un recordatorio pendiente.",
     icon: "/icons/icon-192.png",
     badge: "/icons/icon-192.png",
-    tag: payload.tag || "mimalla-" + Date.now(),
+    tag: payload.tag || "aimer-" + Date.now(),
     data: { url: payload.url || "/" },
   };
   e.waitUntil(self.registration.showNotification(title, opts));

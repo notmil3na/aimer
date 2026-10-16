@@ -1,4 +1,4 @@
-const STORAGE_KEY = "mimalla_pending_saves";
+const STORAGE_KEY = "aimer_pending_saves";
 
 export function getPendingSaves() {
   try {
