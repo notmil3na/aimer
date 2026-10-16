@@ -4,8 +4,10 @@ const LEGACY_ORIGIN = self.location.origin !== NEW_ORIGIN;
 const CORE = [
   "/",
   "/manifest.webmanifest",
+  "/favicon.ico",
   "/icons/icon-192.png",
   "/icons/icon-512.png",
+  "/icons/icon-192-maskable.png",
   "/icons/icon-512-maskable.png",
   "/icons/apple-touch-icon.png",
 ];
