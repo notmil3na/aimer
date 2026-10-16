@@ -207,7 +207,7 @@ export default function Login({ onLogin }) {
       themeColors:  DEFAULT_THEME_COLORS,
       borderRadius: 12,
       fontScale:    1,
-      fontBody:     "DM Sans",
+      fontBody:     "Overused Grotesk",
     };
 
     setLoading(true);

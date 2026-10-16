@@ -1,4 +1,5 @@
 export const FONT_OPTIONS = [
+  { value: "Overused Grotesk",label: "Overused Grotesk",sample: "Aa — grotesca moderna" },
   { value: "DM Sans",         label: "DM Sans",         sample: "Aa — moderna y limpia" },
   { value: "Outfit",          label: "Outfit",           sample: "Aa — geométrica y suave" },
   { value: "Syne",            label: "Syne",             sample: "Aa — editorial y audaz" },

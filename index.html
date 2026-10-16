@@ -30,7 +30,7 @@
           r.style.setProperty("--accent", c[0]);
           r.style.setProperty("--accent2", c[1]);
           r.style.setProperty("--accent-rgb", c[2]);
-          if (u && u.fontBody) r.style.setProperty("--font-body", "'" + u.fontBody + "', system-ui, sans-serif");
+          if (u && u.fontBody && u.fontBody !== "DM Sans") r.style.setProperty("--font-body", "'" + u.fontBody + "', system-ui, sans-serif");
           var tc = document.getElementById("theme-color-meta");
           if (tc) tc.setAttribute("content", BG[mode] || BG.dark);
         } catch (e) {}
@@ -47,6 +47,7 @@
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
     <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet" /></noscript>
     <link rel="manifest" href="/manifest.webmanifest" />

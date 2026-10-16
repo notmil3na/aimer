@@ -1,9 +1,17 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 
+@font-face {
+  font-family: 'Overused Grotesk';
+  src: url('https://raw.githubusercontent.com/RandomMaerks/Overused-Grotesk/master/fonts/variable/OverusedGrotesk-VF.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root, [data-theme="dark"] {
   --font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
-  --font-body: 'DM Sans', system-ui, sans-serif;
+  --font-body: 'Overused Grotesk', system-ui, sans-serif;
 
 
 

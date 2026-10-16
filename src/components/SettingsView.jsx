@@ -138,7 +138,7 @@ export default function SettingsView({ user, onUpdate, onMallaReset, malla, seme
   const [fontScale, setFontScale]       = useState(user.fontScale ?? 1);
   const [appMode, setAppMode]           = useState(user.appMode || "light");
   const [appTheme, setAppTheme]         = useState(user.appTheme || "ambar");
-  const [fontBody, setFontBody]         = useState(user.fontBody || "DM Sans");
+  const [fontBody, setFontBody]         = useState(user.fontBody && user.fontBody !== "DM Sans" ? user.fontBody : "Overused Grotesk");
   const [aparienciaSaved, setAparienciaSaved] = useState(false);
 
   const doSaveApariencia = useCallback(() => {
