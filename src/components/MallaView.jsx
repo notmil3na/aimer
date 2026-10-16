@@ -327,7 +327,6 @@ export default function MallaView({ malla: initialMalla, notas, onSave, user, on
       )}
 
       <div className={styles.semesterWidget}>
-        <div className={styles.semesterWidgetAccent} />
         <div className={styles.semesterWidgetTop}>
           <div>
             <p className={styles.semesterWidgetLabel}>

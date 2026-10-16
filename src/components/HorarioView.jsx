@@ -491,7 +491,6 @@ function ClaseBloque({ clase, materia, color, horaStart, duracion, onClick, isCo
     <div className={`${styles.claseBloque} ${isConflict?styles.claseBloqueConflict:""}`}
       style={{top,height,"--clase-color":color}} onClick={onClick}
       title={`${materia?.id||clase.materiaId}${clase.grupo?` - ${clase.grupo}`:""}${clase.profesor?` · ${clase.profesor}`:""} | ${toViewHora(clase.horaInicio)}–${toViewHora(clase.horaFin)} | ${clase.salonLabel||""}`}>
-      <div className={styles.claseAccent}/>
       <div className={styles.claseBloqueContent}>
         <span className={styles.claseId}>{materia?.id||clase.materiaId}{clase.grupo ? ` - ${clase.grupo}` : ""}</span>
         {showName && materia?.nombre && <span className={styles.claseNombre}>{materia.nombre}</span>}

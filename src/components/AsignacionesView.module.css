@@ -235,18 +235,18 @@
 .card {
   position: relative;
   background: linear-gradient(135deg, color-mix(in srgb, var(--surface) 94%, transparent), color-mix(in srgb, var(--surface2) 90%, transparent));
-  border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
+  border: 1px solid color-mix(in srgb, var(--card-color, var(--accent)) 28%, transparent);
   border-radius: 22px;
   overflow: hidden;
   transition: all 0.2s ease;
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
 }
 .card:hover {
-  border-color: color-mix(in srgb, var(--card-color) 34%, var(--border));
+  border-color: color-mix(in srgb, var(--card-color, var(--accent)) 50%, transparent);
   transform: translateY(-2px);
-  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.16);
+  box-shadow: 0 16px 32px color-mix(in srgb, var(--card-color, var(--accent)) 20%, transparent);
 }
-.cardGraded { border-color: color-mix(in srgb, var(--card-color) 24%, var(--border)); }
+.cardGraded { border-color: color-mix(in srgb, var(--card-color) 28%, transparent); }
 .cardCompleted { opacity: 0.85; }
 
 .cardHeader {
@@ -257,7 +257,6 @@
 }
 .cardHeader:hover { background: color-mix(in srgb, var(--surface2) 82%, transparent); }
 
-.cardAccent { width: 5px; flex-shrink: 0; }
 .cardBody { flex: 1; padding: 14px 16px 14px 14px; min-width: 0; }
 .cardTop { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 6px; }
 .cardTipo {

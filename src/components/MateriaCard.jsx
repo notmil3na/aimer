@@ -39,7 +39,6 @@ function MateriaCardInner({
       }}
       onClick={onClick}
     >
-      <div className={styles.colorBar} style={{ background: color }} />
       <span className={styles.estadoGlyph} style={{ color }}><GlyphIcon size={14} /></span>
       <div className={styles.content}>
         <div className={styles.top}>

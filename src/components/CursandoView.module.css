@@ -124,15 +124,15 @@
   position: relative;
   z-index: 1;
   background: linear-gradient(135deg, color-mix(in srgb, var(--surface) 94%, transparent), color-mix(in srgb, var(--surface2) 90%, transparent));
-  border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
+  border: 1px solid color-mix(in srgb, var(--card-color, var(--accent)) 28%, transparent);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   overflow: hidden; transition: border-color 0.2s, box-shadow 0.2s;
   border-radius: 22px;
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
 }
-.card:hover { border-color: var(--card-color); box-shadow: 0 12px 26px rgba(0, 0, 0, 0.08); }
-.cardFailed { border-color: rgba(224,112,112,0.3) !important; }
+.card:hover { border-color: color-mix(in srgb, var(--card-color, var(--accent)) 50%, transparent); box-shadow: 0 12px 26px color-mix(in srgb, var(--card-color, var(--accent)) 18%, transparent); }
+.cardFailed { border-color: color-mix(in srgb, #e07070 40%, transparent) !important; }
 
 .cardHeader {
   display: flex; align-items: stretch; cursor: pointer;
@@ -141,8 +141,6 @@
   font: inherit; color: inherit; width: 100%; text-align: left;
 }
 .cardHeader:hover { background: color-mix(in srgb, var(--surface2) 88%, transparent); }
-
-.cardColorBar { width: 4px; flex-shrink: 0; background: var(--card-color); }
 
 .cardMeta { flex: 1; padding: 14px 16px; }
 .cardTop { display: flex; gap: 8px; align-items: center; margin-bottom: 3px; }
@@ -227,10 +225,11 @@
   display: flex; align-items: flex-end; gap: 8px; flex-wrap: wrap;
   padding: 8px 10px;
   background: color-mix(in srgb, var(--surface) 96%, transparent);
-  border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
-  border-left: 3px solid color-mix(in srgb, var(--accent) 38%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent);
   border-radius: 14px;
+  transition: border-color 0.18s, box-shadow 0.18s;
 }
+.itemRow:hover { border-color: color-mix(in srgb, var(--accent) 50%, transparent); box-shadow: 0 8px 20px color-mix(in srgb, var(--accent) 14%, transparent); }
 .itemDot {
   width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
@@ -257,8 +256,9 @@
 .corteTotal {
   display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
   padding: 9px 14px;
-  background: color-mix(in srgb, var(--surface2) 94%, transparent); border-top: 1px solid var(--border);
-  border-left: 3px solid transparent;
+  background: color-mix(in srgb, var(--surface2) 94%, transparent);
+  border: 1px solid color-mix(in srgb, var(--corte-color, var(--border)) 28%, transparent);
+  border-radius: 12px;
 }
 .corteTotalLabel {
   font-size: 10px; font-weight: 700; text-transform: uppercase;
@@ -285,12 +285,14 @@
 .notaFinalRow {
   display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
   padding: 12px 14px;
-  background: color-mix(in srgb, var(--surface) 96%, transparent); border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
+  background: color-mix(in srgb, var(--surface) 96%, transparent); border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
-  border-radius: 16px; border-left: 3px solid var(--accent);
+  border-radius: 16px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+  transition: border-color 0.18s, box-shadow 0.18s;
 }
+.notaFinalRow:hover { border-color: color-mix(in srgb, var(--accent) 50%, transparent); box-shadow: 0 10px 24px color-mix(in srgb, var(--accent) 16%, transparent); }
 .notaFinalLabel { font-size: 12px; font-weight: 600; color: var(--text-muted); }
 .notaFinalVal { font-family: var(--font-display); font-size: 22px; font-weight: 400; }
 .notaFinalSub { font-size: 13px; color: var(--text-muted); }

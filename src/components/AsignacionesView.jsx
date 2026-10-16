@@ -161,7 +161,6 @@ function AsignacionCard({ item, allMaterias, onUpdate, onDelete, onEdit, onSyncC
   return (
     <div className={`${styles.card} ${item.nota ? styles.cardGraded : ""} ${item.completada ? styles.cardCompleted : ""}`} style={{ "--card-color": info.color }}>
       <div className={styles.cardHeader} onClick={() => setExpanded(v => !v)}>
-        <div className={styles.cardAccent} style={{ background: info.color }} />
         <div className={styles.cardBody}>
           <div className={styles.cardTop}>
             <span className={styles.cardTipo} style={{ color: info.color }}><info.Icon size={11} /> {info.label}</span>

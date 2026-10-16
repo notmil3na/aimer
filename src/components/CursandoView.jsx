@@ -244,7 +244,6 @@ function MateriaCard({ materia, data, onChange, colors, borderRadius, horarioCla
       style={{ "--card-color": cardColor, borderRadius: `${borderRadius ?? 12}px` }}
     >
       <button className={styles.cardHeader} onClick={() => setExpanded(v => !v)} aria-expanded={expanded}>
-        <div className={styles.cardColorBar} style={{ background: cardColor }} />
         <div className={styles.cardMeta}>
           <div className={styles.cardTop}>
             <span className={styles.cardId}>{materia.id}</span>

@@ -369,7 +369,6 @@ export default function SettingsView({ user, onUpdate, onMallaReset, malla, seme
                 <div className={styles.cursandoList}>
                   {materiasActuales.map(m => (
                     <div key={m.id} className={styles.cursandoItem}>
-                      <div className={styles.cursandoItemBar} style={{ background: "var(--accent)" }} />
                       <div className={styles.cursandoItemBody}>
                         <span className={styles.cursandoItemId}>{m.id}</span>
                         <span className={styles.cursandoItemNombre}>{m.nombre}</span>
