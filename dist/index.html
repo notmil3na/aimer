@@ -58,13 +58,29 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Aimer" />
-    <script type="module" crossorigin src="/assets/index-28dfc72d.js"></script>
+    <script type="module" crossorigin src="/assets/index-540bb4aa.js"></script>
     <link rel="modulepreload" crossorigin href="/assets/vendor-27d6d7f2.js">
-    <link rel="stylesheet" href="/assets/index-d1f86e16.css">
+    <link rel="stylesheet" href="/assets/index-0c115956.css">
   </head>
   <body>
     
-    <div class="aurora" aria-hidden="true"></div>
+    <div class="bg" aria-hidden="true">
+      <span class="bg-mesh bg-mesh--accent"></span>
+      <span class="bg-mesh bg-mesh--lilac"></span>
+      <span class="bg-mesh bg-mesh--violet"></span>
+      <span class="bg-grain"></span>
+    </div>
+    <script>
+      (function () {
+        try {
+          var bg = document.querySelector(".bg");
+          if (!bg) return;
+          var sync = function () { bg.classList.toggle("bg-paused", document.hidden); };
+          document.addEventListener("visibilitychange", sync);
+          sync();
+        } catch (e) {}
+      })();
+    </script>
     <div id="root"></div>
     
   </body>

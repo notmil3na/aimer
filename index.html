@@ -61,7 +61,23 @@
   </head>
   <body>
     
-    <div class="aurora" aria-hidden="true"></div>
+    <div class="bg" aria-hidden="true">
+      <span class="bg-mesh bg-mesh--accent"></span>
+      <span class="bg-mesh bg-mesh--lilac"></span>
+      <span class="bg-mesh bg-mesh--violet"></span>
+      <span class="bg-grain"></span>
+    </div>
+    <script>
+      (function () {
+        try {
+          var bg = document.querySelector(".bg");
+          if (!bg) return;
+          var sync = function () { bg.classList.toggle("bg-paused", document.hidden); };
+          document.addEventListener("visibilitychange", sync);
+          sync();
+        } catch (e) {}
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
