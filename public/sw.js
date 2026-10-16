@@ -1,4 +1,6 @@
-const CACHE = "aimer-v12";
+const CACHE = "aimer-v13";
+const NEW_ORIGIN = "https://aimer-project.yaritzamilena4.workers.dev";
+const LEGACY_ORIGIN = self.location.origin !== NEW_ORIGIN;
 const CORE = [
   "/",
   "/manifest.webmanifest",
@@ -177,6 +179,11 @@ self.addEventListener("fetch", (e) => {
 
   const url = new URL(req.url);
   if (url.pathname === "/sw.js") return;
+
+  if (LEGACY_ORIGIN && (req.mode === "navigate" || url.pathname === "/" || url.pathname.endsWith(".html"))) {
+    e.respondWith(Response.redirect(NEW_ORIGIN + url.pathname + url.search, 307));
+    return;
+  }
 
   if (req.mode === "navigate" || url.pathname === "/" || url.pathname.endsWith(".html")) {
     e.respondWith(serveHtml(req, url));
