@@ -148,8 +148,8 @@ export default function HorarioExport({ user, horarioData, malla, onClose, onNot
             <div ref={sheetRef} className={styles.sheet}>
               <div className={styles.sheetHeader}>
                 <div className={styles.sheetBrand}>
-                  <span className={styles.sheetBrandStar}>✦</span>
                   <span>Aimer</span>
+                  <span className={styles.sheetBrandStar}>✦</span>
                 </div>
                 <h1 className={styles.sheetTitle}>Mi Horario</h1>
                 <p className={styles.sheetMeta}>

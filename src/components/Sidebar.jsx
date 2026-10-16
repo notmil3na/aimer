@@ -19,8 +19,8 @@ export default function Sidebar({ user, tabs, activeTab, onTabChange, onLogout, 
       {}
       <div className={styles.brandRow}>
         <div className={styles.brand}>
-          <span className={styles.brandIcon}><IconStar size={20} /></span>
           <span className={styles.brandText}>Aimer</span>
+          <span className={styles.brandIcon}><IconStar size={20} /></span>
         </div>
         <div className={styles.brandActions}>
           {bell}
