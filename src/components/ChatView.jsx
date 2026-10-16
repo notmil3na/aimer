@@ -177,7 +177,7 @@ function MessageBubble({ msg, mine, sender, onAddAssignment, onAddNote }) {
         </div>
       )}
       <div className={`${styles.bubble} ${mine ? styles.bubbleMine : ""}`}>
-        {t === "text" && <div className={styles.bubbleText}>{msg.content}</div>}
+                {t === "text" && <div className={`${styles.bubbleText} selectable`}>{msg.content}</div>}
 
         {t === "image" && (
           <div className={styles.bubbleImgWrap}>

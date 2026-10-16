@@ -194,7 +194,7 @@ function AsignacionCard({ item, allMaterias, onUpdate, onDelete, onEdit, onSyncC
       {expanded && (
         <div className={styles.cardExpanded}>
           {item.descripcion && (
-            <p className={styles.cardDesc}>{item.descripcion}</p>
+                <p className={`${styles.cardDesc} selectable`}>{item.descripcion}</p>
           )}
 
           <div className={styles.gradeRow}>
