@@ -60,7 +60,7 @@
   -webkit-backdrop-filter: blur(var(--glass-blur));
 }
 
-.title { font-family: var(--font-display); font-size: 28px; font-weight: 400; color: var(--text); }
+.title { font-family: var(--font-display); font-size: 28px; font-weight: 300; color: var(--text); }
 .subtitle { font-size: 13px; color: var(--text-muted); margin-top: 3px; }
 
 .headerActions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }

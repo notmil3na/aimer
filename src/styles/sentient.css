@@ -1,0 +1,114 @@
+@font-face {
+  font-family: 'Sentient';
+  src: url('/fonts/Sentient-Variable.woff2') format('woff2'),
+       url('/fonts/Sentient-Variable.woff') format('woff');
+  font-weight: 200 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Sentient';
+  src: url('/fonts/Sentient-VariableItalic.woff2') format('woff2'),
+       url('/fonts/Sentient-VariableItalic.woff') format('woff');
+  font-weight: 200 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Sentient-Variable';
+  src: url('/fonts/Sentient-Variable.woff2') format('woff2'),
+       url('/fonts/Sentient-Variable.woff') format('woff');
+  font-weight: 200 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Sentient-VariableItalic';
+  src: url('/fonts/Sentient-VariableItalic.woff2') format('woff2'),
+       url('/fonts/Sentient-VariableItalic.woff') format('woff');
+  font-weight: 200 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Sentient-Extralight';
+  src: url('/fonts/Sentient-Extralight.woff2') format('woff2'),
+       url('/fonts/Sentient-Extralight.woff') format('woff');
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Sentient-ExtralightItalic';
+  src: url('/fonts/Sentient-ExtralightItalic.woff2') format('woff2'),
+       url('/fonts/Sentient-ExtralightItalic.woff') format('woff');
+  font-weight: 200;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Sentient-Light';
+  src: url('/fonts/Sentient-Light.woff2') format('woff2'),
+       url('/fonts/Sentient-Light.woff') format('woff');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Sentient-LightItalic';
+  src: url('/fonts/Sentient-LightItalic.woff2') format('woff2'),
+       url('/fonts/Sentient-LightItalic.woff') format('woff');
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Sentient-Regular';
+  src: url('/fonts/Sentient-Regular.woff2') format('woff2'),
+       url('/fonts/Sentient-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Sentient-Italic';
+  src: url('/fonts/Sentient-Italic.woff2') format('woff2'),
+       url('/fonts/Sentient-Italic.woff') format('woff');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Sentient-Medium';
+  src: url('/fonts/Sentient-Medium.woff2') format('woff2'),
+       url('/fonts/Sentient-Medium.woff') format('woff');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Sentient-MediumItalic';
+  src: url('/fonts/Sentient-MediumItalic.woff2') format('woff2'),
+       url('/fonts/Sentient-MediumItalic.woff') format('woff');
+  font-weight: 500;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Sentient-Bold';
+  src: url('/fonts/Sentient-Bold.woff2') format('woff2'),
+       url('/fonts/Sentient-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Sentient-BoldItalic';
+  src: url('/fonts/Sentient-BoldItalic.woff2') format('woff2'),
+       url('/fonts/Sentient-BoldItalic.woff') format('woff');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}

@@ -1,3 +1,5 @@
+@import "./styles/sentient.css";
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 
@@ -10,16 +12,8 @@
 }
 
 :root, [data-theme="dark"] {
-  --font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-display: 'Sentient', Georgia, 'Times New Roman', serif;
   --font-body: 'Overused Grotesk', system-ui, sans-serif;
-
-
-
-h1 > em, h2 > em, h3 > em {
-  font-style: italic;
-  font-weight: 500;
-  color: var(--accent);
-}
 
   --bg:       #0e0a18;
   --surface:  rgba(255,255,255,0.045);
@@ -79,6 +73,13 @@ h1 > em, h2 > em, h3 > em {
   --shadow-lg: 0 20px 50px rgba(120,90,160,0.18);
 
   color-scheme: light;
+}
+
+h1 > em, h2 > em, h3 > em {
+  font-family: 'Sentient-MediumItalic';
+  font-style: italic;
+  font-weight: 500;
+  color: var(--accent);
 }
 
 html, body, #root {
