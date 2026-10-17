@@ -340,9 +340,12 @@ export default function Login({ onLogin }) {
             <span className={styles.brandTag}>por y para estudiantes</span>
           </div>
 
-          {/* Carita animada, en un círculo centrado */}
-          <div className={styles.faceCircle}>
-            <AnimatedFace className={styles.faceSvg} />
+          {/* Carita animada, en un círculo centrado sobre un aro de acento plano */}
+          <div className={styles.faceWrap}>
+            <span className={styles.faceHalo} aria-hidden="true" />
+            <div className={styles.faceCircle}>
+              <AnimatedFace className={styles.faceSvg} />
+            </div>
           </div>
 
           <div className={styles.headline}>

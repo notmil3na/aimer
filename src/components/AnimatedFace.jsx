@@ -11,7 +11,7 @@ export default function AnimatedFace({ className }) {
   return (
     <svg
       className={className}
-      viewBox="0 0 512 512"
+      viewBox="0 26 512 512"
       role="img"
       aria-label="Carita animada que parpadea y mira a los lados"
       focusable="false"
@@ -88,7 +88,7 @@ export default function AnimatedFace({ className }) {
         </filter>
       </defs>
 
-      <rect width="512" height="512" fill="url(#afBg)" />
+      <rect x="-96" y="-96" width="704" height="704" fill="url(#afBg)" />
 
       {/* difuminados exteriores (fijos) */}
       <use
@@ -209,7 +209,7 @@ export default function AnimatedFace({ className }) {
       </g>
 
       {/* grano sutil, como el original */}
-      <rect width="512" height="512" filter="url(#afGrain)" opacity=".5" />
+      <rect x="-96" y="-96" width="704" height="704" filter="url(#afGrain)" opacity=".5" />
     </svg>
   );
 }

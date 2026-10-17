@@ -154,12 +154,24 @@
 }
 
 /* Carita animada, en un círculo centrado entre la marca y el titular */
-.faceCircle {
+.faceWrap {
   align-self: center;
   position: relative;
   z-index: 1;
   width: clamp(176px, 46%, 232px);
   aspect-ratio: 1;
+}
+/* Aro plano del color de acento, un poco más grande, por detrás del círculo */
+.faceHalo {
+  position: absolute;
+  inset: -14px;
+  border-radius: 50%;
+  background: var(--panel-accent);
+}
+.faceCircle {
+  position: relative;
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
   overflow: hidden;
   background: var(--crema);
