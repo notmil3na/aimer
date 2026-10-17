@@ -336,7 +336,7 @@ export default function Login({ onLogin }) {
             <BrandStar size={22} />
             <span className={styles.brandName}>Aimer</span>
             <span className={styles.brandSep}>·</span>
-            <span className={styles.brandTag}>Mi plan de estudio</span>
+            <span className={styles.brandTag}>por y para estudiantes</span>
           </div>
 
           <div className={styles.headline}>
@@ -350,7 +350,7 @@ export default function Login({ onLogin }) {
               <>
                 <p className={styles.hSerif}>Aimer,</p>
                 <p className={styles.hSans}>tu compañera académica.</p>
-                <p className={styles.hCopy}>Tu vida académica en un solo lugar, para llegar a donde quieres llegar, con orden.</p>
+                <p className={styles.hCopy}>Para llegar a donde quieres llegar.</p>
               </>
             )}
           </div>
