@@ -11,7 +11,7 @@ export default function AnimatedFace({ className }) {
   return (
     <svg
       className={className}
-      viewBox="76 116 360 360"
+      viewBox="0 0 512 512"
       role="img"
       aria-label="Carita animada que parpadea y mira a los lados"
       focusable="false"

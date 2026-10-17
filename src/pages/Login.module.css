@@ -158,7 +158,7 @@
   align-self: center;
   position: relative;
   z-index: 1;
-  width: clamp(140px, 36%, 190px);
+  width: clamp(176px, 46%, 232px);
   aspect-ratio: 1;
   border-radius: 50%;
   overflow: hidden;
