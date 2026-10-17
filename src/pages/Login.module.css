@@ -89,8 +89,6 @@
 }
 
 /* ---------- Panel visual ---------- */
-/* Hoy es un color plano. Para poner la imagen: agrega
-   background-image: url(...); background-size: cover; a .panel */
 
 .panel {
   position: relative;
@@ -103,24 +101,55 @@
   background: var(--panel-bg);
   color: var(--panel-fg);
 }
+
+/* Colores de las formas en cada panel */
 .panelLogin {
   --panel-bg: var(--carmin);
   --panel-fg: var(--crema);
   --panel-accent: var(--mantequilla);
+  --b1: #f6d584;  /* mantequilla */
+  --b2: #e84d2f;  /* naranja */
+  --b3: #cde4fa;  /* azul hielo */
+  --b4: #e0c690;  /* dorado */
+  --b5: #8f1f2c;  /* carmín profundo */
 }
 .panelRegister {
   --panel-bg: var(--naranja);
   --panel-fg: var(--ink);
   --panel-accent: var(--crema);
+  --b1: #f6d584;  /* mantequilla */
+  --b2: #c7313f;  /* carmín */
+  --b3: #cde4fa;  /* azul hielo */
+  --b4: #e0c690;  /* dorado */
+  --b5: #d9401f;  /* naranja profundo */
 }
 
+/* Círculos difuminados */
+.panel::before {
+  content: "";
+  position: absolute;
+  inset: -80px;               /* el blur no deja bordes duros */
+  z-index: 0;
+  background:
+    radial-gradient(circle 150px at 72% 14%, var(--b1) 96%, transparent 100%),
+    radial-gradient(circle 120px at 46% 28%, var(--b3) 96%, transparent 100%),
+    radial-gradient(circle 110px at 20% 40%, var(--b4) 96%, transparent 100%),
+    radial-gradient(circle 210px at 95% 40%, var(--b2) 96%, transparent 100%),
+    radial-gradient(circle 260px at 20% 105%, var(--b5) 96%, transparent 100%);
+  filter: blur(46px);
+  pointer-events: none;
+}
+
+/* Granulado fuerte, estático */
 .panel::after {
   content: "";
   position: absolute;
   inset: 0;
+  z-index: 0;
   background-image: var(--grain);
-  mix-blend-mode: multiply;
-  opacity: 0.3;
+  mix-blend-mode: overlay;
+  filter: contrast(1.8);
+  opacity: 0.7;
   pointer-events: none;
 }
 
