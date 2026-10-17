@@ -5,6 +5,7 @@ import { UNIVERSITIES, autoSemester } from "../utils/academic";
 import { api, prewarm } from "../api";
 import styles from "./Login.module.css";
 import { IconCheck, BrandStar, IconWarning } from "../components/Icons";
+import AnimatedFace from "../components/AnimatedFace";
 import useBodyScrollLock from "../hooks/useBodyScrollLock";
 
 const DEFAULT_THEME_COLORS = {
@@ -337,6 +338,11 @@ export default function Login({ onLogin }) {
             <span className={styles.brandName}>Aimer</span>
             <span className={styles.brandSep}>·</span>
             <span className={styles.brandTag}>por y para estudiantes</span>
+          </div>
+
+          {/* Carita animada, en un círculo centrado */}
+          <div className={styles.faceCircle}>
+            <AnimatedFace className={styles.faceSvg} />
           </div>
 
           <div className={styles.headline}>

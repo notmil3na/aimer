@@ -1,0 +1,54 @@
+/* Animaciones de la carita (clases con prefijo af- para no chocar con nada) */
+
+.afLean {
+  animation: afLean 9s ease-in-out infinite;
+}
+.afBreathe {
+  animation: afBreathe 3.2s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+.afLook {
+  animation: afLook 9s ease-in-out infinite;
+}
+.afEye {
+  animation: afBlink 9s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+}
+
+@keyframes afLean {
+  0%, 12%   { transform: translateX(0); }
+  16%, 30%  { transform: translateX(-5px); }
+  35%, 40%  { transform: translateX(0); }
+  44%, 58%  { transform: translateX(5px); }
+  63%, 100% { transform: translateX(0); }
+}
+
+@keyframes afLook {
+  0%, 12%   { transform: translate(0, 0); }
+  16%, 30%  { transform: translate(-14px, -1px); }
+  35%, 40%  { transform: translate(0, 0); }
+  44%, 58%  { transform: translate(14px, -1px); }
+  63%, 100% { transform: translate(0, 0); }
+}
+
+@keyframes afBlink {
+  0%, 66%   { transform: scaleY(1); }
+  68%       { transform: scaleY(0.08); }
+  71%, 77%  { transform: scaleY(1); }
+  79%       { transform: scaleY(0.08); }
+  82%, 100% { transform: scaleY(1); }
+}
+
+@keyframes afBreathe {
+  0%, 100% { transform: scale(1, 1); }
+  50%      { transform: scale(1.015, 0.985); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .afLean,
+  .afBreathe,
+  .afLook,
+  .afEye { animation: none; }
+}
