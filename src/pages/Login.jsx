@@ -348,8 +348,8 @@ export default function Login({ onLogin }) {
               </>
             ) : (
               <>
-                <p className={styles.hSerif}>Tu semestre,</p>
-                <p className={styles.hSans}>en orden.</p>
+                <p className={styles.hSerif}>Aimer,</p>
+                <p className={styles.hSans}>tu compañera académica.</p>
                 <p className={styles.hCopy}>Tu vida académica en un solo lugar, para llegar a donde quieres llegar, con orden.</p>
               </>
             )}
