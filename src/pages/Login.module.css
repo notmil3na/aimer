@@ -11,6 +11,7 @@
   --mantequilla: #f6d584;
   --carmin: #c7313f;
   --naranja: #e84d2f;
+  --rosado: #d23d51;   /* rosado del gradiente inferior del panel */
   --field: #f3ebdd;
   --line: #e3d6c2;
   --muted: #5a4e45;
@@ -25,11 +26,20 @@
 
   position: relative;
   box-sizing: border-box;
+  flex: 1 1 auto;
   min-height: 100vh;
   min-height: 100dvh;
   display: flex;
   align-items: center;
+  /* #root mide 100dvh y recorta (overflow: hidden): si la tarjeta no cabe
+     (móvil / PWA, o ventanas bajas) el wrap es quien scrollea. `safe center`
+     evita que se recorte la parte de arriba cuando la tarjeta no cabe. */
+  align-items: safe center;
   justify-content: center;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   padding: calc(32px + env(safe-area-inset-top)) 32px calc(32px + env(safe-area-inset-bottom));
   background: var(--page);
   color: var(--ink);
@@ -107,6 +117,7 @@
   --panel-bg: var(--carmin);
   --panel-fg: var(--crema);
   --panel-accent: var(--mantequilla);
+  --panel-ring: var(--rosado);
   --b1: #f6d584;  /* mantequilla */
   --b2: #e84d2f;  /* naranja */
   --b3: #cde4fa;  /* azul hielo */
@@ -117,6 +128,7 @@
   --panel-bg: var(--naranja);
   --panel-fg: var(--ink);
   --panel-accent: var(--crema);
+  --panel-ring: var(--rosado);
   --b1: #f6d584;  /* mantequilla */
   --b2: #c7313f;  /* carmín */
   --b3: #cde4fa;  /* azul hielo */
@@ -168,6 +180,14 @@
   border-radius: 50%;
   background: var(--panel-accent);
 }
+/* Círculo rosado del gradiente inferior: un poco más grande que el del icono
+   y más pequeño que el aro amarillo, por dentro de éste */
+.faceRing {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  background: var(--panel-ring);
+}
 .faceCircle {
   position: relative;
   width: 100%;
@@ -185,6 +205,57 @@
   display: block;
   width: 100%;
   height: 100%;
+}
+
+/* Burbuja de pensamiento (sólo la tarjeta) que sobresale por arriba a la derecha del círculo */
+.thought {
+  position: absolute;
+  z-index: 2;
+  left: 62%;
+  bottom: 84%;
+  padding: 9px 19px 10px;
+  border-radius: 17px;
+  background:
+    radial-gradient(130% 120% at 32% -12%, rgba(255, 255, 255, 0.78), transparent 58%),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--mantequilla) 38%, #fff) 0%,
+      color-mix(in srgb, var(--mantequilla) 70%, #fff) 55%,
+      var(--mantequilla) 100%
+    );
+  color: var(--ink);
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(18px, 2.4vw, 22px);
+  line-height: 1;
+  white-space: nowrap;
+  transform: rotate(-5deg);
+  /* relieve de calcomanía (canto inferior) + luz interior + sombra proyectada */
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -6px 10px -8px rgba(120, 90, 40, 0.25),
+    0 5px 0 -1px color-mix(in srgb, var(--mantequilla) 55%, #a9863f),
+    0 16px 28px -12px rgba(60, 20, 14, 0.55);
+  isolation: isolate;
+  pointer-events: none;
+  animation: thoughtIn 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.25) 0.15s both;
+}
+/* granulado de papel sobre la burbuja, para dar textura */
+.thought::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image: var(--grain);
+  mix-blend-mode: multiply;
+  opacity: 0.22;
+  pointer-events: none;
+}
+
+@keyframes thoughtIn {
+  from { opacity: 0; transform: translateY(7px) scale(0.82) rotate(-5deg); }
+  to   { opacity: 1; transform: translateY(0) scale(1) rotate(-5deg); }
 }
 
 .brand {
@@ -568,10 +639,13 @@
 
 /* ---------- Responsive ---------- */
 
+/* Teléfono y tablet vertical: el panel visual pasa a ser una cabecera compacta.
+   Con los tamaños de escritorio medía 428px de alto (dos tercios de la pantalla
+   de un teléfono) y empujaba todo el formulario fuera de la vista. */
 @media (max-width: 860px) {
   .wrap {
     align-items: flex-start;
-    padding: calc(16px + env(safe-area-inset-top)) 14px calc(16px + env(safe-area-inset-bottom));
+    padding: calc(14px + env(safe-area-inset-top)) 12px calc(14px + env(safe-area-inset-bottom));
   }
   .card {
     grid-template-columns: 1fr;
@@ -579,21 +653,34 @@
     border-radius: 24px;
     margin: auto;
   }
-  .panel { padding: 24px 24px 28px; gap: 28px; }
+  .panel { padding: 20px 20px 22px; gap: 18px; }
+  .brand { gap: 8px; font-size: 13px; }
+  /* En el panel carmín el texto claro cae sobre la zona lavada del degradado
+     (amarillo/rosado): la sombra lo mantiene legible. */
+  .panelLogin .brand {
+    text-shadow: 0 1px 6px rgba(110, 18, 30, 0.55), 0 1px 2px rgba(110, 18, 30, 0.45);
+  }
+  .panelLogin .brand svg { filter: drop-shadow(0 1px 4px rgba(110, 18, 30, 0.5)); }
+  .faceWrap { width: clamp(124px, 34%, 168px); }
+  .thought { bottom: 76%; left: 58%; padding: 7px 15px 8px; font-size: 16px; }
   .hCopy { display: none; }
-  .hSerif { font-size: clamp(44px, 13vw, 64px); }
-  .hSans { font-size: clamp(30px, 9vw, 44px); }
-  .formSide { padding: 28px 22px 30px; }
+  .hSerif { font-size: clamp(30px, 10vw, 44px); }
+  .hSans { font-size: clamp(22px, 6.8vw, 32px); }
+  .formSide { padding: 22px 20px 24px; }
   .formStar { display: none; }
+  .title { font-size: 36px; }
+  .title em { font-size: 42px; }
+  .switchLine { margin: 8px 0 20px; }
+  .hintSlot { min-height: 14px; margin: -8px 0 -4px; }
 }
 
 @media (max-width: 420px) {
   .row2 { grid-template-columns: 1fr; }
-  .title { font-size: 34px; }
-  .title em { font-size: 40px; }
+  .title { font-size: 32px; }
+  .title em { font-size: 38px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .card, .shake { animation: none; }
+  .card, .shake, .thought { animation: none; }
   .wrap, .stepBars i, .btn, .field input, .selectInput { transition: none; }
 }

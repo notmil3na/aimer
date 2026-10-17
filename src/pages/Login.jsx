@@ -343,9 +343,11 @@ export default function Login({ onLogin }) {
           {/* Carita animada, en un círculo centrado sobre un aro de acento plano */}
           <div className={styles.faceWrap}>
             <span className={styles.faceHalo} aria-hidden="true" />
+            <span className={styles.faceRing} aria-hidden="true" />
             <div className={styles.faceCircle}>
               <AnimatedFace className={styles.faceSvg} />
             </div>
+            <div className={styles.thought} aria-hidden="true">¡Hola!</div>
           </div>
 
           <div className={styles.headline}>
