@@ -350,7 +350,7 @@ export default function Login({ onLogin }) {
               <>
                 <p className={styles.hSerif}>Tu semestre,</p>
                 <p className={styles.hSans}>en orden.</p>
-                <p className={styles.hCopy}>Malla, horario, notas y amigos en un solo lugar.</p>
+                <p className={styles.hCopy}>Tu vida académica en un solo lugar, para llegar a donde quieres llegar, con orden.</p>
               </>
             )}
           </div>
