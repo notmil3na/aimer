@@ -344,7 +344,6 @@ export default function Login({ onLogin }) {
               <>
                 <p className={styles.hSerif}>Empieza,</p>
                 <p className={styles.hSans}>todo en uno.</p>
-                <p className={styles.hCopy}>Tu cuenta toma dos pasos y menos de un minuto.</p>
               </>
             ) : (
               <>
