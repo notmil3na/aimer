@@ -31,10 +31,3 @@ export function clearPendingSave(column) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(pending));
   } catch {}
 }
-
-export function clearAllPendingSaves() {
-  try {
-    localStorage.removeItem(STORAGE_KEY);
-  } catch {
-  }
-}

@@ -1,6 +1,6 @@
-// helpers compartidos del worker (equivale a api/_lib.mjs en vercel).
-// diferencias clave: no hay process.env (las variables llegan en `c.env`),
-// no hay req/res de node (usamos el contexto de hono) y el jwt usa web crypto.
+// helpers compartidos del worker.
+// no hay process.env (las variables llegan en `c.env`), no hay req/res de node
+// (usamos el contexto de hono) y el jwt usa web crypto.
 import { scrypt, randomBytes, timingSafeEqual } from "node:crypto";
 
 export function envReady(env) {
@@ -21,8 +21,7 @@ export async function readBody(c) {
   }
 }
 
-// imita el `req` de vercel (method, url, headers, query) para que los handlers
-// se parezcan lo más posible a los originales.
+// `req` ligero (method, url, headers, query) con la forma que esperan los handlers.
 export function vreq(c) {
   const url = new URL(c.req.url);
   return {

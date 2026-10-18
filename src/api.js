@@ -9,10 +9,6 @@ function readSession() {
   }
 }
 
-export function getSession() {
-  return readSession();
-}
-
 export function saveSession(token, user, data) {
   const prev = readSession();
   const nextData = data !== undefined ? data : (prev && prev.data) || null;

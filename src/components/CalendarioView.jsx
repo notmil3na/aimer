@@ -44,10 +44,6 @@ function formatTime(h) {
   return mm === 0 ? `${h12} ${period}` : `${h12}:${String(mm).padStart(2, "0")} ${period}`;
 }
 
-function sameDay(a, b) {
-  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
-}
-
 function getDiasEnMes(year, month) {
   return new Date(year, month + 1, 0).getDate();
 }

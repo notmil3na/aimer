@@ -78,66 +78,6 @@
   flex-shrink: 0;
 }
 .addBtn:hover { opacity: 0.95; transform: translateY(-1px); box-shadow: 0 12px 28px rgba(var(--accent-rgb), 0.3); }
-.showCompletedBtn {
-  background: color-mix(in srgb, var(--surface2) 90%, transparent);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  color: var(--text-muted);
-  font-family: var(--font-body);
-  font-size: 12px;
-  font-weight: 600;
-  padding: 8px 14px;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.showCompletedBtn:hover { border-color: var(--accent); color: var(--text); transform: translateY(-1px); }
-
-.summaryGrid {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-  margin-bottom: 16px;
-}
-.summaryCard,
-.summaryCardPrimary {
-  padding: 14px 16px;
-  border-radius: 20px;
-  border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
-  background: linear-gradient(135deg, color-mix(in srgb, var(--surface) 92%, transparent), color-mix(in srgb, var(--surface2) 90%, transparent));
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-}
-.summaryCardPrimary {
-  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 18%, var(--surface)), var(--surface));
-  border-color: color-mix(in srgb, var(--accent) 26%, var(--border));
-}
-.summaryLabel {
-  display: block;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  margin-bottom: 6px;
-}
-.summaryValue {
-  display: block;
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--text);
-  line-height: 1.25;
-}
-.summaryText {
-  margin-top: 4px;
-  font-size: 12px;
-  color: var(--text-muted);
-  line-height: 1.35;
-}
-
-
 .filters {
   position: relative;
   z-index: 1;
@@ -730,7 +670,6 @@
 @media (max-width: 900px) {
   .wrap { padding: 18px 14px; }
   .title { font-size: 22px; }
-  .summaryGrid { grid-template-columns: 1fr; }
   .filters { flex-direction: column; align-items: stretch; }
   .filterBtns { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 2px; }
   .cardRight { padding: 10px 12px; }
@@ -743,9 +682,7 @@
   .header { flex-direction: column; align-items: stretch; gap: 10px; padding: 16px 14px; }
   .headerIntro { width: 100%; }
   .headerActions { width: 100%; flex-direction: column; align-items: stretch; }
-  .addBtn, .showCompletedBtn { flex: 1; width: 100%; text-align: center; justify-content: center; }
-  .summaryGrid { grid-template-columns: 1fr; gap: 10px; }
-  .summaryCard, .summaryCardPrimary { padding: 12px 14px; }
+.addBtn { flex: 1; width: 100%; text-align: center; justify-content: center; }
   .filters { padding: 10px 12px; gap: 10px; flex-direction: column; align-items: stretch; }
   .filterGroup { width: 100%; }
   .filterLabel { font-size: 10px; }

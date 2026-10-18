@@ -14,20 +14,15 @@
     "run_worker_first": ["/api/*"]
   },
 
-  // recordatorios push, una vez al día. cloudflare usa utc (igual que el cron de vercel:
-  // 13:00 utc = 8:00 a. m. en bogotá). está a las 13:05 para que, mientras vercel siga
-  // con su cron de las 13:00, no corran a la vez; los recordatorios ya enviados se
-  // guardan en `sentKeys`, así que correr dos veces no duplica notificaciones.
+  // recordatorios push, una vez al día. cloudflare usa utc (13:05 utc = 8:05 a. m.
+  // en bogotá). los recordatorios ya enviados se guardan en `sentKeys`, así que
+  // correr dos veces no duplica notificaciones.
   "triggers": { "crons": ["5 13 * * *"] },
 
   "observability": { "enabled": true },
 
   "vars": {
-    "VAPID_SUBJECT": "https://mallaunimag.com",
-    // desactivado a propósito: evita el bucle Vercel <-> Worker al redirigir
-    // vercel al worker. deben quedar vacíos para que worker/index.js no reenvíe.
-    "LEGACY_ORIGIN": "",
-    "LEGACY_PREFIXES": ""
+    "VAPID_SUBJECT": "https://mallaunimag.com"
   },
 
   // base de datos sql. se aplican las migraciones de ./migrations con

@@ -4,15 +4,9 @@
   "outputDirectory": "dist",
   "redirects": [
     {
-      "source": "/((?!api/|sw.js).*)",
+      "source": "/((?!sw.js).*)",
       "destination": "https://aimer-project.yaritzamilena4.workers.dev/$1",
       "permanent": false
-    }
-  ],
-  "crons": [
-    {
-      "path": "/api/push",
-      "schedule": "0 13 * * *"
     }
   ],
   "headers": [

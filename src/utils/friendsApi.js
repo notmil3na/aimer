@@ -4,8 +4,6 @@ export function canonicalPair(a, b) {
   return a < b ? [a, b] : [b, a];
 }
 
-export const FRIENDSHIP_TABLE_MISSING = "42P01";
-
 const cache = new Map();
 const CACHE_TTL = 60 * 1000;
 

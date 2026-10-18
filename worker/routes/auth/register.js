@@ -1,4 +1,4 @@
-import { envReady, json, readBody, hashPassword, toUserRow, vreq } from "../../lib.js";
+import { envReady, json, readBody, hashPassword, vreq } from "../../lib.js";
 import { jstringify } from "../../db.js";
 
 const USERNAME_RE = /^[a-zA-Z0-9._-]{2,20}$/;

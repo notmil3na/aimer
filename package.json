@@ -5,24 +5,18 @@
   "scripts": {
     "dev": "vite",
     "build": "node ./node_modules/vite/bin/vite.js build",
-    "preview": "vite preview",
-    "tauri": "tauri",
-    "desktop:dev": "tauri dev",
-    "desktop:build": "tauri build"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.104.1",
-    "@vercel/speed-insights": "^2.0.0",
     "hono": "^4.13.13",
     "html-to-image": "^1.11.13",
     "jspdf": "^4.2.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "web-push": "^3.6.7",
     "web-push-neo": "^0.1.2"
   },
   "devDependencies": {
-    "@tauri-apps/cli": "^2.11.4",
     "@vitejs/plugin-react": "^4.0.0",
     "sharp": "^0.35.3",
     "vite": "^4.4.0",

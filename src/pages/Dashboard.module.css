@@ -76,66 +76,6 @@
   padding-bottom: 18px;
   border-bottom: 1px solid var(--border);
 }
-.hoyDate {
-  font-family: var(--font-display);
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-muted);
-  margin-bottom: 10px;
-  letter-spacing: 0.02em;
-}
-.hoyCards {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.hoyCard {
-  display: flex;
-  background: var(--surface2);
-  border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  transition: border-color 0.15s, box-shadow 0.15s;
-}
-.hoyCard:hover {
-  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
-  box-shadow: 0 10px 24px color-mix(in srgb, var(--accent) 16%, transparent);
-}
-.hoyCardBody {
-  padding: 10px 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  flex: 1;
-}
-.hoyCardTitle {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.hoyCardId {
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--accent);
-  background: rgba(var(--accent-rgb), 0.1);
-  border: 1px solid rgba(var(--accent-rgb), 0.2);
-  border-radius: 4px;
-  padding: 1px 6px;
-  letter-spacing: 0.04em;
-}
-.hoyCardLocation {
-  font-size: 12px;
-  color: var(--text-muted);
-}
-.hoyCardTime {
-  font-size: 12px;
-  color: var(--text-muted);
-  font-weight: 500;
-}
-
 .tabLoading {
   display: flex;
   flex-direction: column;
@@ -362,7 +302,6 @@
   .onboardingTitle { font-size: 14px; }
   .onboardingStep { padding: 8px 10px; }
   .hoyWidget { margin: 12px 10px 0; }
-  .hoyCardTitle { font-size: 12px; }
 }
 
 @media (max-width: 560px) {

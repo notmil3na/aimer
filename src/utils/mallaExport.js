@@ -3,7 +3,6 @@ import {
   isEnglishLetterGrade,
   isGradePassed,
   isGradeFailed,
-  isValidNumericGrade,
 } from "./gradeHelpers.js";
 
 function formatNotaLine(materia, semestre, nota) {

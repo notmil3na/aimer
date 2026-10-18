@@ -35,14 +35,6 @@ function formatDate(iso) {
   return `${d} ${MESES_CORTOS[m]}`;
 }
 
-function formatTime(h) {
-  if (!h) return "";
-  const [hh, mm] = h.split(":").map(Number);
-  const period = hh >= 12 ? "p.m." : "a.m.";
-  const h12 = hh === 0 ? 12 : hh > 12 ? hh - 12 : hh;
-  return mm === 0 ? `${h12} ${period}` : `${h12}:${String(mm).padStart(2, "0")} ${period}`;
-}
-
 function getAssignmentStatus(item) {
   if (item.completada) return { label: "Completada", tone: "done" };
   const dueIso = item.fechaExamen || item.fechaEntrega || item.fechaFin;
@@ -64,16 +56,6 @@ const TIPO_INFO = {
 };
 
 const PESOS_DEFAULT = [150, 150, 200];
-
-function calcCorteNota(items) {
-  if (!items || items.length === 0) return null;
-  let suma = 0, contados = 0;
-  items.forEach(({ nota }) => {
-    const n = parseFloat(nota);
-    if (!isNaN(n)) { suma += n; contados++; }
-  });
-  return contados > 0 ? Number(suma.toFixed(1)) : null;
-}
 
 function migrateCortes(cortes) {
   if (!cortes || cortes.length === 0) {

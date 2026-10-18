@@ -97,17 +97,3 @@ export async function getChatUploadUrl(other, meta) {
     return { ok: false, needsMigration: false, data: null, error: (err && err.message) || "No se pudo preparar la subida" };
   }
 }
-
-export function chatPreview(labelOrMsg) {
-  if (typeof labelOrMsg === "string") return labelOrMsg;
-  const m = labelOrMsg || {};
-  if (m.message_type === "text") {
-    const t = (m.content || "").trim().replace(/\s+/g, " ");
-    return t.length > 60 ? t.slice(0, 60) + "…" : t;
-  }
-  if (m.message_type === "image") return "📷 Foto";
-  if (m.message_type === "file") return "📎 Archivo";
-  if (m.message_type === "assignment") return "📋 Compartió una asignación";
-  if (m.message_type === "note") return "📒 Compartió un apunte";
-  return "Mensaje";
-}

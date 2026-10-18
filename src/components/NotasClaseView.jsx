@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef, useCallback, useEffect } from "react";
 import {
-  uuid, blockUuid, toISODate, DESTINO_LABEL, formatFecha,
+  uuid, toISODate, DESTINO_LABEL, formatFecha,
   makeBlock, toBlocksFromNote, noteToTexto, BLOCK_TYPES,
   matchMarkdownShortcut,
 } from "../utils/notasClase";

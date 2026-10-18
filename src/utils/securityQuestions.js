@@ -8,7 +8,3 @@ export const SECURITY_QUESTIONS = [
   "¿Cuál es el nombre de tu canción favorita?",
   "¿Qué deporte practicabas en el colegio?",
 ];
-
-export function isPresetQuestion(q) {
-  return SECURITY_QUESTIONS.includes(q);
-}

@@ -20,19 +20,6 @@ import { handler as push, runCron } from "./routes/push.js";
 
 const app = new Hono();
 
-// migración gradual: si defines LEGACY_ORIGIN (la url de vercel) y LEGACY_PREFIXES
-// (p. ej. "/api/friendships,/api/push"), esas rutas se reenvían a vercel en vez de
-// resolverse aquí. cuando todo esté probado, quita las dos variables.
-app.use("/api/*", async (c, next) => {
-  const origin = c.env.LEGACY_ORIGIN;
-  const prefixes = (c.env.LEGACY_PREFIXES || "").split(",").map((s) => s.trim()).filter(Boolean);
-  if (origin && prefixes.some((p) => c.req.path === p || c.req.path.startsWith(p + "/"))) {
-    const u = new URL(c.req.url);
-    return fetch(new Request(origin + u.pathname + u.search, c.req.raw));
-  }
-  await next();
-});
-
 app.all("/api/auth/login", login);
 app.all("/api/auth/register", register);
 app.all("/api/auth/me", me);

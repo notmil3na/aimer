@@ -322,7 +322,6 @@
 .modal .removeBtn:hover { color: #e07070; background: rgba(224,112,112,0.08); }
 .modal .deleteBtn { color: #e07070; }
 .modal .deleteBtn:hover { background: rgba(224,112,112,0.08); }
-.modal .deleteHint { color: var(--modal-muted); }
 @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
 .modalHeader {
@@ -442,7 +441,6 @@
 .btnSecondary:hover { border-color: var(--text-muted); color: var(--text); }
 
 
-.deleteHint { position: fixed; bottom: 80px; right: 24px; z-index: 300; }
 .deleteBtn {
   background: rgba(224,112,112,0.1); border: 1px solid rgba(224,112,112,0.3);
   border-radius: var(--radius-sm); color: #e07070;
@@ -463,14 +461,12 @@
   .modalBody { padding: 14px; gap: 12px; }
   .modalFooter { padding: 12px 14px; }
   .edificioGrid { grid-template-columns: repeat(2, 1fr); }
-  .deleteHint { right: 10px; bottom: 10px; }
   .planGrid { grid-template-columns: 1fr; gap: 12px; }
   .miniGridInner { min-width: 260px; }
   .miniCardHeader { padding: 8px 12px; }
   .miniCardName { font-size: 12px; }
   .planTopBar { flex-direction: column; align-items: flex-start; gap: 10px; }
   .planOpciones { justify-content: flex-start; width: 100%; }
-  .planAcciones { justify-content: flex-start; flex-wrap: wrap; width: 100%; }
   .header { flex-direction: column; align-items: flex-start; gap: 12px; }
   .headerActions { width: 100%; justify-content: flex-start; flex-wrap: wrap; }
   .addBtn { align-self: auto; }
@@ -633,7 +629,6 @@
 }
 .planOpcionDot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 
-.planAcciones { display: flex; gap: 8px; align-items: center; }
 .planAddBtn {
   background: var(--surface2); border: 1px solid var(--border);
   border-radius: var(--radius-sm); color: var(--accent);
@@ -641,15 +636,6 @@
   padding: 6px 14px; cursor: pointer; transition: all 0.15s;
 }
 .planAddBtn:hover { background: rgba(var(--accent-rgb), 0.08); border-color: var(--accent); }
-
-.planDeleteBtn {
-  background: transparent; border: 1px solid rgba(224,112,112,0.3);
-  border-radius: var(--radius-sm); color: #e07070;
-  font-family: var(--font-body); font-size: 12px;
-  padding: 6px 12px; cursor: pointer; transition: all 0.15s;
-}
-.planDeleteBtn:hover { background: rgba(224,112,112,0.08); }
-
 
 .planGrid {
   display: grid;
@@ -807,45 +793,6 @@
 .miniMoveBtn { display: none; }
 
 
-.miniTableWrap { overflow-x: auto; }
-.miniTable {
-  width: 100%; border-collapse: collapse;
-  font-size: 10px;
-}
-.miniTable th {
-  text-align: center; padding: 4px 3px;
-  font-size: 9px; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.05em; color: var(--text-muted);
-  border-bottom: 1px solid var(--border);
-  background: var(--surface2);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-}
-.miniTable td {
-  vertical-align: top; padding: 2px; width: calc(100% / var(--num-cols));
-  border-right: 1px solid var(--border);
-}
-.miniTable td:last-child { border-right: none; }
-.miniHoraCell {
-  font-size: 9px; color: var(--text-muted); padding: 2px 4px;
-  text-align: right; white-space: nowrap; border-bottom: 1px solid var(--border);
-  min-width: 34px;
-}
-.miniHoraRow { border-bottom: 1px solid rgba(var(--border), 0.5); }
-
-
-.miniBloque {
-  border-radius: 4px; padding: 3px 5px; margin: 1px 1px;
-  border: 1px solid color-mix(in srgb, var(--bloque-color) 28%, transparent);
-  background: color-mix(in srgb, var(--bloque-color) 14%, var(--surface));
-  font-size: 9px; line-height: 1.3;
-  cursor: pointer; transition: background 0.12s, transform 0.12s, border-color 0.12s, box-shadow 0.12s;
-}
-.miniBloque:hover { background: color-mix(in srgb, var(--bloque-color) 24%, var(--surface)); border-color: color-mix(in srgb, var(--bloque-color) 50%, transparent); box-shadow: 0 6px 14px color-mix(in srgb, var(--bloque-color) 16%, transparent); transform: scale(1.02); }
-.miniBloqueId { font-weight: 700; color: var(--bloque-color); }
-.miniBloqueHora { color: var(--text-muted); font-size: 8px; }
-
-
 .miniGridWrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .miniGridInner {
   display: grid;
@@ -907,34 +854,6 @@
 }
 .miniStat { font-size: 10px; color: var(--text-muted); }
 .miniStat strong { color: var(--text); }
-
-
-.compareBar {
-  display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
-  padding: 10px 14px; margin-bottom: 12px;
-  background: var(--surface); border: 1px solid rgba(var(--accent-rgb), 0.3);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  border-radius: var(--radius-sm);
-}
-.compareLabel { font-size: 12px; font-weight: 600; color: var(--accent); }
-.compareTag {
-  background: rgba(var(--accent-rgb), 0.1); border: 1px solid rgba(var(--accent-rgb), 0.3);
-  border-radius: 6px; font-size: 11px; color: var(--text);
-  padding: 4px 10px; display: flex; align-items: center; gap: 6px;
-}
-.compareTagRemove {
-  background: none; border: none; color: var(--text-muted);
-  cursor: pointer; font-size: 11px; padding: 0;
-}
-.compareTagRemove:hover { color: #e07070; }
-.compareClearBtn {
-  margin-left: auto; background: transparent;
-  border: 1px solid var(--border); border-radius: 6px;
-  color: var(--text-muted); font-family: var(--font-body); font-size: 11px;
-  padding: 4px 10px; cursor: pointer; transition: all 0.15s;
-}
-.compareClearBtn:hover { border-color: var(--text-muted); color: var(--text); }
 
 
 .planEmptyState {

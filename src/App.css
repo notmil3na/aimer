@@ -26,7 +26,7 @@ input, textarea, select,
 
 @font-face {
   font-family: 'Overused Grotesk';
-  src: url('https://raw.githubusercontent.com/RandomMaerks/Overused-Grotesk/master/fonts/variable/OverusedGrotesk-VF.ttf') format('truetype');
+  src: url('/fonts/OverusedGrotesk-VF.ttf') format('truetype');
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;

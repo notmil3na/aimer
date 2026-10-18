@@ -5,5 +5,4 @@ node_modules/
 .wrangler/
 *.log
 .env*
-src-tauri/target/
-src-tauri/gen/
+.openchamber/

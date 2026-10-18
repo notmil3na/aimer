@@ -1,4 +1,4 @@
-import { HORAS_FORM, horaIdx, toViewHora } from "./horarioHelpers.js";
+import { HORAS_FORM, horaIdx } from "./horarioHelpers.js";
 
 export const WINDOW_START = 0;
 export const WINDOW_END   = HORAS_FORM.length;
@@ -7,13 +7,6 @@ export const DAY_ORDER = ["L", "M", "X", "J", "V", "S"];
 export const DAY_LABELS = { L: "Lunes", M: "Martes", X: "Miércoles", J: "Jueves", V: "Viernes", S: "Sábado" };
 
 export function formatHourIdx(idx) {
-  const h = idx + 6;
-  return `${h}:00`;
-}
-
-export function compactHour(hora) {
-  const idx = horaIdx(hora);
-  if (idx < 0) return toViewHora(hora) || "";
   const h = idx + 6;
   return `${h}:00`;
 }
