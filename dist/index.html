@@ -9,7 +9,7 @@
     <script>
       (function () {
         try {
-          var BG = { dark: "#0e0a18", light: "#f8f4fc" };
+          var BG = { dark: "#191522", light: "#fcfbfe" };
           var THEMES = {
             rojo:      ["#FF3B4D", "#D1212F", "255,59,77"],
             naranja:   ["#FF7A1A", "#E35E00", "255,122,26"],
@@ -24,6 +24,9 @@
           var s = JSON.parse(localStorage.getItem("malla_session") || "null");
           var u = (s && s.user) || (s && !s.token ? s : null);
           var r = document.documentElement;
+          var vv = window.visualViewport;
+          var appH = (vv && vv.height) || window.innerHeight;
+          if (appH) r.style.setProperty("--app-h", Math.round(appH) + "px");
           var mode = (u && u.appMode) || "dark";
           var c = THEMES[(u && u.appTheme)] || THEMES.ambar;
           r.setAttribute("data-theme", mode);
@@ -63,9 +66,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Aimer" />
-    <script type="module" crossorigin src="/assets/index-1b31d82e.js"></script>
+    <script type="module" crossorigin src="/assets/index-21a66234.js"></script>
     <link rel="modulepreload" crossorigin href="/assets/vendor-27d6d7f2.js">
-    <link rel="stylesheet" href="/assets/index-e2cb61c6.css">
+    <link rel="stylesheet" href="/assets/index-66806392.css">
   </head>
   <body>
     

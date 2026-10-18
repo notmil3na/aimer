@@ -39,6 +39,9 @@ input, textarea, select,
   --bg:       #0e0a18;
   --surface:  rgba(255,255,255,0.045);
   --surface2: rgba(255,255,255,0.075);
+  /* --surface ya compuesto sobre --bg: es el fondo del area de contenido y lo
+     que pinta el canvas del navegador (ver html mas abajo). */
+  --bg-content: #191522;
   --border:   rgba(255,255,255,0.10);
   --text:     #f4f1fb;
   --text-muted: #9b93b8;
@@ -77,6 +80,7 @@ input, textarea, select,
   --bg:       #f8f4fc;
   --surface:  rgba(255,255,255,0.62);
   --surface2: rgba(255,255,255,0.42);
+  --bg-content: #fcfbfe;
   --border:   rgba(120,90,160,0.16);
   --text:     #241f33;
   --text-muted: #756c8f;
@@ -108,13 +112,21 @@ html, body, #root {
   height: -webkit-fill-available;
   min-height: 100vh;
   min-height: 100dvh;
-  height: 100dvh;
+  /* --app-h lo pone index.html y lo mantiene useAppHeightFix: es el alto real
+     del viewport visible. 100dvh se queda corto cuando el navegador esconde
+     sus barras (movil), y esa diferencia aparecia como una barra de color al
+     pie de la pantalla. */
+  height: var(--app-h, 100dvh);
   overflow: hidden;
   overscroll-behavior: none;
 }
 
 html {
-  background-color: var(--bg);
+  /* el canvas del navegador es lo unico que llega al borde fisico de la
+     pantalla. se pinta igual que el area de contenido (--bg-content) para que
+     cualquier franja que quede fuera del shell de la app no se vea como una
+     barra de color que cambia con el tema. */
+  background-color: var(--bg-content);
 }
 
 html, body {
@@ -220,7 +232,7 @@ body {
   display: flex;
   flex-direction: column;
   height: 100%;
-  height: 100dvh;
+  height: var(--app-h, 100dvh);
   min-height: 0;
   overflow: hidden;
 }

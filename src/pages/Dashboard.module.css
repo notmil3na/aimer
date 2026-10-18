@@ -313,8 +313,9 @@
 @media (max-width: 900px) {
   .layout {
     flex-direction: column;
+    /* sin tope: debe llegar al alto real del viewport (--app-h en #root) para
+       que no quede una franja al pie que pinte el canvas del navegador. */
     height: 100%;
-    max-height: 100dvh;
     min-height: 0;
     overflow: hidden;
     box-sizing: border-box;

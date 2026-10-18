@@ -68,7 +68,7 @@ export const APP_THEMES = {
 
 export { generateCortes, CORTES, corteForSemester } from "./utils/cortes";
 
-const BG_BY_MODE = { dark: "#0e0a18", light: "#f8f4fc" };
+const BG_BY_MODE = { dark: "#191522", light: "#fcfbfe" };
 
 export function applyTheme(themeKey, mode, fontBody) {
   const t = APP_THEMES[themeKey] || APP_THEMES.ambar;
