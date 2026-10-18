@@ -68,8 +68,6 @@ export const APP_THEMES = {
 
 export { generateCortes, CORTES, corteForSemester } from "./utils/cortes";
 
-const BG_BY_MODE = { dark: "#191522", light: "#fcfbfe" };
-
 export function applyTheme(themeKey, mode, fontBody) {
   const t = APP_THEMES[themeKey] || APP_THEMES.ambar;
   const m = mode || "dark";
@@ -84,8 +82,6 @@ export function applyTheme(themeKey, mode, fontBody) {
   } else {
     root.style.removeProperty("--font-body");
   }
-  const themeColorMeta = document.getElementById("theme-color-meta") || document.querySelector('meta[name="theme-color"]');
-  if (themeColorMeta) themeColorMeta.setAttribute("content", BG_BY_MODE[m] || BG_BY_MODE.dark);
 }
 
 export async function saveUser(userData) {

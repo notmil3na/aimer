@@ -4,12 +4,17 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content" />
     <meta name="description" content="Aimer – Plan de estudios, horarios, notas, asignaciones y colaboración de tu semestre." />
-    <meta name="theme-color" id="theme-color-meta" content="#0e0a18" />
+    <!-- Sin <meta name="theme-color"> a proposito. En iOS Safari ese meta hace
+         que la barra inferior (y la de estado) se pinten como una BANDA OPACA
+         del color indicado, que no coincide con el contenido de la app y se ve
+         como una franja de color al pie que cambia con el tema. Sin el meta,
+         Safari muestrea el fondo de <html> (--bg-content, igual que el area de
+         contenido) y sus barras se funden con la interfaz. No volver a
+         agregarlo: ya se quito una vez por este mismo motivo. -->
     <title>Aimer</title>
     <script>
       (function () {
         try {
-          var BG = { dark: "#191522", light: "#fcfbfe" };
           var THEMES = {
             rojo:      ["#FF3B4D", "#D1212F", "255,59,77"],
             naranja:   ["#FF7A1A", "#E35E00", "255,122,26"],
@@ -34,8 +39,6 @@
           r.style.setProperty("--accent2", c[1]);
           r.style.setProperty("--accent-rgb", c[2]);
           if (u && u.fontBody && u.fontBody !== "DM Sans") r.style.setProperty("--font-body", "'" + u.fontBody + "', system-ui, sans-serif");
-          var tc = document.getElementById("theme-color-meta");
-          if (tc) tc.setAttribute("content", BG[mode] || BG.dark);
         } catch (e) {}
       })();
     </script>
@@ -66,9 +69,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Aimer" />
-    <script type="module" crossorigin src="/assets/index-21a66234.js"></script>
+    <script type="module" crossorigin src="/assets/index-f6c7556b.js"></script>
     <link rel="modulepreload" crossorigin href="/assets/vendor-27d6d7f2.js">
-    <link rel="stylesheet" href="/assets/index-66806392.css">
+    <link rel="stylesheet" href="/assets/index-65ac523f.css">
   </head>
   <body>
     

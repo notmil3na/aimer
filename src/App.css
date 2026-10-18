@@ -152,6 +152,15 @@ body {
   background-color: var(--bg);
 }
 
+/* En movil el shell de la app tapa .bg por completo: lo unico que asoma es la
+   franja que el viewport del navegador deja al pie (barras de Safari). Si .bg
+   pinta --bg ahi, esa franja se ve como una barra oscura distinta del
+   contenido. Se pinta --bg-content (el fondo del area de contenido) para que
+   desaparezca. En escritorio .bg si es el fondo visible: no se toca. */
+@media (max-width: 900px) {
+  .bg { background-color: var(--bg-content); }
+}
+
 .bg-mesh {
   position: absolute;
   border-radius: 50%;
