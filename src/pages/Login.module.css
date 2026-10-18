@@ -646,17 +646,26 @@
    Con los tamaños de escritorio medía 428px de alto (dos tercios de la pantalla
    de un teléfono) y empujaba todo el formulario fuera de la vista. */
 @media (max-width: 860px) {
+  /* En teléfono el login es la pantalla entera: nada de tarjeta con fondo
+     alrededor. El panel carmín llega al borde de arriba (el relleno de la
+     safe-area vive dentro del panel, no en .wrap) y el formulario en crema
+     llega al borde de abajo. */
   .wrap {
-    align-items: flex-start;
-    padding: calc(14px + env(safe-area-inset-top)) 12px calc(14px + env(safe-area-inset-bottom));
+    align-items: stretch;
+    padding: 0;
   }
   .card {
     grid-template-columns: 1fr;
     min-height: 0;
-    border-radius: 24px;
-    margin: auto;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
   }
-  .panel { padding: 20px 20px 22px; gap: 18px; }
+  .panel {
+    padding: max(20px, calc(env(safe-area-inset-top) + 14px)) 20px 22px;
+    gap: 18px;
+  }
   .brand { gap: 8px; font-size: 13px; }
   /* En el panel carmín el texto claro cae sobre la zona lavada del degradado
      (amarillo/rosado): la sombra lo mantiene legible. */
@@ -669,7 +678,7 @@
   .hCopy { display: none; }
   .hSerif { font-size: clamp(30px, 10vw, 44px); }
   .hSans { font-size: clamp(22px, 6.8vw, 32px); }
-  .formSide { padding: 22px 20px 24px; }
+  .formSide { padding: 22px 20px max(24px, calc(env(safe-area-inset-bottom) + 16px)); }
   .formStar { display: none; }
   .title { font-size: 36px; }
   .title em { font-size: 42px; }
