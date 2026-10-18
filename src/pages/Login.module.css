@@ -205,9 +205,12 @@
   display: block;
   width: 100%;
   height: 100%;
-  /* la carita ocupa mas del disco (antes flotaba chica en un circulo vacio) */
-  transform: scale(1.22);
-  transform-origin: 50% 52%;
+  /* La carita se escala sobre el centro del disco y deja aire: el cuerpo ocupa
+     ~58% del ancho del circulo y el resplandor naranja se queda dentro. Antes
+     (scale 1.22 sobre el 52% de alto) el cuerpo llegaba al 77% y el brillo se
+     cortaba contra el borde del circulo, que se veia como un zoom. */
+  transform: scale(0.92);
+  transform-origin: 50% 50%;
 }
 
 /* Burbuja de pensamiento (sólo la tarjeta) que sobresale por arriba a la derecha del círculo */
