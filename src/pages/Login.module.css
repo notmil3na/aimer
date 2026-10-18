@@ -172,20 +172,36 @@
   width: clamp(176px, 46%, 232px);
   aspect-ratio: 1;
 }
-/* Aro plano del color de acento, un poco más grande, por detrás del círculo */
-.faceHalo {
+/* Halo de la carita: una banda de vidrio esmerilado pegada al disco y dos anillos
+   finos concéntricos que se desvanecen hacia afuera. Todo es translúcido (crema
+   sobre el degradado), así que se ve parejo sobre cualquier zona del fondo, y las
+   separaciones son porcentajes para que escale igual en móvil y en escritorio. */
+.faceWrap::before {            /* anillo exterior, el más tenue */
+  content: "";
   position: absolute;
-  inset: -14px;
+  inset: -34%;
   border-radius: 50%;
-  background: var(--panel-accent);
+  border: 1px solid color-mix(in srgb, var(--crema) 26%, transparent);
+  pointer-events: none;
 }
-/* Círculo rosado del gradiente inferior: un poco más grande que el del icono
-   y más pequeño que el aro amarillo, por dentro de éste */
-.faceRing {
+.faceRing {                    /* anillo intermedio */
   position: absolute;
-  inset: -6px;
+  inset: -21%;
   border-radius: 50%;
-  background: var(--panel-ring);
+  border: 1.5px solid color-mix(in srgb, var(--crema) 42%, transparent);
+  pointer-events: none;
+}
+.faceHalo {                    /* banda de vidrio pegada al disco */
+  position: absolute;
+  inset: -9%;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--crema) 24%, transparent);
+  border: 1.5px solid color-mix(in srgb, var(--crema) 62%, transparent);
+  -webkit-backdrop-filter: blur(10px) saturate(130%);
+  backdrop-filter: blur(10px) saturate(130%);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #fff 70%, transparent),
+    0 0 60px 6px color-mix(in srgb, var(--panel-accent) 38%, transparent);
 }
 .faceCircle {
   position: relative;
@@ -194,24 +210,25 @@
   border-radius: 50%;
   overflow: hidden;
   background: var(--crema);
-  /* resplandor del color de acento rodeando todo el círculo */
   box-shadow:
-    0 0 0 2px color-mix(in srgb, var(--panel-accent) 40%, transparent),
-    0 0 52px 10px color-mix(in srgb, var(--panel-accent) 70%, transparent),
-    0 18px 34px -18px rgba(60, 20, 14, 0.5);
+    0 0 0 3px color-mix(in srgb, var(--crema) 88%, transparent),
+    0 22px 38px -16px rgba(60, 20, 14, 0.55);
 }
 .faceSvg {
   display: block;
   width: 100%;
   height: 100%;
+  /* la carita ocupa mas del disco (antes flotaba chica en un circulo vacio) */
+  transform: scale(1.22);
+  transform-origin: 50% 52%;
 }
 
 /* Burbuja de pensamiento (sólo la tarjeta) que sobresale por arriba a la derecha del círculo */
 .thought {
   position: absolute;
   z-index: 2;
-  left: 62%;
-  bottom: 84%;
+  left: 68%;
+  bottom: 88%;
   padding: 9px 19px 10px;
   border-radius: 17px;
   background:
@@ -661,7 +678,9 @@
   }
   .panelLogin .brand svg { filter: drop-shadow(0 1px 4px rgba(110, 18, 30, 0.5)); }
   .faceWrap { width: clamp(124px, 34%, 168px); }
-  .thought { bottom: 76%; left: 58%; padding: 7px 15px 8px; font-size: 16px; }
+  .faceWrap::before { display: none; }
+  .faceRing { inset: -19%; }
+  .thought { bottom: 80%; left: 62%; padding: 7px 15px 8px; font-size: 16px; }
   .hCopy { display: none; }
   .hSerif { font-size: clamp(30px, 10vw, 44px); }
   .hSans { font-size: clamp(22px, 6.8vw, 32px); }
