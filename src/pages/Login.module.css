@@ -171,26 +171,13 @@
   z-index: 1;
   width: clamp(176px, 46%, 232px);
   aspect-ratio: 1;
+  /* aire entre la carita y el titular de abajo (el panel reparte el resto) */
+  margin-bottom: 16px;
 }
-/* Halo de la carita: una banda de vidrio esmerilado pegada al disco y dos anillos
-   finos concéntricos que se desvanecen hacia afuera. Todo es translúcido (crema
-   sobre el degradado), así que se ve parejo sobre cualquier zona del fondo, y las
-   separaciones son porcentajes para que escale igual en móvil y en escritorio. */
-.faceWrap::before {            /* anillo exterior, el más tenue */
-  content: "";
-  position: absolute;
-  inset: -34%;
-  border-radius: 50%;
-  border: 1px solid color-mix(in srgb, var(--crema) 26%, transparent);
-  pointer-events: none;
-}
-.faceRing {                    /* anillo intermedio */
-  position: absolute;
-  inset: -21%;
-  border-radius: 50%;
-  border: 1.5px solid color-mix(in srgb, var(--crema) 42%, transparent);
-  pointer-events: none;
-}
+/* Halo de la carita: una sola banda de vidrio esmerilado pegada al disco, con el
+   resplandor del color de acento. Es translúcida (crema sobre el degradado), así
+   que se ve parejo sobre cualquier zona del fondo, y las separaciones son
+   porcentajes para que escale igual en móvil y en escritorio. */
 .faceHalo {                    /* banda de vidrio pegada al disco */
   position: absolute;
   inset: -9%;
@@ -677,9 +664,7 @@
     text-shadow: 0 1px 6px rgba(110, 18, 30, 0.55), 0 1px 2px rgba(110, 18, 30, 0.45);
   }
   .panelLogin .brand svg { filter: drop-shadow(0 1px 4px rgba(110, 18, 30, 0.5)); }
-  .faceWrap { width: clamp(124px, 34%, 168px); }
-  .faceWrap::before { display: none; }
-  .faceRing { inset: -19%; }
+  .faceWrap { width: clamp(124px, 34%, 168px); margin-bottom: 22px; }
   .thought { bottom: 80%; left: 62%; padding: 7px 15px 8px; font-size: 16px; }
   .hCopy { display: none; }
   .hSerif { font-size: clamp(30px, 10vw, 44px); }
