@@ -434,12 +434,20 @@ function ThreadView({ user, friend, onBack, onNotify, onToggleInfo, infoOpen, sh
   useEffect(() => {
     const vv = window.visualViewport;
     if (!vv) return undefined;
-    const onVpChange = () => scrollToBottom();
+    const root = document.documentElement;
+    const onVpChange = () => {
+      // alto que tapa el teclado; por debajo de 120px no es teclado (barras / safe-area) -> 0
+      const covered = Math.round(window.innerHeight - vv.height - vv.offsetTop);
+      root.style.setProperty("--kb-inset", covered > 120 ? `${covered}px` : "0px");
+      scrollToBottom();
+    };
+    onVpChange();
     vv.addEventListener("resize", onVpChange);
     vv.addEventListener("scroll", onVpChange);
     return () => {
       vv.removeEventListener("resize", onVpChange);
       vv.removeEventListener("scroll", onVpChange);
+      root.style.removeProperty("--kb-inset");
     };
   }, [scrollToBottom]);
 
@@ -1045,4 +1053,4 @@ export default function ChatView({ user, malla, notasClaseData, asignacionesData
       )}
     </div>
   );
-}
+}

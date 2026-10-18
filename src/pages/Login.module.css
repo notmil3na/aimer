@@ -27,11 +27,10 @@
   position: relative;
   box-sizing: border-box;
   flex: 1 1 auto;
-  min-height: 100vh;
-  min-height: 100dvh;
+  min-height: 0;
   display: flex;
   align-items: center;
-  /* #root mide 100dvh y recorta (overflow: hidden): si la tarjeta no cabe
+  /* #root es fixed/inset 0 y recorta (overflow: hidden): si la tarjeta no cabe
      (móvil / PWA, o ventanas bajas) el wrap es quien scrollea. `safe center`
      evita que se recorte la parte de arriba cuando la tarjeta no cabe. */
   align-items: safe center;

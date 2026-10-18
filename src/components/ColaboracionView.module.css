@@ -386,7 +386,7 @@
 
 .loading {
   display: flex; align-items: center; justify-content: center;
-  gap: 12px; min-height: calc(100dvh - 32px); color: var(--text-muted);
+  gap: 12px; min-height: 60vh; color: var(--text-muted);
   font-family: var(--font-body); font-size: 14px; flex-direction: column;
   text-align: center;
 }
@@ -508,7 +508,7 @@
   .personGrid { grid-template-columns: 1fr; }
   .personCard { flex-wrap: wrap; }
   .personActions { width: 100%; justify-content: flex-end; }
-  .loading { min-height: calc(100dvh - 130px); }
+  .loading { min-height: 60vh; }
   .dispCard { padding: 14px; }
 }
 

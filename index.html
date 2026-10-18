@@ -29,9 +29,6 @@
           var s = JSON.parse(localStorage.getItem("malla_session") || "null");
           var u = (s && s.user) || (s && !s.token ? s : null);
           var r = document.documentElement;
-          var vv = window.visualViewport;
-          var appH = (vv && vv.height) || window.innerHeight;
-          if (appH) r.style.setProperty("--app-h", Math.round(appH) + "px");
           var mode = (u && u.appMode) || "dark";
           var c = THEMES[(u && u.appTheme)] || THEMES.ambar;
           r.setAttribute("data-theme", mode);

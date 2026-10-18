@@ -60,7 +60,7 @@ export default class ErrorBoundary extends React.Component {
     };
     const rootStyle = isView
       ? card
-      : { ...card, minHeight: "100dvh", background: "var(--bg)" };
+      : { ...card, flex: 1, minHeight: 0, background: "var(--bg)" };
 
     return (
       <div style={rootStyle}>

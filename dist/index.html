@@ -29,9 +29,6 @@
           var s = JSON.parse(localStorage.getItem("malla_session") || "null");
           var u = (s && s.user) || (s && !s.token ? s : null);
           var r = document.documentElement;
-          var vv = window.visualViewport;
-          var appH = (vv && vv.height) || window.innerHeight;
-          if (appH) r.style.setProperty("--app-h", Math.round(appH) + "px");
           var mode = (u && u.appMode) || "dark";
           var c = THEMES[(u && u.appTheme)] || THEMES.ambar;
           r.setAttribute("data-theme", mode);
@@ -68,9 +65,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Aimer" />
-    <script type="module" crossorigin src="/assets/index-1ae77ed3.js"></script>
+    <script type="module" crossorigin src="/assets/index-4b70b9e1.js"></script>
     <link rel="modulepreload" crossorigin href="/assets/vendor-27d6d7f2.js">
-    <link rel="stylesheet" href="/assets/index-f7574248.css">
+    <link rel="stylesheet" href="/assets/index-d79d3200.css">
   </head>
   <body>
     

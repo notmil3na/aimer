@@ -6,7 +6,6 @@ const CustomCursor = lazy(() => import("./components/CustomCursor"));
 import { api, saveSession, clearSession, getToken, prewarm } from "./api";
 import { ensureFont } from "./utils/fonts";
 import { getPhoto } from "./utils/photo";
-import useAppHeightFix from "./hooks/useAppHeightFix";
 import "./App.css";
 
 export const APP_THEMES = {
@@ -121,8 +120,6 @@ export default function App() {
   const [user, setUser]   = useState(null);
   const [ready, setReady] = useState(false);
 
-  useAppHeightFix();
-
   useEffect(() => {
     let cancelled = false;
     prewarm();
@@ -186,7 +183,7 @@ export default function App() {
     return (
       <div style={{
         display: "flex", alignItems: "center", justifyContent: "center",
-        minHeight: "100dvh", color: "var(--text-muted)", fontFamily: "var(--font-body)",
+        flex: 1, minHeight: 0, color: "var(--text-muted)", fontFamily: "var(--font-body)",
         flexDirection: "column", gap: "12px",
       }}>
         <span style={{ fontSize: "28px", color: "var(--accent)" }}>✦</span>
@@ -199,7 +196,7 @@ export default function App() {
     <Suspense fallback={
       <div style={{
         display: "flex", alignItems: "center", justifyContent: "center",
-        minHeight: "100dvh", color: "var(--text-muted)", fontFamily: "var(--font-body)",
+        flex: 1, minHeight: 0, color: "var(--text-muted)", fontFamily: "var(--font-body)",
         flexDirection: "column", gap: "12px",
       }}>
         <span style={{ fontSize: "28px", color: "var(--accent)" }}>✦</span>

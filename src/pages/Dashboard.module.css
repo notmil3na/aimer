@@ -2,10 +2,6 @@
   display: flex;
   flex: 1;
   min-height: 0;
-  min-height: 100vh;
-  min-height: 100dvh;
-  height: 100vh;
-  height: 100dvh;
   overflow: hidden;
   gap: 0;
 }
@@ -253,9 +249,7 @@
 @media (max-width: 900px) {
   .layout {
     flex-direction: column;
-    /* sin tope: debe llegar al alto real del viewport (--app-h en #root) para
-       que no quede una franja al pie que pinte el canvas del navegador. */
-    height: 100%;
+    /* llena #root (position: fixed; inset: 0) por flex, sin alturas medidas. */
     min-height: 0;
     overflow: hidden;
     box-sizing: border-box;

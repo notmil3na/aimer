@@ -107,16 +107,16 @@ h1 > em, h2 > em, h3 > em {
   color: var(--accent);
 }
 
-html, body, #root {
+/* SIN alturas medidas: nada de 100vh / 100dvh / -webkit-fill-available / --app-h.
+   Esos valores no coinciden con la pantalla real en iOS (PWA instalada) y la
+   diferencia quedaba como una barra oscura al pie. La app se ancla con
+   position: fixed + inset: 0 (ver #root), asi que siempre toca los 4 bordes
+   fisicos de la pantalla, con o sin barras del navegador, sin importar el tema. */
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
   height: 100%;
-  height: -webkit-fill-available;
-  min-height: 100vh;
-  min-height: 100dvh;
-  /* --app-h lo pone index.html y lo mantiene useAppHeightFix: es el alto real
-     del viewport visible. 100dvh se queda corto cuando el navegador esconde
-     sus barras (movil), y esa diferencia aparecia como una barra de color al
-     pie de la pantalla. */
-  height: var(--app-h, 100dvh);
   overflow: hidden;
   overscroll-behavior: none;
 }
@@ -236,13 +236,11 @@ body {
 }
 
 #root {
-  position: relative;
+  position: fixed;
+  inset: 0;
   z-index: 1;
   display: flex;
   flex-direction: column;
-  height: 100%;
-  height: var(--app-h, 100dvh);
-  min-height: 0;
   overflow: hidden;
 }
 
@@ -342,4 +340,4 @@ select option {
   .convRow {
     touch-action: manipulation;
   }
-}
+}
