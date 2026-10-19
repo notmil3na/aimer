@@ -157,7 +157,7 @@
 }
 .navBtn:hover { background: var(--surface2); color: var(--text); transform: translateX(2px); }
 .navBtn.active {
-  background: linear-gradient(135deg, rgba(var(--accent-rgb),0.9), rgba(var(--accent-rgb),0.55));
+  background: rgba(var(--accent-rgb), 0.85);
   border-color: transparent;
   color: #16121f;
   font-weight: 600;
