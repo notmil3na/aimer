@@ -1,4 +1,4 @@
-const CACHE = "aimer-v1792379697047";
+const CACHE = "aimer-v1792379897319";
 // a donde salta el servidor local de pruebas (vite preview), que no tiene /api
 const NEW_ORIGIN = "https://aimer-project.yaritzamilena4.workers.dev";
 // El salto es SOLO para localhost. Antes se aplicaba a cualquier origen distinto
