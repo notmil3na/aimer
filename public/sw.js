@@ -1,6 +1,11 @@
 const CACHE = "aimer-v13";
+// a donde salta el servidor local de pruebas (vite preview), que no tiene /api
 const NEW_ORIGIN = "https://aimer-project.yaritzamilena4.workers.dev";
-const LEGACY_ORIGIN = self.location.origin !== NEW_ORIGIN;
+// El salto es SOLO para localhost. Antes se aplicaba a cualquier origen distinto
+// de workers.dev, y por eso al entrar a aimeru.lat la navegacion se redirigia a
+// workers.dev y la barra de direcciones mostraba el dominio viejo.
+const LOCAL_HOST = /^(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\])$/i.test(self.location.hostname);
+const LEGACY_ORIGIN = LOCAL_HOST && self.location.origin !== NEW_ORIGIN;
 const CORE = [
   "/",
   "/manifest.webmanifest",
