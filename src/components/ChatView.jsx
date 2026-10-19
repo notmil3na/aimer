@@ -531,8 +531,10 @@ function ThreadView({ user, friend, onBack, onNotify, onToggleInfo, infoOpen, sh
   };
 
   const sendShare = async (payload) => {
-    if (!payload) return;
-    await sendChatMessage(other, {
+    if (!payload || sending) return;
+    setSending(true);
+    setError("");
+    const res = await sendChatMessage(other, {
       message_type: payload.kind === "note" ? "note" : "assignment",
       content: JSON.stringify(payload),
       academic_items: [{
@@ -545,6 +547,11 @@ function ThreadView({ user, friend, onBack, onNotify, onToggleInfo, infoOpen, sh
           : { titulo: payload.item.titulo || "", tipo: payload.item.tipo || "" },
       }],
     });
+    if (res.needsMigration) { setNeedsMig(true); setSending(false); return; }
+    if (!res.ok) { setError(res.error || "No se pudo enviar"); setSending(false); return; }
+    setSending(false);
+    broadcastNew(res);
+    refresh();
   };
 
   const addAssignment = async (payload) => {
