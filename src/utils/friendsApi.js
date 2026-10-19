@@ -1,4 +1,5 @@
 import { api } from "../api";
+import { traducirDatosGuardados } from "../data/malla2022.js";
 
 export function canonicalPair(a, b) {
   return a < b ? [a, b] : [b, a];
@@ -55,6 +56,13 @@ export function searchUsers(q) {
   return wrap(api(`/users?q=${encodeURIComponent(q.trim())}`));
 }
 
+// Los datos de un amigo llegan tal como los guardó su dueño, que puede haber
+// usado otra versión del plan (el 2022-1 se publicó un tiempo con los códigos
+// numéricos de la tabla en el id). Se normalizan antes de usarlos, sobre todo
+// para que coincidan las materias en común y los horarios comparados.
 export function fetchFriendData(username) {
-  return wrap(api(`/user_data/${encodeURIComponent(username)}`));
+  return wrap(api(`/user_data/${encodeURIComponent(username)}`)).then((res) => ({
+    ...res,
+    data: res.data ? traducirDatosGuardados(res.data) : res.data,
+  }));
 }

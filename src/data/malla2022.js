@@ -2,6 +2,11 @@
 // Es el plan que le corresponde a quienes ingresaron en ese corte: se muestra
 // por defecto y se edita como cualquier malla. Para el resto del programa la app
 // sigue usando el plan actual (src/data/malla.js).
+//
+// Los ids siguen la misma convención que el plan actual: un código corto de la
+// materia (ALG1, CAL1...), y el número oficial de la tabla queda en `codigo`.
+// Las materias que existen en los dos planes comparten el id del plan actual,
+// así el avance, el horario y las comparaciones con amigos cuadran por materia.
 
 import { MALLA_SISTEMAS } from "./malla.js";
 
@@ -19,94 +24,94 @@ export const MALLA_SISTEMAS_2022 = [
   {
     semestre: 1,
     materias: [
-      { id: "011401", codigo: "011401", nombre: "Cálculo Diferencial",                    creditos: 4, estado: "faltante", prereqs: [] },
-      { id: "011440", codigo: "011440", nombre: "Formación Humanística y Ciudadana",      creditos: 2, estado: "faltante", prereqs: [] },
-      { id: "011415", codigo: "011415", nombre: "Introducción a la Ingeniería de Sistemas", creditos: 2, estado: "faltante", prereqs: [] },
-      { id: "011412", codigo: "011412", nombre: "Matemáticas Discretas",                  creditos: 4, estado: "faltante", prereqs: [] },
-      { id: "011438", codigo: "011438", nombre: "Procesos Lectores y Escriturales",       creditos: 2, estado: "faltante", prereqs: [] },
-      { id: "011439", codigo: "011439", nombre: "Razonamiento y Representación Matemática", creditos: 2, estado: "faltante", prereqs: [] },
-      { id: "011437", codigo: "011437", nombre: "Vida Universitaria",                     creditos: 2, estado: "faltante", prereqs: [] },
+      { id: "CAL1", codigo: "011401", nombre: "Cálculo Diferencial",                      creditos: 4, estado: "faltante", prereqs: [] },
+      { id: "FHC1", codigo: "011440", nombre: "Formación Humanística y Ciudadana",        creditos: 2, estado: "faltante", prereqs: [] },
+      { id: "IIS1", codigo: "011415", nombre: "Introducción a la Ingeniería de Sistemas", creditos: 2, estado: "faltante", prereqs: [] },
+      { id: "MAD1", codigo: "011412", nombre: "Matemáticas Discretas",                    creditos: 4, estado: "faltante", prereqs: [] },
+      { id: "PLE1", codigo: "011438", nombre: "Procesos Lectores y Escriturales",         creditos: 2, estado: "faltante", prereqs: [] },
+      { id: "RRM1", codigo: "011439", nombre: "Razonamiento y Representación Matemática", creditos: 2, estado: "faltante", prereqs: [] },
+      { id: "VIU1", codigo: "011437", nombre: "Vida Universitaria",                       creditos: 2, estado: "faltante", prereqs: [] },
     ],
   },
   {
     semestre: 2,
     materias: [
-      { id: "011403", codigo: "011403", nombre: "Álgebra Lineal",                         creditos: 3, estado: "faltante", prereqs: ["011439"] },
-      { id: "011416", codigo: "011416", nombre: "Algoritmos y Programación",              creditos: 4, estado: "faltante", prereqs: ["011412"] },
-      { id: "011402", codigo: "011402", nombre: "Cálculo Integral",                       creditos: 4, estado: "faltante", prereqs: ["011401"] },
-      { id: "OPTL0474", codigo: "OPTL0474", nombre: "Creando Bienestar",                  creditos: 0, estado: "faltante", prereqs: [] },
-      { id: "011409", codigo: "011409", nombre: "Estadística I",                          creditos: 3, estado: "faltante", prereqs: ["011401"] },
-      { id: "011441", codigo: "011441", nombre: "Expresión Oral y Argumentación",         creditos: 2, estado: "faltante", prereqs: ["011438"] },
-      { id: "011443", codigo: "011443", nombre: "Teoría y Filosofía del Conocimiento",    creditos: 2, estado: "faltante", prereqs: [] },
+      { id: "ALI1", codigo: "011403", nombre: "Álgebra Lineal",                          creditos: 3, estado: "faltante", prereqs: ["RRM1"] },
+      { id: "ALG1", codigo: "011416", nombre: "Algoritmos y Programación",               creditos: 4, estado: "faltante", prereqs: ["MAD1"] },
+      { id: "CAL2", codigo: "011402", nombre: "Cálculo Integral",                        creditos: 4, estado: "faltante", prereqs: ["CAL1"] },
+      { id: "OPTL0474", codigo: "OPTL0474", nombre: "Creando Bienestar",                 creditos: 0, estado: "faltante", prereqs: [] },
+      { id: "PRE1", codigo: "011409", nombre: "Estadística I",                           creditos: 3, estado: "faltante", prereqs: ["CAL1"] },
+      { id: "EOA1", codigo: "011441", nombre: "Expresión Oral y Argumentación",          creditos: 2, estado: "faltante", prereqs: ["PLE1"] },
+      { id: "TFC1", codigo: "011443", nombre: "Teoría y Filosofía del Conocimiento",     creditos: 2, estado: "faltante", prereqs: [] },
     ],
   },
   {
     semestre: 3,
     materias: [
-      { id: "011404", codigo: "011404", nombre: "Cálculo Vectorial",                      creditos: 4, estado: "faltante", prereqs: ["011402", "011403"] },
-      { id: "011417", codigo: "011417", nombre: "Estructura de Datos I",                  creditos: 4, estado: "faltante", prereqs: ["011416"] },
-      { id: "011406", codigo: "011406", nombre: "Mecánica",                               creditos: 4, estado: "faltante", prereqs: ["011401"] },
-      { id: "011427", codigo: "011427", nombre: "Pensamiento de Sistemas",                creditos: 2, estado: "faltante", prereqs: [] },
-      { id: "011424", codigo: "011424", nombre: "Sistemas Digitales",                     creditos: 4, estado: "faltante", prereqs: ["011412"] },
+      { id: "CAV1", codigo: "011404", nombre: "Cálculo Vectorial",                       creditos: 4, estado: "faltante", prereqs: ["CAL2", "ALI1"] },
+      { id: "EDA1", codigo: "011417", nombre: "Estructura de Datos I",                   creditos: 4, estado: "faltante", prereqs: ["ALG1"] },
+      { id: "FIM1", codigo: "011406", nombre: "Mecánica",                                creditos: 4, estado: "faltante", prereqs: ["CAL1"] },
+      { id: "PES1", codigo: "011427", nombre: "Pensamiento de Sistemas",                 creditos: 2, estado: "faltante", prereqs: [] },
+      { id: "SID1", codigo: "011424", nombre: "Sistemas Digitales",                      creditos: 4, estado: "faltante", prereqs: ["MAD1"] },
     ],
   },
   {
     semestre: 4,
     materias: [
-      { id: "011425", codigo: "011425", nombre: "Arquitectura de Computadores",           creditos: 3, estado: "faltante", prereqs: ["011424"] },
-      { id: "011408", codigo: "011408", nombre: "Calor y Ondas",                          creditos: 4, estado: "faltante", prereqs: ["011406"] },
-      { id: "011405", codigo: "011405", nombre: "Ecuaciones Diferenciales",               creditos: 3, estado: "faltante", prereqs: ["011404"] },
-      { id: "011410", codigo: "011410", nombre: "Estadística II",                         creditos: 3, estado: "faltante", prereqs: ["011409"] },
-      { id: "011419", codigo: "011419", nombre: "Estructura de Datos II",                 creditos: 4, estado: "faltante", prereqs: ["011417"] },
-      { id: "011445", codigo: "011445", nombre: "Seminario I",                            creditos: 2, estado: "faltante", prereqs: ["011443"] },
+      { id: "ARC1", codigo: "011425", nombre: "Arquitectura de Computadores",            creditos: 3, estado: "faltante", prereqs: ["SID1"] },
+      { id: "CYO1", codigo: "011408", nombre: "Calor y Ondas",                           creditos: 4, estado: "faltante", prereqs: ["FIM1"] },
+      { id: "EDI1", codigo: "011405", nombre: "Ecuaciones Diferenciales",                creditos: 3, estado: "faltante", prereqs: ["CAV1"] },
+      { id: "EST2", codigo: "011410", nombre: "Estadística II",                          creditos: 3, estado: "faltante", prereqs: ["PRE1"] },
+      { id: "EDA2", codigo: "011419", nombre: "Estructura de Datos II",                  creditos: 4, estado: "faltante", prereqs: ["EDA1"] },
+      { id: "SEM1", codigo: "011445", nombre: "Seminario I",                             creditos: 2, estado: "faltante", prereqs: ["TFC1"] },
     ],
   },
   {
     semestre: 5,
     materias: [
-      { id: "011422", codigo: "011422", nombre: "Bases de Datos",                         creditos: 4, estado: "faltante", prereqs: ["011419"] },
-      { id: "011421", codigo: "011421", nombre: "Compiladores",                           creditos: 4, estado: "faltante", prereqs: ["011419"] },
-      { id: "011431", codigo: "011431", nombre: "Diseño Organizacional TI",               creditos: 4, estado: "faltante", prereqs: ["011427"] },
-      { id: "011407", codigo: "011407", nombre: "Electricidad y Magnetismo",              creditos: 4, estado: "faltante", prereqs: ["011408"] },
-      { id: "011436", codigo: "011436", nombre: "Ética Profesional",                      creditos: 2, estado: "faltante", prereqs: [], prereqsPct: 40 },
+      { id: "BDA1", codigo: "011422", nombre: "Bases de Datos",                          creditos: 4, estado: "faltante", prereqs: ["EDA2"] },
+      { id: "COM1", codigo: "011421", nombre: "Compiladores",                            creditos: 4, estado: "faltante", prereqs: ["EDA2"] },
+      { id: "DOT1", codigo: "011431", nombre: "Diseño Organizacional TI",                creditos: 4, estado: "faltante", prereqs: ["PES1"] },
+      { id: "EYM1", codigo: "011407", nombre: "Electricidad y Magnetismo",               creditos: 4, estado: "faltante", prereqs: ["CYO1"] },
+      { id: "ETI1", codigo: "011436", nombre: "Ética Profesional",                       creditos: 2, estado: "faltante", prereqs: [], prereqsPct: 40 },
     ],
   },
   {
     semestre: 6,
     materias: [
-      { id: "011414", codigo: "011414", nombre: "Análisis Numérico",                      creditos: 3, estado: "faltante", prereqs: ["011405"] },
-      { id: "011429", codigo: "011429", nombre: "Ingeniería del Software",                creditos: 4, estado: "faltante", prereqs: ["011422", "011431"] },
-      { id: "011434", codigo: "011434", nombre: "Ingeniería Económica",                   creditos: 3, estado: "faltante", prereqs: ["011410"] },
-      { id: "011413", codigo: "011413", nombre: "Matemáticas Especiales",                 creditos: 3, estado: "faltante", prereqs: ["011405"] },
-      { id: "011418", codigo: "011418", nombre: "Programación Orientada a Objetos",       creditos: 4, estado: "faltante", prereqs: ["011422"] },
+      { id: "ANM1", codigo: "011414", nombre: "Análisis Numérico",                       creditos: 3, estado: "faltante", prereqs: ["EDI1"] },
+      { id: "ISW1", codigo: "011429", nombre: "Ingeniería del Software",                 creditos: 4, estado: "faltante", prereqs: ["BDA1", "DOT1"] },
+      { id: "IEC1", codigo: "011434", nombre: "Ingeniería Económica",                    creditos: 3, estado: "faltante", prereqs: ["EST2"] },
+      { id: "MAV1", codigo: "011413", nombre: "Matemáticas Especiales",                  creditos: 3, estado: "faltante", prereqs: ["EDI1"] },
+      { id: "POO1", codigo: "011418", nombre: "Programación Orientada a Objetos",        creditos: 4, estado: "faltante", prereqs: ["BDA1"] },
     ],
   },
   {
     semestre: 7,
     materias: [
-      { id: "011430", codigo: "011430", nombre: "Arquitectura de Software",               creditos: 4, estado: "faltante", prereqs: ["011429"] },
-      { id: "011435", codigo: "011435", nombre: "Gestión de Proyectos",                   creditos: 3, estado: "faltante", prereqs: ["011434"] },
-      { id: "011444", codigo: "011444", nombre: "Metodología de la Investigación",        creditos: 2, estado: "faltante", prereqs: ["011445"] },
-      { id: "011420", codigo: "011420", nombre: "Programación para Web",                  creditos: 4, estado: "faltante", prereqs: ["011418"] },
-      { id: "011426", codigo: "011426", nombre: "Sistemas Operativos",                    creditos: 4, estado: "faltante", prereqs: ["011425", "011419"] },
+      { id: "ASW1", codigo: "011430", nombre: "Arquitectura de Software",                creditos: 4, estado: "faltante", prereqs: ["ISW1"] },
+      { id: "GPR1", codigo: "011435", nombre: "Gestión de Proyectos",                    creditos: 3, estado: "faltante", prereqs: ["IEC1"] },
+      { id: "MTI1", codigo: "011444", nombre: "Metodología de la Investigación",         creditos: 2, estado: "faltante", prereqs: ["SEM1"] },
+      { id: "PWB1", codigo: "011420", nombre: "Programación para Web",                   creditos: 4, estado: "faltante", prereqs: ["POO1"] },
+      { id: "SIS1", codigo: "011426", nombre: "Sistemas Operativos",                     creditos: 4, estado: "faltante", prereqs: ["ARC1", "EDA2"] },
     ],
   },
   {
     semestre: 8,
     materias: [
-      { id: "011423", codigo: "011423", nombre: "Inteligencia Artificial",                creditos: 4, estado: "faltante", prereqs: ["011410", "011421"] },
-      { id: "011411", codigo: "011411", nombre: "Investigación de Operaciones",           creditos: 3, estado: "faltante", prereqs: ["011403", "011410"] },
-      { id: "011432", codigo: "011432", nombre: "Legislación Informática",                creditos: 2, estado: "faltante", prereqs: ["011436"] },
-      { id: "011446", codigo: "011446", nombre: "Seminario II",                           creditos: 2, estado: "faltante", prereqs: ["011444"] },
+      { id: "IAR1", codigo: "011423", nombre: "Inteligencia Artificial",                 creditos: 4, estado: "faltante", prereqs: ["EST2", "COM1"] },
+      { id: "IOD1", codigo: "011411", nombre: "Investigación de Operaciones",            creditos: 3, estado: "faltante", prereqs: ["ALI1", "EST2"] },
+      { id: "LEG1", codigo: "011432", nombre: "Legislación Informática",                 creditos: 2, estado: "faltante", prereqs: ["ETI1"] },
+      { id: "SEM2", codigo: "011446", nombre: "Seminario II",                            creditos: 2, estado: "faltante", prereqs: ["MTI1"] },
     ],
   },
   {
     semestre: 9,
     materias: [
-      { id: "011442", codigo: "011442", nombre: "Cátedra del Caribe",                     creditos: 2, estado: "faltante", prereqs: [], prereqsPct: 70 },
-      { id: "011428", codigo: "011428", nombre: "Dinámica de Sistemas",                   creditos: 4, estado: "faltante", prereqs: ["011427", "011405"] },
-      { id: "011433", codigo: "011433", nombre: "Redes",                                  creditos: 4, estado: "faltante", prereqs: ["011426"] },
-      { id: "011447", codigo: "011447", nombre: "Seminario III",                          creditos: 2, estado: "faltante", prereqs: ["011446"] },
+      { id: "CCA1", codigo: "011442", nombre: "Cátedra del Caribe",                      creditos: 2, estado: "faltante", prereqs: [], prereqsPct: 70 },
+      { id: "DIS1", codigo: "011428", nombre: "Dinámica de Sistemas",                    creditos: 4, estado: "faltante", prereqs: ["PES1", "EDI1"] },
+      { id: "RED1", codigo: "011433", nombre: "Redes",                                   creditos: 4, estado: "faltante", prereqs: ["SIS1"] },
+      { id: "SEM3", codigo: "011447", nombre: "Seminario III",                           creditos: 2, estado: "faltante", prereqs: ["SEM2"] },
     ],
   },
   {
@@ -122,7 +127,7 @@ export const MALLA_SISTEMAS_2022 = [
       { id: "OPT_0005", codigo: "OPT_0005", nombre: "Gobierno de TI",                             creditos: 3, estado: "faltante", prereqs: [], optativa: true },
       { id: "OPT_0007", codigo: "OPT_0007", nombre: "Hacking Ético",                              creditos: 3, estado: "faltante", prereqs: [], optativa: true },
       { id: "OPT_0015", codigo: "OPT_0015", nombre: "Innovación Empresarial",                     creditos: 3, estado: "faltante", prereqs: [], optativa: true },
-      { id: "OPT_0012", codigo: "OPT_0012", nombre: "Microprocesamiento",                         creditos: 3, estado: "faltante", prereqs: ["011425"], optativa: true },
+      { id: "OPT_0012", codigo: "OPT_0012", nombre: "Microprocesamiento",                         creditos: 3, estado: "faltante", prereqs: ["ARC1"], optativa: true },
       { id: "OPT_0009", codigo: "OPT_0009", nombre: "Microservicios",                             creditos: 3, estado: "faltante", prereqs: [], optativa: true },
       { id: "OPT_0014", codigo: "OPT_0014", nombre: "MLOps",                                      creditos: 3, estado: "faltante", prereqs: [], optativa: true },
       { id: "OPT_0003", codigo: "OPT_0003", nombre: "Modelado y Simulación",                      creditos: 3, estado: "faltante", prereqs: [], optativa: true },
@@ -167,10 +172,11 @@ export function claveEstado(nombre) {
   return GRUPOS.get(normalizado) || normalizado;
 }
 
-// --- Traducción de los datos guardados con los ids del plan actual ---
+// --- Traducción de los datos guardados con otros ids ---
 // Quien ingresó en 2022-1 usó hasta ahora el plan actual, así que sus notas,
-// materias cursando, horario y asignaciones están guardados con esos ids. Al
-// pasar al plan 2022-1 se traducen por materia equivalente para no perderlos.
+// materias cursando, horario y asignaciones están guardados con esos ids. Y el
+// plan 2022-1 se publicó un tiempo con los códigos numéricos de la tabla en el
+// id, así que también puede haber datos guardados con esos números.
 
 const NOMBRE_POR_ID_ACTUAL = new Map(
   MALLA_SISTEMAS.flatMap((s) => s.materias).map((m) => [m.id, m.nombre])
@@ -178,13 +184,17 @@ const NOMBRE_POR_ID_ACTUAL = new Map(
 const ID_2022_POR_CLAVE = new Map(
   MALLA_SISTEMAS_2022.flatMap((s) => s.materias).map((m) => [claveEstado(m.nombre), m.id])
 );
+const ID_2022_POR_CODIGO = new Map(
+  MALLA_SISTEMAS_2022.flatMap((s) => s.materias).map((m) => [m.codigo, m.id])
+);
 
-// id del plan actual -> id del plan 2022-1, para la misma materia. Un id que ya
-// es del plan 2022-1 (o se desconoce) se devuelve igual.
+// id de otra versión del plan -> id del plan 2022-1, para la misma materia. Un
+// id que ya es del plan 2022-1 (o se desconoce) se devuelve igual.
 export function idEnPlan2022(id) {
-  const nombre = NOMBRE_POR_ID_ACTUAL.get(String(id));
-  if (!nombre) return id;
-  return ID_2022_POR_CLAVE.get(claveEstado(nombre)) || id;
+  const clave = String(id);
+  const nombre = NOMBRE_POR_ID_ACTUAL.get(clave);
+  if (nombre) return ID_2022_POR_CLAVE.get(claveEstado(nombre)) || clave;
+  return ID_2022_POR_CODIGO.get(clave) || clave;
 }
 
 // Columnas guardadas como mapa id de materia -> datos.
