@@ -205,11 +205,12 @@
   display: block;
   width: 100%;
   height: 100%;
-  /* La carita se escala sobre el centro del disco y deja aire: el cuerpo ocupa
-     ~58% del ancho del circulo y el resplandor naranja se queda dentro. Antes
-     (scale 1.22 sobre el 52% de alto) el cuerpo llegaba al 77% y el brillo se
-     cortaba contra el borde del circulo, que se veia como un zoom. */
-  transform: scale(0.92);
+  /* La carita se escala sobre el centro exacto del disco. El cuerpo ocupa ~66%
+     del ancho del circulo y el resplandor naranja casi toca el borde (84% del
+     radio), asi el difuminado se funde con el disco en vez de terminar dentro y
+     dejar ver su contorno. Con 1.22 el brillo se cortaba en seco (parecia zoom)
+     y con 0.92 el aire dejaba ver el borde del resplandor. */
+  transform: scale(1.05);
   transform-origin: 50% 50%;
 }
 
