@@ -190,7 +190,6 @@ export function publicUser(row) {
     career: row.career ?? "",
     semester: row.semester ?? 1,
     ingresoCorte: row.ingreso_corte ?? "2023-2",
-    birthdate: row.birthdate ?? "",
     hasPhoto: !!row.photo,
     appMode: row.app_mode ?? "dark",
     appTheme: row.app_theme ?? "ambar",
@@ -209,7 +208,6 @@ export function toUserRow(obj) {
   if (obj.career !== undefined) row.career = String(obj.career);
   if (obj.semester !== undefined) row.semester = Number(obj.semester) || 1;
   if (obj.ingresoCorte !== undefined) row.ingreso_corte = String(obj.ingresoCorte);
-  if (obj.birthdate !== undefined) row.birthdate = obj.birthdate || null;
   if (obj.photo !== undefined) row.photo = obj.photo || null;
   if (obj.appMode !== undefined) row.app_mode = String(obj.appMode);
   if (obj.appTheme !== undefined) row.app_theme = String(obj.appTheme);

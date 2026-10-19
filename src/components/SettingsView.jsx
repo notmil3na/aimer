@@ -67,7 +67,6 @@ export default function SettingsView({ user, onUpdate, onMallaReset, malla, seme
     career:       user.career       || "",
     semester:     user.semester     || 1,
     ingresoCorte: user.ingresoCorte || "2023-2",
-    birthdate:    user.birthdate    || "",
     photo:        null,
   });
   const [saved, setSaved] = useState(false);
@@ -283,15 +282,6 @@ export default function SettingsView({ user, onUpdate, onMallaReset, malla, seme
                   <input value={form.name}
                     onChange={e => setForm({ ...form, name: e.target.value })}
                     placeholder="Tu nombre" />
-                </div>
-
-                <div className={styles.field}>
-                  <label>Fecha de nacimiento</label>
-                  <input
-                    type="date"
-                    value={form.birthdate}
-                    onChange={e => setForm({ ...form, birthdate: e.target.value })}
-                  />
                 </div>
 
                 <div className={styles.field}>

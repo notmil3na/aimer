@@ -1,4 +1,4 @@
-import { envReady, isColumnMissing, json, readBody, requireUser, toUserRow, vreq } from "../lib.js";
+import { envReady, json, readBody, requireUser, toUserRow, vreq } from "../lib.js";
 import { jstringify, all, unwrapJSON } from "../db.js";
 
 const USERNAME_RE = /^[a-zA-Z0-9._-]{2,20}$/;
@@ -60,15 +60,6 @@ export async function handler(c) {
       await db.prepare(`UPDATE users SET ${sets} WHERE username = ?`).bind(...vals, me.username).run();
       return json(c, 200, { ok: true });
     } catch (error) {
-      if (isColumnMissing(error) && patch.birthdate !== undefined) {
-        const k2 = keys.filter((k) => k !== "birthdate");
-        if (k2.length > 0) {
-          const s2 = k2.map((k) => `${k} = ?`).join(", ");
-          const v2 = k2.map((k) => patch[k]);
-          await db.prepare(`UPDATE users SET ${s2} WHERE username = ?`).bind(...v2, me.username).run();
-          return json(c, 200, { ok: true });
-        }
-      }
       return json(c, 500, { error: "No se pudo guardar el perfil" });
     }
   }

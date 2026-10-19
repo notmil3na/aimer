@@ -90,7 +90,6 @@ export async function saveUser(userData) {
     career:       userData.career,
     semester:     userData.semester,
     ingresoCorte: userData.ingresoCorte,
-    birthdate:    userData.birthdate,
     appMode:      userData.appMode,
     appTheme:     userData.appTheme,
     themeColors:  userData.themeColors,
