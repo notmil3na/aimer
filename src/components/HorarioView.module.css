@@ -251,9 +251,11 @@
   letter-spacing: 0.02em; line-height: 1.35;
 }
 .claseNombre {
+  /* Envuelve en vez de recortar con puntos suspensivos: lo que no cabe baja
+     de linea (la tarjeta conserva el alto de la franja horaria). */
   font-size: 10.5px; font-weight: 600; color: var(--text);
-  line-height: 1.3; white-space: nowrap; overflow: hidden;
-  text-overflow: ellipsis; margin-bottom: 1px;
+  line-height: 1.3; white-space: normal; overflow-wrap: anywhere;
+  margin-bottom: 1px;
 }
 .claseProfesor { font-size: 10.5px; color: var(--text-muted); font-weight: 500; line-height: 1.35; }
 .claseHora {
@@ -262,8 +264,7 @@
 }
 .claseSalon {
   font-size: 10px; color: var(--text-muted); font-weight: 500;
-  line-height: 1.35; white-space: nowrap; overflow: hidden;
-  text-overflow: ellipsis;
+  line-height: 1.35; white-space: normal; overflow-wrap: anywhere;
 }
 .claseIcon { display: none; }
 
@@ -549,16 +550,20 @@
   .claseBloqueContent { padding: 8px 10px; }
   .claseId { font-size: 12px; }
   .claseNombre {
-    font-size: 14px; font-weight: 600;
-    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-    overflow: hidden; white-space: normal;
+    font-size: 14px; font-weight: 600; white-space: normal;
   }
   .claseProfesor { font-size: 12px; }
-  .claseHora, .claseSalon {
+  .claseHora {
     font-size: 12px;
     display: inline-flex; align-items: center; gap: 4px;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
   }
+  .claseSalon {
+    font-size: 12px;
+    display: inline-flex; align-items: flex-start; gap: 4px;
+    white-space: normal; overflow-wrap: anywhere; max-width: 100%;
+  }
+  .claseSalon .claseIcon { margin-top: 2px; }
   .claseHora { margin-top: auto; padding-top: 3px; }
   .claseIcon { display: inline-flex; flex-shrink: 0; }
 
