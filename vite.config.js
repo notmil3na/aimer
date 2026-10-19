@@ -46,6 +46,10 @@ function swCacheVersion() {
 
 export default defineConfig({
   plugins: [react(), swCacheVersion()],
+  // nada de console/debugger en el bundle que se publica
+  esbuild: {
+    drop: ['console', 'debugger'],
+  },
   server: {
     proxy: {
       "/api": {
@@ -56,6 +60,7 @@ export default defineConfig({
   },
   build: {
     target: 'es2020',
+    sourcemap: false,
     rollupOptions: {
       output: {
         manualChunks: {
