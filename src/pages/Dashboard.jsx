@@ -177,8 +177,6 @@ export default function Dashboard({ user, onLogout, onUpdateUser }) {
     () => (esPlan2022 ? MALLA_SISTEMAS_2022 : getMallaByCareer(user.career)),
     [esPlan2022, user.career]
   );
-  const defaultMalla = useMemo(() => autoApply(baseMalla, user.semester || 1), [baseMalla, user.semester]);
-
   const planAlternativo = useMemo(
     () => (esPlan2022
       ? { label: "plan actual", titulo: "Plan actual", slug: "plan-actual", malla: getMallaByCareer(user.career) }
@@ -193,7 +191,23 @@ export default function Dashboard({ user, onLogout, onUpdateUser }) {
     [esPlan2022, cached]
   );
 
-  const [malla, setMalla] = useState(() => (guardado?.malla ? mergeMallaWithBase(defaultMalla, guardado.malla, esPlan2022) : defaultMalla));
+  // El auto-aprobado (todo aprobado hasta el semestre actual) es sólo el punto
+  // de partida de una cuenta que todavía no tiene malla guardada. En cuanto hay
+  // malla guardada mandan los estados que el usuario tenga configurados, sin
+  // volver a aplicar la regla.
+  const [hayMallaGuardada, setHayMallaGuardada] = useState(!!guardado?.malla);
+  const [malla, setMalla] = useState(() =>
+    guardado?.malla
+      ? mergeMallaWithBase(baseMalla, guardado.malla, esPlan2022)
+      : autoApply(baseMalla, user.semester || 1)
+  );
+
+  useEffect(() => {
+    // Sin malla guardada, el semestre actual es el que define el punto de
+    // partida; en cuanto el usuario guarda algo, esto ya no se aplica.
+    if (!hayMallaGuardada) setMalla(autoApply(baseMalla, user.semester || 1));
+  }, [hayMallaGuardada, baseMalla, user.semester]);
+
   const [notas, setNotas] = useState(guardado?.notas ?? {});
   const [cursandoData, setCursandoData] = useState(guardado?.cursando ?? {});
   const [horarioData, setHorarioData] = useState(guardado?.horario ?? { dias: ["L", "M", "X", "J", "V"], clases: [] });
@@ -204,6 +218,7 @@ export default function Dashboard({ user, onLogout, onUpdateUser }) {
 
   const persistColumn = useCallback(async (column, data, applyLocal) => {
     applyLocal(data);
+    if (column === "malla") setHayMallaGuardada(true);
     updateSessionData({ [column]: data });
     if (!navigator.onLine) {
       queueSave(column, data);
@@ -261,8 +276,14 @@ export default function Dashboard({ user, onLogout, onUpdateUser }) {
   useEffect(() => {
     async function load() {
       const data = await loadUserData();
-      if (data) {
-        const guardadoApi = esPlan2022 ? traducirDatosGuardados(data) : data;
+      // Lo que quedó pendiente de guardar (sin conexión) es más reciente que la
+      // copia del servidor, así que manda.
+      const pendientes = getPendingSaves();
+      const combinado = (data || Object.keys(pendientes).length)
+        ? { ...(data || {}), ...pendientes }
+        : null;
+      const guardadoApi = combinado ? (esPlan2022 ? traducirDatosGuardados(combinado) : combinado) : null;
+      if (guardadoApi) {
         updateSessionData({
           ...(guardadoApi.malla && { malla: guardadoApi.malla }),
           ...(guardadoApi.notas && { notas: guardadoApi.notas }),
@@ -273,7 +294,10 @@ export default function Dashboard({ user, onLogout, onUpdateUser }) {
           ...(guardadoApi.asignaciones && { asignaciones: guardadoApi.asignaciones }),
           ...(guardadoApi.notasclase && { notasclase: guardadoApi.notasclase }),
         });
-        if (guardadoApi.malla) setMalla(mergeMallaWithBase(defaultMalla, guardadoApi.malla, esPlan2022));
+        if (guardadoApi.malla) {
+          setHayMallaGuardada(true);
+          setMalla(mergeMallaWithBase(baseMalla, guardadoApi.malla, esPlan2022));
+        }
         if (guardadoApi.notas) setNotas(guardadoApi.notas);
         if (guardadoApi.cursando) setCursandoData(guardadoApi.cursando);
         if (guardadoApi.horario) setHorarioData(guardadoApi.horario);
@@ -329,12 +353,6 @@ export default function Dashboard({ user, onLogout, onUpdateUser }) {
     items: asignacionesData?.items || [],
     eventos: calendarioData?.eventos || [],
   });
-
-  const handleMallaReset = useCallback((newSemester) => {
-    const reset = autoApply(baseMalla, newSemester);
-    persistColumn("malla", reset, setMalla);
-    notify("Semestre reiniciado");
-  }, [baseMalla, persistColumn, notify]);
 
   const enrollMateriasFromPlan = useCallback((materiaIds) => {
     const idSet = new Set(materiaIds);
@@ -498,7 +516,6 @@ export default function Dashboard({ user, onLogout, onUpdateUser }) {
               <SettingsView
                 user={user}
                 onUpdate={onUpdateUser}
-                onMallaReset={handleMallaReset}
                 malla={malla}
                 semestre={semestre}
                 onSaveSemestre={saveSemestre}

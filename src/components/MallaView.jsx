@@ -9,24 +9,11 @@ import { getObligatorias } from "../utils/careerProgress.js";
 import MateriaCard from "./MateriaCard";
 import styles from "./MallaView.module.css";
 
-function applyAutoApprove(malla, currentSemester) {
-  return malla.map((sem) => ({
-    ...sem,
-    materias: sem.materias.map((m) => {
-      if (typeof sem.semestre !== "number") return m;
-      if (sem.semestre < currentSemester && m.estado === "faltante")
-        return { ...m, estado: "aprobada" };
-      if (sem.semestre === currentSemester && m.estado === "faltante")
-        return { ...m, estado: "cursando" };
-      return m;
-    }),
-  }));
-}
-
 export default function MallaView({ malla: initialMalla, notas, onSave, user, onNotify, semestre, planAlternativo, etiquetaPlan }) {
-  const [malla, setMalla] = useState(() =>
-    applyAutoApprove(initialMalla || MALLA, user.semester || 1)
-  );
+  // La malla llega ya resuelta desde Dashboard: con los estados guardados del
+  // usuario, o con el auto-aprobado de una cuenta que aún no tiene malla
+  // guardada. Aquí no se vuelve a aplicar esa regla.
+  const [malla, setMalla] = useState(() => initialMalla || MALLA);
   const [enPreview, setEnPreview]             = useState(false);
   const [selected, setSelected]               = useState(null);
   const [highlightedPrereqs, setHighlightedPrereqs] = useState([]);

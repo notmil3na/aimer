@@ -56,7 +56,7 @@ const INTERNAL_TABS = [
   { id: "apariencia",  label: "Apariencia",  Icon: IconPaint },
 ];
 
-export default function SettingsView({ user, onUpdate, onMallaReset, malla, semestre, onSaveSemestre }) {
+export default function SettingsView({ user, onUpdate, malla, semestre, onSaveSemestre }) {
   const [activeSection, setActiveSection] = useState("cuenta");
 
   useEffect(() => { ensureFont(user.fontBody); }, [user.fontBody]);
@@ -88,9 +88,8 @@ export default function SettingsView({ user, onUpdate, onMallaReset, malla, seme
       skipNextSave.current = false;
       return;
     }
-    if (newSem !== user.semester) {
-      onMallaReset(newSem);
-    }
+    // Cambiar el semestre no toca la malla: los estados que el usuario marcó se
+    // quedan como están. El auto-aprobado solo aplica a cuentas sin malla guardada.
     const payload = { ...user, ...form, semester: newSem };
     if (!photoLoadedRef.current) {
       delete payload.photo;
@@ -107,7 +106,7 @@ export default function SettingsView({ user, onUpdate, onMallaReset, malla, seme
     }
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
-  }, [form, user, semInicio, semFin, onMallaReset, onUpdate, onSaveSemestre]);
+  }, [form, user, semInicio, semFin, onUpdate, onSaveSemestre]);
 
   useEffect(() => {
     window.clearTimeout(autoSaveTimer.current);
@@ -341,9 +340,9 @@ export default function SettingsView({ user, onUpdate, onMallaReset, malla, seme
                     Calculado desde corte {form.ingresoCorte} · {SEMESTER_CORTE}
                   </small>
                   {Number(form.semester) !== user.semester && Number(form.semester) >= 1 && Number(form.semester) <= 12 && (
-                    <p className={styles.semesterHint}>
-                       <IconWarning size={13} /> Al guardar, los semestres anteriores al {form.semester} se marcarán como aprobados.
-                    </p>
+                    <small className={styles.hint}>
+                      Al guardar se actualiza tu semestre actual. Los estados de tu malla se quedan como los tengas.
+                    </small>
                   )}
                 </div>
               </div>
