@@ -744,7 +744,7 @@
 }
 
 .confirmModal {
-  background: var(--modal-bg, #1e1a2e);
+  background: var(--modal-bg, #242322);
   border: 1px solid var(--modal-border, rgba(255, 255, 255, 0.1));
   border-radius: var(--radius-md, 14px);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
@@ -773,13 +773,13 @@
   font-family: var(--font-display, "Inter", system-ui, sans-serif);
   font-size: 18px;
   font-weight: 400;
-  color: var(--text, #f4f1fb);
+  color: var(--text, #f4f3ee);
   margin: 0;
 }
 
 .confirmMsg {
   font-size: 13px;
-  color: var(--text-muted, #9b93b8);
+  color: var(--text-muted, #a5a19a);
   line-height: 1.5;
   margin: 0 0 16px;
 }
@@ -812,7 +812,7 @@
 .confirmItemName {
   flex: 1;
   font-size: 13px;
-  color: var(--text, #f4f1fb);
+  color: var(--text, #f4f3ee);
 }
 
 .confirmItemBadge {
@@ -833,7 +833,7 @@
 .confirmCancel {
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  color: var(--text-muted, #9b93b8);
+  color: var(--text-muted, #a5a19a);
   border-radius: var(--radius-sm, 10px);
   padding: 9px 18px;
   min-height: 44px;
@@ -846,7 +846,7 @@
 
 .confirmCancel:hover {
   background: rgba(255, 255, 255, 0.1);
-  color: var(--text, #f4f1fb);
+  color: var(--text, #f4f3ee);
 }
 
 .confirmBtn {

@@ -36,30 +36,36 @@ input, textarea, select,
   --font-display: 'Sentient', Georgia, 'Times New Roman', serif;
   --font-body: 'Overused Grotesk', system-ui, sans-serif;
 
-  --bg:       #0e0a18;
+  /* Negro calido: carbon con un punto de calor (el fondo de Claude), en vez del
+     violeta azulado de antes (#0e0a18). --surface es blanco translucido, asi que
+     el panel compuesto sobre --bg da #242322. */
+  --bg:       #1a1918;
   --surface:  rgba(255,255,255,0.045);
   --surface2: rgba(255,255,255,0.075);
   /* --surface ya compuesto sobre --bg: es el fondo del area de contenido y lo
      que pinta el canvas del navegador (ver html mas abajo). */
-  --bg-content: #191522;
+  --bg-content: #242322;
   --border:   rgba(255,255,255,0.10);
-  --text:     #f4f1fb;
-  --text-muted: #9b93b8;
+  --text:     #f4f3ee;
+  --text-muted: #a5a19a;
 
-  --modal-bg:       #1e1a2e;
-  --modal-bg2:      #262238;
+  --modal-bg:       #242322;
+  --modal-bg2:      #2e2c2a;
   --modal-border:   rgba(255,255,255,0.12);
-  --modal-text:     #f4f1fb;
-  --modal-muted:    #9b93b8;
+  --modal-text:     #f4f3ee;
+  --modal-muted:    #a5a19a;
 
   --accent:     #c8a96e;
   --accent2:    #8b6f3a;
   --accent-rgb: 200,169,110;
 
-  --mesh-opacity: 0.12;
+  --mesh-opacity: 0.10;
   --grain-opacity: 0.05;
-  --mesh-lilac: #8b6fd6;
-  --mesh-violet: #a86ee0;
+  /* Halos del fondo. Eran lila y violeta (#8b6fd6 / #a86ee0): junto al fondo
+     violeta eran la mitad del aspecto "azul" del modo oscuro. Los tres son
+     calidos ahora. */
+  --mesh-warm1: #c99a63;
+  --mesh-warm2: #a86b47;
 
   --glass-blur: 6px;
   --radius-xl: 26px;
@@ -200,23 +206,23 @@ body {
   animation-duration: 84s;
 }
 
-.bg-mesh--lilac {
+.bg-mesh--warm1 {
   right: -20%;
   bottom: -26%;
   width: 64vmax;
   height: 64vmax;
-  background: radial-gradient(circle at center, var(--mesh-lilac) 0%, transparent 58%);
+  background: radial-gradient(circle at center, var(--mesh-warm1) 0%, transparent 58%);
   opacity: var(--mesh-opacity);
   animation-name: bgDriftB;
   animation-duration: 90s;
 }
 
-.bg-mesh--violet {
+.bg-mesh--warm2 {
   top: 34%;
   left: 40%;
   width: 56vmax;
   height: 56vmax;
-  background: radial-gradient(circle at center, var(--mesh-violet) 0%, transparent 56%);
+  background: radial-gradient(circle at center, var(--mesh-warm2) 0%, transparent 56%);
   opacity: var(--mesh-opacity);
   animation-name: bgDriftC;
   animation-duration: 72s;
