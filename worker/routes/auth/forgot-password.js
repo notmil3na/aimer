@@ -1,4 +1,28 @@
-import { envReady, json, readBody, verifyPassword, hashPassword, isColumnMissing, vreq } from "../../lib.js";
+import { envReady, json, readBody, verifyPassword, hashPassword, isColumnMissing, HASH_FALSO, vreq } from "../../lib.js";
+
+// mismas preguntas que src/utils/securityQuestions.js (si cambia la lista hay
+// que cambiarla en los dos sitios).
+const PREGUNTAS = [
+  "¿Cómo se llamaba tu primera mascota?",
+  "¿Cuál es el nombre de tu mejor amigo(a) de la infancia?",
+  "¿En qué ciudad naciste?",
+  "¿Cómo se llamaba tu colegio de primaria?",
+  "¿Cuál es tu comida favorita?",
+  "¿Cuál es el segundo apellido de tu madre?",
+  "¿Cuál es el nombre de tu canción favorita?",
+  "¿Qué deporte practicabas en el colegio?",
+];
+
+// pregunta de relleno para las cuentas que no existen (o que no tienen pregunta
+// configurada): se elige de forma estable a partir del usuario, así que la
+// respuesta no se distingue de la de una cuenta real.
+function preguntaFalsa(username) {
+  let h = 0;
+  for (let i = 0; i < username.length; i++) h = (h * 31 + username.charCodeAt(i)) >>> 0;
+  return PREGUNTAS[h % PREGUNTAS.length];
+}
+
+const NO_COINCIDE = "La respuesta no coincide. Si tu cuenta no tiene pregunta de seguridad, pide ayuda al administrador.";
 
 export async function handler(c) {
   const req = vreq(c);
@@ -14,11 +38,12 @@ export async function handler(c) {
   }
 
   const db = c.env.DB;
+  const uname = String(username).trim();
   let data;
   try {
     data = await db
       .prepare("SELECT username,password,security_question,security_answer FROM users WHERE username = ?")
-      .bind(String(username).trim())
+      .bind(uname)
       .first();
   } catch (error) {
     if (isColumnMissing(error)) {
@@ -26,18 +51,20 @@ export async function handler(c) {
     }
     return json(c, 500, { error: "No se pudo recuperar la cuenta" });
   }
-  if (!data) return json(c, 401, { error: "Usuario no encontrado" });
 
-  if (!data.security_question || !data.security_answer) {
-    return json(c, 400, { error: "Ese usuario no configuró pregunta de seguridad", notConfigured: true });
-  }
+  const tienePregunta = !!(data && data.security_question && data.security_answer);
 
+  // paso 1: mostrar la pregunta. exista o no la cuenta se devuelve una pregunta.
   if (!answer || !newPassword) {
-    return json(c, 200, { question: data.security_question });
+    return json(c, 200, { question: tienePregunta ? data.security_question : preguntaFalsa(uname) });
   }
 
-  const ok = await verifyPassword(String(answer), data.security_answer);
-  if (!ok) return json(c, 400, { error: "La respuesta no coincide" });
+  // paso 2: verificar la respuesta. se verifica siempre (contra un hash de
+  // relleno si la cuenta no existe) para igualar el tiempo de respuesta.
+  const ok = await verifyPassword(String(answer), tienePregunta ? data.security_answer : HASH_FALSO);
+  if (!tienePregunta || !ok) {
+    return json(c, 400, { error: NO_COINCIDE });
+  }
 
   const hashed = await hashPassword(String(newPassword));
   try {

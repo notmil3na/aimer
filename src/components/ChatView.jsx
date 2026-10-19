@@ -11,7 +11,6 @@ import {
   fetchChatOverview, fetchThread, openConversation, sendChatMessage,
   markThreadRead, getChatUploadUrl, pinChat, clearChatThread, deleteChatThread,
 } from "../utils/chatApi";
-import { createConversationStream } from "../utils/chatRealtime";
 import {
   buildAssignmentPayload, buildNotePayload, assignmentToAddable, noteToAddable,
   compressImageForChat, dataUrlToBlob, fmtTimeFull, fmtFecha,
@@ -19,9 +18,9 @@ import {
 } from "../utils/chatShare";
 import { uuid } from "../utils/notasClase";
 
-const POLL_ACTIVE_MS = 15000; // con el broadcast caído: red de seguridad a 15 s
-const POLL_IDLE_MS = 90000;   // con el broadcast conectado: red de seguridad a 90 s
-const POLL_LIST_MS = 60000;   // lista de chats (no tiene broadcast)
+const POLL_MIN_MS = 4000;    // conversación abierta y visible: sondeo rápido
+const POLL_MAX_MS = 30000;   // sin novedades el intervalo se alarga hasta aquí
+const POLL_LIST_MS = 60000;  // lista de chats: red de seguridad a un minuto
 
 // consulta solo con la pestaña visible y refresca al volver a ella
 function usePollingWhileVisible(fn, delay) {
@@ -51,6 +50,66 @@ function usePollingWhileVisible(fn, delay) {
       document.removeEventListener("visibilitychange", onVisibility);
     };
   }, [fn, delay]);
+}
+
+// sondeo de la conversación abierta: solo con la pestaña visible, arranca en
+// 4 s y se va alargando (x1.6, tope 30 s) mientras no llegue nada nuevo, para
+// no gastar requests del plan gratuito en un chat quieto. `fn` devuelve true
+// cuando trajo mensajes nuevos. En segundo plano no se consulta nada: al
+// volver a la pestaña se refresca al instante.
+function useAdaptivePoll(fn, enabled = true) {
+  const resetRef = useRef(null);
+  useEffect(() => {
+    if (!enabled || typeof document === "undefined") return undefined;
+    let timer = null;
+    let delay = POLL_MIN_MS;
+    let stopped = false;
+
+    const schedule = () => {
+      clearTimeout(timer);
+      if (stopped || document.visibilityState !== "visible") return;
+      timer = setTimeout(async () => {
+        let news = false;
+        try {
+          news = await fn();
+        } catch (_) {}
+        if (stopped) return;
+        delay = news ? POLL_MIN_MS : Math.min(POLL_MAX_MS, Math.round(delay * 1.6));
+        schedule();
+      }, delay);
+    };
+
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") {
+        delay = POLL_MIN_MS;
+        Promise.resolve()
+          .then(() => fn())
+          .catch(() => {});
+        schedule();
+      } else {
+        clearTimeout(timer);
+      }
+    };
+
+    resetRef.current = () => {
+      delay = POLL_MIN_MS;
+      schedule();
+    };
+
+    document.addEventListener("visibilitychange", onVisibility);
+    schedule();
+    return () => {
+      stopped = true;
+      clearTimeout(timer);
+      document.removeEventListener("visibilitychange", onVisibility);
+      resetRef.current = null;
+    };
+  }, [fn, enabled]);
+
+  // se llama al enviar algo: el próximo sondeo vuelve a ser rápido
+  return useCallback(() => {
+    if (resetRef.current) resetRef.current();
+  }, []);
 }
 
 
@@ -362,11 +421,10 @@ function ThreadView({ user, friend, onBack, onNotify, onToggleInfo, infoOpen, sh
   const [error, setError] = useState("");
   const [shareOpen, setShareOpen] = useState(false);
   const [addingMsg, setAddingMsg] = useState(null);
-  const [broadcastUp, setBroadcastUp] = useState(false);
 
   const scrollRef = useRef(null);
-  const streamRef = useRef(null);
   const readGuardRef = useRef("");
+  const lastCountRef = useRef(-1);
 
   const scrollToBottom = useCallback(() => {
     requestAnimationFrame(() => {
@@ -376,28 +434,38 @@ function ThreadView({ user, friend, onBack, onNotify, onToggleInfo, infoOpen, sh
   }, []);
 
   const messages = (data && data.messages) || [];
-  const channelToken = (data && data.channel_token) || "";
 
   const notify = useCallback(
     (msg) => { if (onNotify) onNotify(msg); },
     [onNotify]
   );
 
+  // true cuando el sondeo trajo mensajes nuevos (para el intervalo adaptativo)
   const refresh = useCallback(async () => {
-    let res = await fetchThread(other);
-    if (res.needsMigration) { setNeedsMig(true); setLoading(false); return; }
+    const marca = (d) => {
+      const n = ((d && d.messages) || []).length;
+      const news = n !== lastCountRef.current;
+      lastCountRef.current = n;
+      return news;
+    };
+    const res = await fetchThread(other);
+    if (res.needsMigration) { setNeedsMig(true); setLoading(false); return false; }
     if (res.data && res.data.conversation_id) {
       setData(res.data);
       setNeedsMig(false);
       if (onMessages) onMessages(res.data.messages || []);
+      const news = marca(res.data);
+      setLoading(false);
+      return news;
     } else if (res.data && !res.data.conversation_id) {
       const opened = await openConversation(other);
-      if (opened.needsMigration) { setNeedsMig(true); setLoading(false); return; }
-      if (!opened.ok) { setError(opened.error || "No se pudo abrir la conversación"); setLoading(false); return; }
+      if (opened.needsMigration) { setNeedsMig(true); setLoading(false); return false; }
+      if (!opened.ok) { setError(opened.error || "No se pudo abrir la conversación"); setLoading(false); return false; }
       const again = await fetchThread(other);
-      if (again.data) { setData(again.data); if (onMessages) onMessages(again.data.messages || []); }
+      if (again.data) { setData(again.data); if (onMessages) onMessages(again.data.messages || []); marca(again.data); }
     }
     setLoading(false);
+    return true;
   }, [other, fetchThread, openConversation]);
 
   useEffect(() => {
@@ -405,27 +473,13 @@ function ThreadView({ user, friend, onBack, onNotify, onToggleInfo, infoOpen, sh
     setLoading(true);
     setError("");
     setInput("");
+    lastCountRef.current = -1;
     refresh();
   }, [other, refresh]);
 
-  // con el broadcast conectado se consulta cada 90 s; si cae, cada 15 s.
-  // en ambos casos solo con la pestaña visible (y se refresca al volver).
-  usePollingWhileVisible(refresh, broadcastUp ? POLL_IDLE_MS : POLL_ACTIVE_MS);
-
-  useEffect(() => {
-    if (!channelToken) { setBroadcastUp(false); return undefined; }
-    const stream = createConversationStream(
-      channelToken,
-      () => refresh(),
-      (status) => {
-        const up = status === "SUBSCRIBED";
-        setBroadcastUp(up);
-        if (up) refresh();
-      }
-    );
-    streamRef.current = stream;
-    return () => { stream.close(); streamRef.current = null; setBroadcastUp(false); };
-  }, [channelToken, refresh]);
+  // con la conversación abierta se consulta cada 4 s (hasta 30 s si está
+  // quieta) y solo con la pestaña visible; al volver a ella se refresca ya.
+  const bumpPoll = useAdaptivePoll(refresh, true);
 
   useEffect(() => {
     scrollToBottom();
@@ -460,13 +514,6 @@ function ThreadView({ user, friend, onBack, onNotify, onToggleInfo, infoOpen, sh
     markThreadRead(other).then(() => refresh());
   }, [messages, other, refresh]);
 
-  const broadcastNew = (res) => {
-    const tok = res && res.data && res.data.channel_token;
-    if (tok && streamRef.current) {
-      streamRef.current.send({ kind: "new", from: me });
-    }
-  };
-
   const sendText = async () => {
     const texto = input.trim();
     if (!texto || sending) return;
@@ -476,8 +523,8 @@ function ThreadView({ user, friend, onBack, onNotify, onToggleInfo, infoOpen, sh
     if (res.needsMigration) { setNeedsMig(true); setSending(false); return; }
     if (!res.ok) { setError(res.error || "No se pudo enviar el mensaje"); setSending(false); return; }
     setInput("");
-    broadcastNew(res);
     setSending(false);
+    bumpPoll();
     refresh();
   };
 
@@ -525,8 +572,8 @@ function ThreadView({ user, friend, onBack, onNotify, onToggleInfo, infoOpen, sh
     });
     if (res.needsMigration) { setNeedsMig(true); setSending(false); return; }
     if (!res.ok) { setError(res.error || "No se pudo enviar el archivo"); setSending(false); return; }
-    broadcastNew(res);
     setSending(false);
+    bumpPoll();
     refresh();
   };
 
@@ -550,7 +597,7 @@ function ThreadView({ user, friend, onBack, onNotify, onToggleInfo, infoOpen, sh
     if (res.needsMigration) { setNeedsMig(true); setSending(false); return; }
     if (!res.ok) { setError(res.error || "No se pudo enviar"); setSending(false); return; }
     setSending(false);
-    broadcastNew(res);
+    bumpPoll();
     refresh();
   };
 
@@ -820,7 +867,6 @@ export default function ChatView({ user, malla, notasClaseData, asignacionesData
         key: u.username,
         partner: u,
         conversation_id: c ? c.conversation_id : null,
-        channel_token: c ? c.channel_token : "",
         last: c ? c.last : null,
         unread: c ? c.unread || 0 : 0,
         pinned: c ? !!c.pinned : false,

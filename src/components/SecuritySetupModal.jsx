@@ -5,8 +5,8 @@ import styles from "./SecuritySetupModal.module.css";
 import { IconShield, IconClose, IconCheck, IconWarning } from "./Icons";
 import useBodyScrollLock from "../hooks/useBodyScrollLock";
 
-const SECURITY_MIGRATION_SQL = `alter table public.users add column if not exists security_question text;
-alter table public.users add column if not exists security_answer text;`;
+const SECURITY_MIGRATION_SQL = `ALTER TABLE users ADD COLUMN security_question TEXT;
+ALTER TABLE users ADD COLUMN security_answer TEXT;`;
 
 const SET_FLAG = "malla_security_set";
 const DISMISSED_FLAG = "malla_security_dismissed";
@@ -62,7 +62,7 @@ export default function SecuritySetupModal() {
     } catch (e) {
       setBusy(false);
       if (e.needsMigration) {
-        setErr("Falta la migración en Supabase.");
+        setErr("Falta aplicar la migración de seguridad en el servidor.");
         setMode("migration");
       } else {
         setErr(e.message || "No se pudo guardar");

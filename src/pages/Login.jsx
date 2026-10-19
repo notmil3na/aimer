@@ -83,11 +83,7 @@ function ForgotPasswordModal({ onClose }) {
       }
     } catch (err) {
       setLoading(false);
-      if (err.notConfigured) {
-        setError("Tu cuenta no tiene pregunta de seguridad configurada. Contacta al administrador.");
-      } else {
-        setError(err.message || "Usuario no encontrado");
-      }
+      setError(err.message || "No se pudo recuperar la cuenta");
     }
   };
 

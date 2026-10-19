@@ -177,6 +177,11 @@ export function isColumnMissing(err) {
   );
 }
 
+// hash de relleno: cuando la cuenta no existe se verifica igual contra este
+// valor, para gastar el mismo cpu que un login real. si no, el tiempo de
+// respuesta delata qué usuarios están registrados.
+export const HASH_FALSO = `scrypt:${"0".repeat(31)}f:${"0".repeat(128)}`;
+
 export function publicUser(row) {
   if (!row) return null;
   // theme_colors vive en la base como texto json: si se devuelve tal cual, el

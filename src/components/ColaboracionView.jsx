@@ -20,6 +20,9 @@ import { horaIdx, toViewHora } from "../utils/horarioHelpers.js";
 
 const STATUS_LABEL = { libre: "Libre en común", yo: "Solo tú", amigo: "Solo tu amigo", ambos: "Ambos ocupados" };
 
+// la búsqueda de personas necesita al menos 2 caracteres (igual que el worker)
+const BUSQUEDA_MIN = 2;
+
 const NOW_DIA = { 0: "D", 1: "L", 2: "M", 3: "X", 4: "J", 5: "V", 6: "S" };
 
 function currentHourIdx(now) {
@@ -578,6 +581,8 @@ export default function ColaboracionView({
       }).catch(() => {});
       return;
     }
+    // con menos de 2 caracteres no se consulta al servidor (ni se gasta request)
+    if (q.length < BUSQUEDA_MIN) { setSearching(false); return; }
     let active = true;
     setSearching(true);
     const timer = setTimeout(async () => {
@@ -643,7 +648,8 @@ export default function ColaboracionView({
   const outgoing = userList.filter((u) => isOutgoing(u.username));
 
   const q = query.trim();
-  const searchResults = q
+  const busquedaCorta = q.length > 0 && q.length < BUSQUEDA_MIN;
+  const searchResults = q && !busquedaCorta
     ? (users || []).filter((u) => u.username !== user.username)
     : [];
 
@@ -744,7 +750,11 @@ export default function ColaboracionView({
             <p className={styles.usersLoading}><span className={styles.loadingSpinner} /> Buscando usuarios…</p>
           )}
 
-          {query && searchResults.length === 0 && (
+          {query && busquedaCorta && (
+            <p className={styles.searchEmpty}>Escribe al menos {BUSQUEDA_MIN} caracteres.</p>
+          )}
+
+          {query && !busquedaCorta && searchResults.length === 0 && (
             <p className={styles.searchEmpty}>Sin resultados para <strong>"{query}"</strong>.</p>
           )}
 
@@ -756,9 +766,11 @@ export default function ColaboracionView({
                   <div className={styles.personInfo}>
                     <p className={styles.personName}>{u.name || u.username}</p>
                     <p className={styles.personUser}>@{u.username}</p>
-                    <p className={styles.personMeta}>
-                      {u.career || "—"}{u.semester ? ` · Sem. ${u.semester}` : ""}
-                    </p>
+                    {(u.career || u.semester) ? (
+                      <p className={styles.personMeta}>
+                        {u.career || "—"}{u.semester ? ` · Sem. ${u.semester}` : ""}
+                      </p>
+                    ) : null}
                   </div>
                   <div className={styles.personActions}>
                     {isFriend(u.username) ? (
@@ -806,9 +818,11 @@ export default function ColaboracionView({
                   <div className={styles.personInfo}>
                     <p className={styles.personName}>{u.name || u.username}</p>
                     <p className={styles.personUser}>@{u.username}</p>
-                    <p className={styles.personMeta}>
-                      {u.career || "—"}{u.semester ? ` · Sem. ${u.semester}` : ""}
-                    </p>
+                    {(u.career || u.semester) ? (
+                      <p className={styles.personMeta}>
+                        {u.career || "—"}{u.semester ? ` · Sem. ${u.semester}` : ""}
+                      </p>
+                    ) : null}
                   </div>
                   <div className={styles.personActions}>
                     <button className={styles.btnPrimary} onClick={() => handleAccept(u.username)}>
@@ -849,9 +863,11 @@ export default function ColaboracionView({
                   <div className={styles.personInfo}>
                     <p className={styles.personName}>{u.name || u.username}</p>
                     <p className={styles.personUser}>@{u.username}</p>
-                    <p className={styles.personMeta}>
-                      {u.career || "—"}{u.semester ? ` · Sem. ${u.semester}` : ""}
-                    </p>
+                    {(u.career || u.semester) ? (
+                      <p className={styles.personMeta}>
+                        {u.career || "—"}{u.semester ? ` · Sem. ${u.semester}` : ""}
+                      </p>
+                    ) : null}
                   </div>
                   <div className={styles.personActions}>
                     <button className={styles.btnPrimary} onClick={() => handleCompare(u.username)}>

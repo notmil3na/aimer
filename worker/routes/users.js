@@ -3,6 +3,16 @@ import { jstringify, all, unwrapJSON } from "../db.js";
 
 const USERNAME_RE = /^[a-zA-Z0-9._-]{2,20}$/;
 
+// la búsqueda necesita al menos 2 caracteres, devuelve 20 resultados como mucho
+// y sin lista de usuarios (sin `q`) solo se devuelven amigos y solicitudes.
+const BUSQUEDA_MIN = 2;
+const LIMITE_BUSQUEDA = 20;
+const LIMITE_LISTA = 200;
+
+function limpio(rows) {
+  return (rows || []).map(({ photo, ...rest }) => ({ ...rest, hasPhoto: !!photo }));
+}
+
 export async function handler(c) {
   const req = vreq(c);
   if (!envReady(c.env)) return json(c, 500, { error: "Configuración del servidor incompleta" });
@@ -24,21 +34,34 @@ export async function handler(c) {
       .replace(/[^\p{L}\p{N} ._@-]/gu, "")
       .trim()
       .slice(0, 50);
-    let data = [];
+
     if (q) {
+      if (q.length < BUSQUEDA_MIN) return json(c, 200, { data: [], tooShort: true });
       const like = `%${q}%`;
       const r = await all(
         db
-          .prepare("SELECT username,name,university,career,semester,ingreso_corte,photo FROM users WHERE name LIKE ? OR username LIKE ? ORDER BY name")
-          .bind(like, like)
+          .prepare(
+            "SELECT username,name,photo FROM users WHERE (name LIKE ? OR username LIKE ?) AND username <> ? ORDER BY name LIMIT ?"
+          )
+          .bind(like, like, me.username, LIMITE_BUSQUEDA)
       );
-      data = r.data;
-    } else {
-      const r = await all(db.prepare("SELECT username,name,university,career,semester,ingreso_corte,photo FROM users ORDER BY name"));
-      data = r.data;
+      return json(c, 200, { data: limpio(r.data) });
     }
-    const clean = (data || []).map(({ photo, ...rest }) => ({ ...rest, hasPhoto: !!photo }));
-    return json(c, 200, { data: clean });
+
+    const r = await all(
+      db
+        .prepare(
+          `SELECT u.username, u.name, u.university, u.career, u.semester, u.photo
+             FROM users u
+             JOIN friendships f
+               ON (f.user_username = ? AND f.friend_username = u.username)
+               OR (f.friend_username = ? AND f.user_username = u.username)
+            ORDER BY u.name
+            LIMIT ?`
+        )
+        .bind(me.username, me.username, LIMITE_LISTA)
+    );
+    return json(c, 200, { data: limpio(r.data) });
   }
 
   if (req.method === "POST") {

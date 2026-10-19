@@ -1,4 +1,4 @@
-import { envReady, json, readBody, verifyPassword, hashPassword, signToken, publicUser, vreq } from "../../lib.js";
+import { envReady, json, readBody, verifyPassword, hashPassword, signToken, publicUser, HASH_FALSO, vreq } from "../../lib.js";
 import { jparse } from "../../db.js";
 
 export async function handler(c) {
@@ -12,10 +12,11 @@ export async function handler(c) {
   const uname = String(username).trim();
   const db = c.env.DB;
   const user = await db.prepare("SELECT * FROM users WHERE username = ?").bind(uname).first();
-  if (!user) return json(c, 401, { error: "Usuario no encontrado" });
 
-  const ok = await verifyPassword(String(password), user.password);
-  if (!ok) return json(c, 401, { error: "Contraseña incorrecta" });
+  // se verifica siempre, contra un hash de relleno si la cuenta no existe: así
+  // el tiempo de respuesta no delata qué usuarios están registrados.
+  const ok = await verifyPassword(String(password), user ? user.password : HASH_FALSO);
+  if (!user || !ok) return json(c, 401, { error: "Usuario o contraseña incorrectos" });
 
   if (typeof user.password === "string" && !user.password.startsWith("scrypt:")) {
     const hashed = await hashPassword(String(password));
