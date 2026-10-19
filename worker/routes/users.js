@@ -1,5 +1,5 @@
 import { envReady, isColumnMissing, json, readBody, requireUser, toUserRow, vreq } from "../lib.js";
-import { jstringify, all } from "../db.js";
+import { jstringify, all, unwrapJSON } from "../db.js";
 
 const USERNAME_RE = /^[a-zA-Z0-9._-]{2,20}$/;
 
@@ -47,7 +47,12 @@ export async function handler(c) {
     const body = await readBody(c);
     const patch = toUserRow(body);
     if (Object.keys(patch).length === 0) return json(c, 400, { error: "Sin cambios" });
-    if (patch.theme_colors) patch.theme_colors = jstringify(patch.theme_colors);
+    if (patch.theme_colors !== undefined && patch.theme_colors !== null) {
+      // el cliente puede mandar el objeto o el mismo texto que recibió; se
+      // desenvuelve siempre para no ir acumulando niveles de escapado.
+      const colors = unwrapJSON(patch.theme_colors);
+      patch.theme_colors = colors && typeof colors === "object" ? jstringify(colors) : null;
+    }
     const keys = Object.keys(patch);
     const sets = keys.map((k) => `${k} = ?`).join(", ");
     const vals = keys.map((k) => patch[k]);

@@ -21,10 +21,30 @@ const MALLA_PRESETS = [
 ];
 
 function isLightColor(hex) {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
+  if (typeof hex !== "string") return false;
+  const clean = hex.replace("#", "");
+  if (clean.length < 6) return false;
+  const r = parseInt(clean.slice(0, 2), 16) || 0;
+  const g = parseInt(clean.slice(2, 4), 16) || 0;
+  const b = parseInt(clean.slice(4, 6), 16) || 0;
   return (r * 299 + g * 587 + b * 114) / 1000 > 160;
+}
+
+// los colores de la malla vienen de la base como texto json: si llega el texto
+// (versiones anteriores del worker lo devolvían sin parsear) se desenvuelve y se
+// completa con los colores por defecto, para que nunca falte una clave.
+function toColorMap(raw) {
+  let value = raw;
+  for (let i = 0; i < 3 && typeof value === "string"; i++) {
+    try {
+      value = JSON.parse(value);
+    } catch {
+      value = null;
+      break;
+    }
+  }
+  const colors = value && typeof value === "object" ? value : {};
+  return { ...MALLA_PRESETS[0].colors, ...colors };
 }
 
 function toISO(d) {
@@ -133,7 +153,7 @@ export default function SettingsView({ user, onUpdate, onMallaReset, malla, seme
   const initial = form.name ? form.name[0].toUpperCase() : "?";
   const availableCareers = form.university ? (UNIVERSITIES[form.university] || []) : [];
 
-  const [colors, setColors]             = useState(user.themeColors || MALLA_PRESETS[0].colors);
+  const [colors, setColors]             = useState(() => toColorMap(user.themeColors));
   const [borderRadius, setBorderRadius] = useState(user.borderRadius ?? 12);
   const [fontScale, setFontScale]       = useState(user.fontScale ?? 1);
   const [appMode, setAppMode]           = useState(user.appMode || "light");

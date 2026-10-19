@@ -33,6 +33,18 @@ export function jstringify(obj) {
   }
 }
 
+// desenvuelve un valor guardado como texto json, incluso si se codificó dos
+// veces (pasa cuando se vuelve a guardar un texto que ya venía del servidor).
+export function unwrapJSON(value) {
+  let v = value;
+  for (let i = 0; i < 3 && typeof v === "string"; i++) {
+    const next = jparse(v);
+    if (next === null) break;
+    v = next;
+  }
+  return v;
+}
+
 // acepta tanto un `D1PreparedStatement` (sin ejecutar) como una promesa ya lanzada.
 // devuelve el primer resultado
 export async function first(q) {

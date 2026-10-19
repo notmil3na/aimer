@@ -2,6 +2,7 @@
 // no hay process.env (las variables llegan en `c.env`), no hay req/res de node
 // (usamos el contexto de hono) y el jwt usa web crypto.
 import { scrypt, randomBytes, timingSafeEqual } from "node:crypto";
+import { unwrapJSON } from "./db.js";
 
 export function envReady(env) {
   return !!(env.DB && env.SESSION_SECRET);
@@ -178,6 +179,10 @@ export function isColumnMissing(err) {
 
 export function publicUser(row) {
   if (!row) return null;
+  // theme_colors vive en la base como texto json: si se devuelve tal cual, el
+  // frontend recibe un string y el selector de Apariencia revienta al leer
+  // colors.cursando (undefined.slice).
+  const themeColors = unwrapJSON(row.theme_colors);
   return {
     username: row.username,
     name: row.name ?? "",
@@ -189,7 +194,7 @@ export function publicUser(row) {
     hasPhoto: !!row.photo,
     appMode: row.app_mode ?? "dark",
     appTheme: row.app_theme ?? "ambar",
-    themeColors: row.theme_colors ?? null,
+    themeColors: themeColors && typeof themeColors === "object" ? themeColors : null,
     borderRadius: row.border_radius ?? 12,
     fontScale: row.font_scale ?? 1,
     fontBody: row.font_body ?? "DM Sans",
