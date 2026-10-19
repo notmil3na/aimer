@@ -1,6 +1,9 @@
 // Plan de estudios 2022-1 de Ingeniería de Sistemas (Universidad del Magdalena).
-// Se ofrece como vista previa de solo lectura a quienes ingresaron en ese corte:
-// la malla guardada del estudiante no cambia (ver MallaView).
+// Es el plan que le corresponde a quienes ingresaron en ese corte: se muestra
+// por defecto y se edita como cualquier malla. Para el resto del programa la app
+// sigue usando el plan actual (src/data/malla.js).
+
+import { MALLA_SISTEMAS } from "./malla.js";
 
 export const PLAN_2022 = {
   label: "Plan 2022-1",
@@ -129,18 +132,18 @@ export const MALLA_SISTEMAS_2022 = [
   },
 ];
 
-// Equivalencias por nombre con el plan que usa hoy la app (la clave es el nombre
-// en el plan 2022-1). Sirven para traer el avance del estudiante a la vista previa.
-const EQUIVALENCIAS = {
-  "MECANICA": "FISICA MECANICA",
-  "ESTADISTICA I": "PROBABILIDAD Y ESTADISTICA",
-  "ESTADISTICA II": "ESTADISTICA INFERENCIAL",
-  "ETICA PROFESIONAL": "ETICA EN INGENIERIA DE SISTEMAS",
-  "MATEMATICAS ESPECIALES": "MATEMATICAS AVANZADAS",
-  "INVESTIGACION DE OPERACIONES": "INVESTIGACION DE OPERACIONES DETERMINISTICAS",
-  "DISENO ORGANIZACIONAL TI": "DISENO ORGANIZACIONAL DE TI",
-  "INGENIERIA DEL SOFTWARE": "INGENIERIA DE SOFTWARE",
-};
+// Materias equivalentes entre el plan 2022-1 y el plan actual (el orden del par
+// da igual). Sirven para llevar el avance de un plan al otro por nombre.
+const PARES_EQUIVALENTES = [
+  ["MECANICA", "FISICA MECANICA"],
+  ["ESTADISTICA I", "PROBABILIDAD Y ESTADISTICA"],
+  ["ESTADISTICA II", "ESTADISTICA INFERENCIAL"],
+  ["ETICA PROFESIONAL", "ETICA EN INGENIERIA DE SISTEMAS"],
+  ["MATEMATICAS ESPECIALES", "MATEMATICAS AVANZADAS"],
+  ["INVESTIGACION DE OPERACIONES", "INVESTIGACION DE OPERACIONES DETERMINISTICAS"],
+  ["DISENO ORGANIZACIONAL TI", "DISENO ORGANIZACIONAL DE TI"],
+  ["INGENIERIA DEL SOFTWARE", "INGENIERIA DE SOFTWARE"],
+];
 
 export function normalizarNombre(nombre) {
   return String(nombre || "")
@@ -151,23 +154,86 @@ export function normalizarNombre(nombre) {
     .toUpperCase();
 }
 
-// Copia el plan 2022-1 con los estados que el estudiante ya tiene en su malla,
-// emparejando por nombre (con equivalencias). Lo que no tiene equivalente queda
-// como faltante. No modifica el plan original.
-export function aplicarAvance(plan, mallaActual) {
+const GRUPOS = new Map();
+PARES_EQUIVALENTES.forEach(([a, b], i) => {
+  GRUPOS.set(normalizarNombre(a), `equivalente-${i}`);
+  GRUPOS.set(normalizarNombre(b), `equivalente-${i}`);
+});
+
+// Clave con la que se empareja una materia entre planes: su nombre normalizado,
+// o el grupo si es una equivalencia conocida.
+export function claveEstado(nombre) {
+  const normalizado = normalizarNombre(nombre);
+  return GRUPOS.get(normalizado) || normalizado;
+}
+
+// --- Traducción de los datos guardados con los ids del plan actual ---
+// Quien ingresó en 2022-1 usó hasta ahora el plan actual, así que sus notas,
+// materias cursando, horario y asignaciones están guardados con esos ids. Al
+// pasar al plan 2022-1 se traducen por materia equivalente para no perderlos.
+
+const NOMBRE_POR_ID_ACTUAL = new Map(
+  MALLA_SISTEMAS.flatMap((s) => s.materias).map((m) => [m.id, m.nombre])
+);
+const ID_2022_POR_CLAVE = new Map(
+  MALLA_SISTEMAS_2022.flatMap((s) => s.materias).map((m) => [claveEstado(m.nombre), m.id])
+);
+
+// id del plan actual -> id del plan 2022-1, para la misma materia. Un id que ya
+// es del plan 2022-1 (o se desconoce) se devuelve igual.
+export function idEnPlan2022(id) {
+  const nombre = NOMBRE_POR_ID_ACTUAL.get(String(id));
+  if (!nombre) return id;
+  return ID_2022_POR_CLAVE.get(claveEstado(nombre)) || id;
+}
+
+// Columnas guardadas como mapa id de materia -> datos.
+const COLUMNAS_POR_MATERIA = ["notas", "cursando", "notasclase"];
+
+function traducirCamposMateria(valor) {
+  if (Array.isArray(valor)) return valor.map(traducirCamposMateria);
+  if (valor && typeof valor === "object") {
+    return Object.fromEntries(Object.entries(valor).map(([k, v]) => [
+      k,
+      k === "materiaId" && typeof v === "string" ? idEnPlan2022(v) : traducirCamposMateria(v),
+    ]));
+  }
+  return valor;
+}
+
+// Copia los datos guardados con los ids de materia traducidos al plan 2022-1.
+export function traducirDatosGuardados(datos) {
+  if (!datos || typeof datos !== "object") return datos;
+  const out = { ...datos };
+  COLUMNAS_POR_MATERIA.forEach((col) => {
+    const valor = out[col];
+    if (valor && typeof valor === "object" && !Array.isArray(valor)) {
+      out[col] = Object.fromEntries(
+        Object.entries(valor).map(([k, v]) => [idEnPlan2022(k), v])
+      );
+    }
+  });
+  ["horario", "plan", "calendario", "asignaciones"].forEach((col) => {
+    if (out[col]) out[col] = traducirCamposMateria(out[col]);
+  });
+  return out;
+}
+
+// Copia un plan con los estados que hay en otra malla, emparejando por nombre
+// (con equivalencias). Sirve en los dos sentidos (2022-1 -> actual y al revés).
+// Lo que no tiene equivalente se queda como está. No modifica el plan original.
+export function aplicarAvance(plan, mallaOrigen) {
   const estados = new Map();
-  (mallaActual || []).forEach((sem) => {
+  (mallaOrigen || []).forEach((sem) => {
     (sem.materias || []).forEach((m) => {
-      estados.set(normalizarNombre(m.nombre), m.estado || "faltante");
+      estados.set(claveEstado(m.nombre), m.estado || "faltante");
     });
   });
 
   return plan.map((sem) => ({
     ...sem,
     materias: sem.materias.map((m) => {
-      const clave = normalizarNombre(m.nombre);
-      const alias = EQUIVALENCIAS[clave];
-      const estado = estados.get(clave) || (alias ? estados.get(normalizarNombre(alias)) : null);
+      const estado = estados.get(claveEstado(m.nombre));
       return estado ? { ...m, estado } : { ...m };
     }),
   }));

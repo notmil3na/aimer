@@ -23,7 +23,7 @@ function applyAutoApprove(malla, currentSemester) {
   }));
 }
 
-export default function MallaView({ malla: initialMalla, notas, onSave, user, onNotify, semestre, planAlternativo }) {
+export default function MallaView({ malla: initialMalla, notas, onSave, user, onNotify, semestre, planAlternativo, etiquetaPlan }) {
   const [malla, setMalla] = useState(() =>
     applyAutoApprove(initialMalla || MALLA, user.semester || 1)
   );
@@ -267,9 +267,9 @@ export default function MallaView({ malla: initialMalla, notas, onSave, user, on
   const handleDownload = () => {
     const content = buildMallaTxt({ user, malla: vistaMalla, notas: notas || {} });
     const safeName = (user.username || "estudiante").replace(/[^\w.-]/g, "_");
-    const suffix = enPreviewActivo ? "_plan-2022-1" : "";
+    const suffix = enPreviewActivo ? `_${planAlternativo.slug}` : "";
     downloadTxt(`malla_${safeName}${suffix}.txt`, content);
-    onNotify?.(enPreviewActivo ? "Plan 2022-1 descargado" : "Malla descargada");
+    onNotify?.(enPreviewActivo ? `Plan ${planAlternativo.label} descargado` : "Malla descargada");
   };
   const semester = useMemo(() => getSemesterCountdown(semestre), [semestre]);
   const semDates = useMemo(() => semesterDatesFor(semestre), [semestre]);
@@ -290,7 +290,8 @@ export default function MallaView({ malla: initialMalla, notas, onSave, user, on
           <div>
             <h2 className={styles.title}>
               Malla <em>Curricular</em>
-              {enPreviewActivo && <span className={styles.planChip}>{planAlternativo.label}</span>}
+              {(enPreviewActivo ? planAlternativo.titulo : etiquetaPlan) &&
+                <span className={styles.planChip}>{enPreviewActivo ? planAlternativo.titulo : etiquetaPlan}</span>}
             </h2>
             <p className={styles.subtitle}>{user.career} · {user.university}</p>
           </div>

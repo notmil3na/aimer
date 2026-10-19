@@ -5,7 +5,7 @@ import NotificationBell from "../components/NotificationBell";
 import SecuritySetupModal from "../components/SecuritySetupModal";
 import useReminders from "../hooks/useReminders";
 import { getMallaByCareer } from "../data/malla.js";
-import { MALLA_SISTEMAS_2022, aplicaPlan2022 } from "../data/malla2022.js";
+import { MALLA_SISTEMAS_2022, aplicaPlan2022, claveEstado, traducirDatosGuardados } from "../data/malla2022.js";
 import { api, getSessionData, updateSessionData } from "../api";
 import { getPendingSaves, hasPendingSaves, queueSave, clearPendingSave } from "../utils/offlineQueue.js";
 import styles from "./Dashboard.module.css";
@@ -59,15 +59,16 @@ function autoApply(malla, currentSemester) {
   }));
 }
 
-function mergeMallaWithBase(baseMalla, savedMalla) {
+function mergeMallaWithBase(baseMalla, savedMalla, porNombre = false) {
   if (!savedMalla) return baseMalla;
+  const clave = (m) => (porNombre ? claveEstado(m.nombre) : m.id);
   const savedById = new Map(
-    savedMalla.flatMap((sem) => sem.materias).map((m) => [m.id, m])
+    savedMalla.flatMap((sem) => sem.materias).map((m) => [clave(m), m])
   );
   return baseMalla.map((sem) => ({
     ...sem,
     materias: sem.materias.map((baseMat) => {
-      const savedMat = savedById.get(baseMat.id);
+      const savedMat = savedById.get(clave(baseMat));
       return savedMat
         ? { ...baseMat, estado: savedMat.estado ?? baseMat.estado }
         : baseMat;
@@ -168,26 +169,38 @@ export default function Dashboard({ user, onLogout, onUpdateUser }) {
     }, options?.duration || 4000);
   }, []);
 
-  const baseMalla = useMemo(() => getMallaByCareer(user.career), [user.career]);
+  // Plan 2022-1: para quienes ingresaron en ese corte en Ingeniería de Sistemas
+  // es su plan (se edita y se guarda como cualquier malla). El plan actual, el
+  // que aplica a todos, queda disponible como vista previa.
+  const esPlan2022 = useMemo(() => aplicaPlan2022(user), [user.career, user.ingresoCorte]);
+  const baseMalla = useMemo(
+    () => (esPlan2022 ? MALLA_SISTEMAS_2022 : getMallaByCareer(user.career)),
+    [esPlan2022, user.career]
+  );
   const defaultMalla = useMemo(() => autoApply(baseMalla, user.semester || 1), [baseMalla, user.semester]);
 
-  // Plan 2022-1: solo para quienes ingresaron en ese corte en Ingeniería de
-  // Sistemas. Llega a la malla como vista previa; su malla guardada no cambia.
   const planAlternativo = useMemo(
-    () => (aplicaPlan2022(user)
-      ? { label: "plan 2022-1", malla: MALLA_SISTEMAS_2022 }
+    () => (esPlan2022
+      ? { label: "plan actual", titulo: "Plan actual", slug: "plan-actual", malla: getMallaByCareer(user.career) }
       : null),
-    [user.career, user.ingresoCorte]
+    [esPlan2022, user.career]
   );
 
-  const [malla, setMalla] = useState(() => (cached?.malla ? mergeMallaWithBase(defaultMalla, cached.malla) : defaultMalla));
-  const [notas, setNotas] = useState(cached?.notas ?? {});
-  const [cursandoData, setCursandoData] = useState(cached?.cursando ?? {});
-  const [horarioData, setHorarioData] = useState(cached?.horario ?? { dias: ["L", "M", "X", "J", "V"], clases: [] });
-  const [planData, setPlanData] = useState(cached?.plan ?? null);
-  const [calendarioData, setCalendarioData] = useState(cached?.calendario ?? { eventos: [] });
-  const [asignacionesData, setAsignacionesData] = useState(cached?.asignaciones ?? { items: [] });
-  const [notasClaseData, setNotasClaseData] = useState(cached?.notasclase ?? {});
+  // Los datos guardados vienen con los ids del plan actual; para quien pasa al
+  // plan 2022-1 se traducen por materia equivalente (notas, cursando, horario...).
+  const guardado = useMemo(
+    () => (esPlan2022 ? traducirDatosGuardados(cached) : cached),
+    [esPlan2022, cached]
+  );
+
+  const [malla, setMalla] = useState(() => (guardado?.malla ? mergeMallaWithBase(defaultMalla, guardado.malla, esPlan2022) : defaultMalla));
+  const [notas, setNotas] = useState(guardado?.notas ?? {});
+  const [cursandoData, setCursandoData] = useState(guardado?.cursando ?? {});
+  const [horarioData, setHorarioData] = useState(guardado?.horario ?? { dias: ["L", "M", "X", "J", "V"], clases: [] });
+  const [planData, setPlanData] = useState(guardado?.plan ?? null);
+  const [calendarioData, setCalendarioData] = useState(guardado?.calendario ?? { eventos: [] });
+  const [asignacionesData, setAsignacionesData] = useState(guardado?.asignaciones ?? { items: [] });
+  const [notasClaseData, setNotasClaseData] = useState(guardado?.notasclase ?? {});
 
   const persistColumn = useCallback(async (column, data, applyLocal) => {
     applyLocal(data);
@@ -249,24 +262,25 @@ export default function Dashboard({ user, onLogout, onUpdateUser }) {
     async function load() {
       const data = await loadUserData();
       if (data) {
+        const guardadoApi = esPlan2022 ? traducirDatosGuardados(data) : data;
         updateSessionData({
-          ...(data.malla && { malla: data.malla }),
-          ...(data.notas && { notas: data.notas }),
-          ...(data.cursando && { cursando: data.cursando }),
-          ...(data.horario && { horario: data.horario }),
-          ...(data.plan && { plan: data.plan }),
-          ...(data.calendario && { calendario: data.calendario }),
-          ...(data.asignaciones && { asignaciones: data.asignaciones }),
-          ...(data.notasclase && { notasclase: data.notasclase }),
+          ...(guardadoApi.malla && { malla: guardadoApi.malla }),
+          ...(guardadoApi.notas && { notas: guardadoApi.notas }),
+          ...(guardadoApi.cursando && { cursando: guardadoApi.cursando }),
+          ...(guardadoApi.horario && { horario: guardadoApi.horario }),
+          ...(guardadoApi.plan && { plan: guardadoApi.plan }),
+          ...(guardadoApi.calendario && { calendario: guardadoApi.calendario }),
+          ...(guardadoApi.asignaciones && { asignaciones: guardadoApi.asignaciones }),
+          ...(guardadoApi.notasclase && { notasclase: guardadoApi.notasclase }),
         });
-        if (data.malla) setMalla(mergeMallaWithBase(defaultMalla, data.malla));
-        if (data.notas) setNotas(data.notas);
-        if (data.cursando) setCursandoData(data.cursando);
-        if (data.horario) setHorarioData(data.horario);
-        if (data.plan) setPlanData(data.plan);
-        if (data.calendario) setCalendarioData(data.calendario);
-        if (data.asignaciones) setAsignacionesData(data.asignaciones);
-        if (data.notasclase) setNotasClaseData(data.notasclase);
+        if (guardadoApi.malla) setMalla(mergeMallaWithBase(defaultMalla, guardadoApi.malla, esPlan2022));
+        if (guardadoApi.notas) setNotas(guardadoApi.notas);
+        if (guardadoApi.cursando) setCursandoData(guardadoApi.cursando);
+        if (guardadoApi.horario) setHorarioData(guardadoApi.horario);
+        if (guardadoApi.plan) setPlanData(guardadoApi.plan);
+        if (guardadoApi.calendario) setCalendarioData(guardadoApi.calendario);
+        if (guardadoApi.asignaciones) setAsignacionesData(guardadoApi.asignaciones);
+        if (guardadoApi.notasclase) setNotasClaseData(guardadoApi.notasclase);
       }
       setLoaded(true);
     }
@@ -474,6 +488,7 @@ export default function Dashboard({ user, onLogout, onUpdateUser }) {
                 onNotify={notify}
                 semestre={semestre}
                 planAlternativo={planAlternativo}
+                etiquetaPlan={esPlan2022 ? "Plan 2022-1" : null}
               />
             )}
             {tab === "notas" && (
