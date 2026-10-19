@@ -5,6 +5,7 @@ import NotificationBell from "../components/NotificationBell";
 import SecuritySetupModal from "../components/SecuritySetupModal";
 import useReminders from "../hooks/useReminders";
 import { getMallaByCareer } from "../data/malla.js";
+import { MALLA_SISTEMAS_2022, aplicaPlan2022 } from "../data/malla2022.js";
 import { api, getSessionData, updateSessionData } from "../api";
 import { getPendingSaves, hasPendingSaves, queueSave, clearPendingSave } from "../utils/offlineQueue.js";
 import styles from "./Dashboard.module.css";
@@ -169,6 +170,15 @@ export default function Dashboard({ user, onLogout, onUpdateUser }) {
 
   const baseMalla = useMemo(() => getMallaByCareer(user.career), [user.career]);
   const defaultMalla = useMemo(() => autoApply(baseMalla, user.semester || 1), [baseMalla, user.semester]);
+
+  // Plan 2022-1: solo para quienes ingresaron en ese corte en Ingeniería de
+  // Sistemas. Llega a la malla como vista previa; su malla guardada no cambia.
+  const planAlternativo = useMemo(
+    () => (aplicaPlan2022(user)
+      ? { label: "plan 2022-1", malla: MALLA_SISTEMAS_2022 }
+      : null),
+    [user.career, user.ingresoCorte]
+  );
 
   const [malla, setMalla] = useState(() => (cached?.malla ? mergeMallaWithBase(defaultMalla, cached.malla) : defaultMalla));
   const [notas, setNotas] = useState(cached?.notas ?? {});
@@ -463,6 +473,7 @@ export default function Dashboard({ user, onLogout, onUpdateUser }) {
                 user={user}
                 onNotify={notify}
                 semestre={semestre}
+                planAlternativo={planAlternativo}
               />
             )}
             {tab === "notas" && (

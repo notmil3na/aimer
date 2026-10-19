@@ -57,6 +57,11 @@ function MateriaCardInner({
               <IconMalla size={10} /> {materia.prereqs.length} prereq{materia.prereqs.length > 1 ? "s" : ""}
             </div>
           )}
+          {materia.prereqsPct ? (
+            <div className={styles.prereqBadge}>
+              <IconMalla size={10} /> {materia.prereqsPct}% plan
+            </div>
+          ) : null}
         </div>
       </div>
     </div>

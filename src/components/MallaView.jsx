@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { MALLA, ESTADOS } from "../data/malla.js";
+import { aplicarAvance } from "../data/malla2022.js";
 import { getSemesterCountdown, semesterCorteFor, semesterDatesFor } from "../utils/semesterCountdown.js";
 import { canEnrollMateria } from "../utils/gradeHelpers.js";
 import { buildMallaTxt, downloadTxt } from "../utils/mallaExport.js";
@@ -22,10 +23,11 @@ function applyAutoApprove(malla, currentSemester) {
   }));
 }
 
-export default function MallaView({ malla: initialMalla, notas, onSave, user, onNotify, semestre }) {
+export default function MallaView({ malla: initialMalla, notas, onSave, user, onNotify, semestre, planAlternativo }) {
   const [malla, setMalla] = useState(() =>
     applyAutoApprove(initialMalla || MALLA, user.semester || 1)
   );
+  const [enPreview, setEnPreview]             = useState(false);
   const [selected, setSelected]               = useState(null);
   const [highlightedPrereqs, setHighlightedPrereqs] = useState([]);
   const [highlightedUnlocks, setHighlightedUnlocks] = useState([]);
@@ -55,9 +57,15 @@ export default function MallaView({ malla: initialMalla, notas, onSave, user, on
   const br     = user.borderRadius ?? 12;
   const fs     = user.fontScale ?? 1;
 
-  const allMaterias = useMemo(() => malla.flatMap((s) => s.materias), [malla]);
+  const enPreviewActivo = enPreview && !!planAlternativo;
+  const vistaMalla = useMemo(
+    () => (enPreviewActivo ? aplicarAvance(planAlternativo.malla, malla) : malla),
+    [enPreviewActivo, planAlternativo, malla]
+  );
+
+  const allMaterias = useMemo(() => vistaMalla.flatMap((s) => s.materias), [vistaMalla]);
   const materiaById = useMemo(() => new Map(allMaterias.map(m => [m.id, m])), [allMaterias]);
-  const obligatorias = useMemo(() => getObligatorias(malla), [malla]);
+  const obligatorias = useMemo(() => getObligatorias(vistaMalla), [vistaMalla]);
 
   const getColor = useCallback((estado) => {
     if (estado === "aprobada") return colors.aprobada || "#6ec88a";
@@ -145,6 +153,7 @@ export default function MallaView({ malla: initialMalla, notas, onSave, user, on
   }, [malla, onSave, selected, materiaById]);
 
   const handleEstadoChange = useCallback((materiaId, newEstado) => {
+    if (enPreviewActivo) return;
     const materia = materiaById.get(materiaId);
     if (!materia) return;
 
@@ -202,7 +211,7 @@ export default function MallaView({ malla: initialMalla, notas, onSave, user, on
     }
 
     applyEstadoChange(materiaId, newEstado);
-  }, [malla, materiaById, applyEstadoChange]);
+  }, [malla, materiaById, applyEstadoChange, enPreviewActivo]);
 
   const stats = useMemo(() => ({
     total:     obligatorias.length,
@@ -221,7 +230,8 @@ export default function MallaView({ malla: initialMalla, notas, onSave, user, on
       .filter((m) => m.estado === "cursando")
       .reduce((a, m) => a + m.creditos, 0);
     const pct = total > 0 ? Math.round((aprobados / total) * 100) : 0;
-    return { total, aprobados, cursando, pct };
+    const pctExacto = total > 0 ? (aprobados / total) * 100 : 0;
+    return { total, aprobados, cursando, pct, pctExacto };
   }, [obligatorias]);
 
   const pendingPrereqs = useMemo(() => {
@@ -231,35 +241,45 @@ export default function MallaView({ malla: initialMalla, notas, onSave, user, on
       const missing = (m.prereqs || []).filter(
         (pid) => materiaById.get(pid)?.estado !== "aprobada"
       );
-      if (missing.length > 0) {
+      const pctFalta = m.prereqsPct && creditStats.pctExacto < m.prereqsPct ? m.prereqsPct : null;
+      if (missing.length > 0 || pctFalta) {
         alerts.push({
           materia: m,
           missing: missing.map((pid) => materiaById.get(pid)?.nombre || pid),
+          pctFalta,
         });
       }
     });
     return alerts;
-  }, [obligatorias, materiaById]);
+  }, [obligatorias, materiaById, creditStats.pctExacto]);
 
-  const selectedMissingPrereqs = useMemo(() => {
-    if (!selected) return [];
-    return (selected.prereqs || []).filter(
-      (pid) => materiaById.get(pid)?.estado !== "aprobada"
-    );
-  }, [selected, materiaById]);
+  const selectedPendientes = useMemo(() => {
+    if (!selected) return { nombres: [], pctFalta: null };
+    const nombres = (selected.prereqs || [])
+      .filter((pid) => materiaById.get(pid)?.estado !== "aprobada")
+      .map((pid) => materiaById.get(pid)?.nombre || pid);
+    const pctFalta = selected.prereqsPct && creditStats.pctExacto < selected.prereqsPct
+      ? selected.prereqsPct
+      : null;
+    return { nombres, pctFalta };
+  }, [selected, materiaById, creditStats.pctExacto]);
 
   const handleDownload = () => {
-    const content = buildMallaTxt({ user, malla, notas: notas || {} });
+    const content = buildMallaTxt({ user, malla: vistaMalla, notas: notas || {} });
     const safeName = (user.username || "estudiante").replace(/[^\w.-]/g, "_");
-    downloadTxt(`malla_${safeName}.txt`, content);
-    onNotify?.("Malla descargada");
+    const suffix = enPreviewActivo ? "_plan-2022-1" : "";
+    downloadTxt(`malla_${safeName}${suffix}.txt`, content);
+    onNotify?.(enPreviewActivo ? "Plan 2022-1 descargado" : "Malla descargada");
   };
   const semester = useMemo(() => getSemesterCountdown(semestre), [semestre]);
   const semDates = useMemo(() => semesterDatesFor(semestre), [semestre]);
   const MESES_CORTOS_M = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
   const fmtSemDate = (d) => `${d.getDate()} ${MESES_CORTOS_M[d.getMonth()]} ${d.getFullYear()}`;
   const semRange = `${fmtSemDate(semDates.start)} – ${fmtSemDate(semDates.end)}`;
-  const matriculables = useMemo(() => allMaterias.filter((m) => canEnrollMateria(m, allMaterias)), [allMaterias]);
+  const matriculables = useMemo(() => allMaterias.filter((m) =>
+    canEnrollMateria(m, allMaterias)
+    && (!m.prereqsPct || creditStats.pctExacto >= m.prereqsPct)
+  ), [allMaterias, creditStats.pctExacto]);
   const matriculableIds = useMemo(() => new Set(matriculables.map((m) => m.id)), [matriculables]);
 
   return (
@@ -268,12 +288,25 @@ export default function MallaView({ malla: initialMalla, notas, onSave, user, on
       <div className={styles.header}>
         <div className={styles.headerLeft}>
           <div>
-            <h2 className={styles.title}>Malla <em>Curricular</em></h2>
+            <h2 className={styles.title}>
+              Malla <em>Curricular</em>
+              {enPreviewActivo && <span className={styles.planChip}>{planAlternativo.label}</span>}
+            </h2>
             <p className={styles.subtitle}>{user.career} · {user.university}</p>
           </div>
           <button type="button" className={styles.downloadBtn} onClick={handleDownload}>
             ↓ Descargar malla (.txt)
           </button>
+          {planAlternativo && !enPreviewActivo && (
+            <button type="button" className={styles.planBtn} onClick={() => {
+              setSelected(null);
+              setHighlightedPrereqs([]);
+              setHighlightedUnlocks([]);
+              setEnPreview(true);
+            }}>
+              Ver {planAlternativo.label}
+            </button>
+          )}
         </div>
         <div className={styles.headerRight}>
           <div className={styles.stats}>
@@ -291,6 +324,23 @@ export default function MallaView({ malla: initialMalla, notas, onSave, user, on
           </div>
         </div>
       </div>
+
+      {enPreviewActivo && (
+        <div className={styles.previewBanner}>
+          <div className={styles.previewBannerText}>
+            <strong>Estás viendo el {planAlternativo.label}</strong>
+            <span>Vista previa de solo lectura: tu malla y tus estados guardados no cambian.</span>
+          </div>
+          <button type="button" className={styles.previewBack} onClick={() => {
+            setSelected(null);
+            setHighlightedPrereqs([]);
+            setHighlightedUnlocks([]);
+            setEnPreview(false);
+          }}>
+            Volver a mi plan
+          </button>
+        </div>
+      )}
 
       {}
       <div className={styles.progressWrap}>
@@ -375,7 +425,7 @@ export default function MallaView({ malla: initialMalla, notas, onSave, user, on
 
       {}
       <div className={styles.grid}>
-        {malla.map((sem, si) => {
+        {vistaMalla.map((sem, si) => {
           const isOptativas = sem.semestre === "opt";
           const optColumns = isOptativas
             ? [sem.materias.slice(0, 6), sem.materias.slice(6, 12), sem.materias.slice(12, 15)]
@@ -500,33 +550,68 @@ export default function MallaView({ malla: initialMalla, notas, onSave, user, on
             }}><IconClose size={14} /></button>
           </div>
           <div className={styles.detailBody}>
-            {selectedMissingPrereqs.length > 0 && (
+            {(selectedPendientes.nombres.length > 0 || selectedPendientes.pctFalta) && (
               <div className={styles.prereqAlertDetail}>
                 <IconWarning size={14} />
                 <span>
-                  <strong>Prerequisito(s) pendiente(s):</strong>{" "}
-                  {selectedMissingPrereqs.map((pid) => materiaById.get(pid)?.nombre || pid).join(", ")}.
-                  Aún no toca cursar esta materia.
+                  {selectedPendientes.nombres.length > 0 && (
+                    <>
+                      <strong>Prerequisito(s) pendiente(s):</strong>{" "}
+                      {selectedPendientes.nombres.join(", ")}.
+                    </>
+                  )}
+                  {selectedPendientes.pctFalta ? (
+                    <> Necesita el <strong>{selectedPendientes.pctFalta}%</strong> de los créditos del plan aprobados; llevas {Math.floor(creditStats.pctExacto)}%.</>
+                  ) : (
+                    selectedPendientes.nombres.length > 0 ? <> Aún no toca cursar esta materia.</> : null
+                  )}
                 </span>
               </div>
             )}
-            <div className={styles.detailSection}>
-              <p className={styles.detailSectionLabel}>Cambiar estado:</p>
-              <div className={styles.estadoBtns}>
-                {Object.entries(ESTADOS).map(([k, v]) => (
-                  <button
-                    key={k}
-                    className={`${styles.estadoBtn} ${selected.estado === k ? styles.estadoBtnActive : ""}`}
-                    style={selected.estado === k ? { background: getColor(k), color: "#0e0e14" } : {}}
-                    onClick={() => {
-                      handleEstadoChange(selected.id, k);
-                    }}
-                  >
-                    {v.emoji} {v.label}
-                  </button>
-                ))}
+            {enPreviewActivo ? (
+              <div className={styles.detailSection}>
+                <p className={styles.detailSectionLabel}>Vista previa</p>
+                <p className={styles.previewNote}>
+                  Este plan es informativo: los estados no se editan y tu malla guardada no cambia.
+                </p>
               </div>
-            </div>
+            ) : (
+              <div className={styles.detailSection}>
+                <p className={styles.detailSectionLabel}>Cambiar estado:</p>
+                <div className={styles.estadoBtns}>
+                  {Object.entries(ESTADOS).map(([k, v]) => (
+                    <button
+                      key={k}
+                      className={`${styles.estadoBtn} ${selected.estado === k ? styles.estadoBtnActive : ""}`}
+                      style={selected.estado === k ? { background: getColor(k), color: "#0e0e14" } : {}}
+                      onClick={() => {
+                        handleEstadoChange(selected.id, k);
+                      }}
+                    >
+                      {v.emoji} {v.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            {selected.prereqsPct ? (
+              <div className={styles.detailSection}>
+                <p className={styles.detailSectionLabel}>Avance del plan requerido:</p>
+                <div className={styles.prereqList}>
+                  <div
+                    className={styles.prereqItem}
+                    style={{ borderColor: getColor(creditStats.pctExacto >= selected.prereqsPct ? "aprobada" : "faltante") }}
+                  >
+                    <span
+                      className={styles.prereqDot}
+                      style={{ background: getColor(creditStats.pctExacto >= selected.prereqsPct ? "aprobada" : "faltante") }}
+                    />
+                    <span className={styles.prereqName}>{selected.prereqsPct}% de los créditos del plan</span>
+                    <span className={styles.prereqStatus}>Llevas {Math.floor(creditStats.pctExacto)}%</span>
+                  </div>
+                </div>
+              </div>
+            ) : null}
             {selected.prereqs.length > 0 && (
               <div className={styles.detailSection}>
                 <p className={styles.detailSectionLabel}>Prerequisitos:</p>
