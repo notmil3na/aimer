@@ -701,7 +701,6 @@ export default function ColaboracionView({
       <div className={styles.header}>
         <div>
           <h2 className={styles.title}>Amigos</h2>
-          <p className={styles.subtitle}>Agrega amigos, compara horarios y busca huecos libres para estudiar juntos</p>
         </div>
         <div className={styles.headerBadge}>
           <IconUsers size={14} /> {amigos.length} amigo{amigos.length !== 1 ? "s" : ""}

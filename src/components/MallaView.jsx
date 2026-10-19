@@ -293,7 +293,7 @@ export default function MallaView({ malla: initialMalla, notas, onSave, user, on
               {(enPreviewActivo ? planAlternativo.titulo : etiquetaPlan) &&
                 <span className={styles.planChip}>{enPreviewActivo ? planAlternativo.titulo : etiquetaPlan}</span>}
             </h2>
-            <p className={styles.subtitle}>{user.career} · {user.university}</p>
+            {user.career && <p className={styles.subtitle}>{user.career}</p>}
           </div>
           <button type="button" className={styles.downloadBtn} onClick={handleDownload}>
             ↓ Descargar malla (.txt)
