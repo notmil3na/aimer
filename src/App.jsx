@@ -53,9 +53,9 @@ export const APP_THEMES = {
   },
   rosa: {
     name: "Rosa",
-    accent: "#FF4D8D",
-    accent2: "#E02A6D",
-    accentRgb: "255,77,141",
+    accent: "#FE4040",
+    accent2: "#D62B2B",
+    accentRgb: "254,64,64",
   },
   gris: {
     name: "Gris",
