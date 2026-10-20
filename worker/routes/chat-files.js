@@ -5,6 +5,15 @@ import { json, verifyPath } from "../lib.js";
 
 const MAX_FILE_BYTES = 8 * 1024 * 1024;
 
+// nombre seguro para la cabecera: versión ascii de respaldo + el nombre real
+// en utf-8 (filename*). Así los acentos y emojis no rompen la descarga.
+function contentDisposition(type, name) {
+  const clean = String(name || "archivo").slice(0, 120) || "archivo";
+  const ascii = clean.replace(/[^\x20-\x7e]/g, "_").replace(/["\\]/g, "_") || "archivo";
+  const encoded = encodeURIComponent(clean).replace(/['()*]/g, (ch) => `%${ch.charCodeAt(0).toString(16).toUpperCase()}`);
+  return `${type}; filename="${ascii}"; filename*=UTF-8''${encoded}`;
+}
+
 export async function uploadHandler(c) {
   const url = new URL(c.req.url);
   const path = url.searchParams.get("path") || "";
@@ -35,7 +44,10 @@ export async function downloadHandler(c) {
   headers.set("Content-Type", obj.httpMetadata?.contentType || "application/octet-stream");
   headers.set("Cache-Control", "private, max-age=3600");
   if (obj.size) headers.set("Content-Length", String(obj.size));
-  const name = String(path).split("/").pop() || "archivo";
-  headers.set("Content-Disposition", `inline; filename="${name.replace(/"/g, "")}"`);
+  // ?download=1 fuerza la descarga (attachment). En el teléfono es la única
+  // forma fiable de guardar el archivo en vez de solo abrirlo en el visor.
+  const asDownload = ["1", "true", "attachment"].includes(String(url.searchParams.get("download") || "").toLowerCase());
+  const name = url.searchParams.get("name") || String(path).split("/").pop() || "archivo";
+  headers.set("Content-Disposition", contentDisposition(asDownload ? "attachment" : "inline", name));
   return new Response(obj.body, { headers });
 }

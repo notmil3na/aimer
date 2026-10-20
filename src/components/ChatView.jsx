@@ -221,6 +221,26 @@ function NoteCard({ msg, mine, onAdd }) {
   );
 }
 
+// los adjuntos viven detrás de un enlace firmado. Con download=1 el worker
+// responde con Content-Disposition: attachment, así el teléfono guarda el
+// archivo en Descargas/Files en vez de abrirlo en el visor.
+function attachmentDownloadUrl(att) {
+  if (!att || !att.url) return null;
+  return `${att.url}${att.url.includes("?") ? "&" : "?"}download=1`;
+}
+
+function downloadAttachment(att) {
+  const href = attachmentDownloadUrl(att);
+  if (!href) return;
+  const a = document.createElement("a");
+  a.href = href;
+  a.download = att.file_name || "";
+  a.rel = "noopener";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
 function MessageBubble({ msg, mine, sender, onAddAssignment, onAddNote }) {
   const t = msg.message_type;
   const att = msg.attachment || {};
@@ -240,24 +260,44 @@ function MessageBubble({ msg, mine, sender, onAddAssignment, onAddNote }) {
 
         {t === "image" && (
           <div className={styles.bubbleImgWrap}>
-            {att.url ? (
-              <img src={att.url} alt={att.file_name || "Imagen adjunta"} className={styles.bubbleImg} onClick={openAtt} />
-            ) : (
-              <div className={styles.bubbleImgMissing}>Imagen no disponible</div>
-            )}
+            <div className={styles.bubbleImgBox}>
+              {att.url ? (
+                <img src={att.url} alt={att.file_name || "Imagen adjunta"} className={styles.bubbleImg} onClick={openAtt} />
+              ) : (
+                <div className={styles.bubbleImgMissing}>Imagen no disponible</div>
+              )}
+              {att.url && (
+                <a
+                  className={styles.bubbleImgDl}
+                  href={attachmentDownloadUrl(att)}
+                  download={att.file_name || "imagen.jpg"}
+                  title="Descargar imagen"
+                  aria-label="Descargar imagen"
+                >
+                  <IconDownload size={14} />
+                </a>
+              )}
+            </div>
             {att.file_name && <div className={styles.bubbleImgName}>{att.file_name}</div>}
           </div>
         )}
 
         {t === "file" && (
-          <div className={styles.fileCard} onClick={openAtt}>
+          <a
+            className={styles.fileCard}
+            href={att.url ? attachmentDownloadUrl(att) : undefined}
+            download={att.file_name || "archivo"}
+            title={att.url ? `Descargar ${att.file_name || "archivo"}` : "Archivo no disponible"}
+            aria-label={att.url ? `Descargar ${att.file_name || "archivo"}` : "Archivo no disponible"}
+            onClick={(e) => { if (!att.url) e.preventDefault(); }}
+          >
             <span className={styles.fileIcon}><IconPaperclip size={15} /></span>
             <div className={styles.fileInfo}>
               <span className={styles.fileName}>{att.file_name || "Archivo"}</span>
               {att.file_size ? <span className={styles.fileSize}>{(att.file_size / 1024).toFixed(0)} KB</span> : null}
             </div>
             <IconDownload size={14} className={styles.fileDl} />
-          </div>
+          </a>
         )}
 
         {t === "assignment" && <AssignmentCard msg={msg} mine={mine} onAdd={onAddAssignment} />}
@@ -774,13 +814,18 @@ function InfoPanel({ friend, messages, onClose }) {
             <button
               key={m.id}
               className={styles.infoFile}
-              onClick={() => m.attachment && m.attachment.url && window.open(m.attachment.url, "_blank", "noopener")}
+              onClick={() => {
+                if (!m.attachment || !m.attachment.url) return;
+                if (m.message_type === "file") downloadAttachment(m.attachment);
+                else window.open(m.attachment.url, "_blank", "noopener");
+              }}
             >
               <span className={styles.infoFileIcon}>{m.message_type === "image" ? <IconImage size={14} /> : <IconPaperclip size={14} />}</span>
               <span className={styles.infoFileTxt}>
                 <span className={styles.infoFileTitle}>{m.attachment && m.attachment.file_name ? m.attachment.file_name : (m.message_type === "image" ? "Imagen" : "Archivo")}</span>
                 <span className={styles.infoFileDate}>{fmtTimeFull(m.created_at)}</span>
               </span>
+              {m.message_type === "file" && <IconDownload size={13} className={styles.infoFileDl} />}
             </button>
           ))
         )}
