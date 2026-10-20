@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, lazy, Suspense } from "react";
+import { useState, useEffect, useLayoutEffect, useMemo, useRef, lazy, Suspense } from "react";
 import {
   HORAS_FORM,
   LEGACY_HORAS,
@@ -487,11 +487,43 @@ function ClaseModal({ materiasDisponibles, allMaterias, existingClases, editIdxS
 function ClaseBloque({ clase, materia, color, horaStart, duracion, onClick, isConflict }) {
   const top=horaStart*64, height=duracion*64-4;
   const showName = duracion >= 2;
+  // El salon solo se muestra cuando la tarjeta tiene espacio para algo mas que
+  // el nombre y la hora (el horario exportado usa el mismo corte).
+  const showSalon = !!clase.salonLabel && duracion >= 2;
+  const contenidoRef = useRef(null);
+  const salonRef = useRef(null);
+  const salonWrapRef = useRef(null);
+  // Si no cabe todo, el salon cede: se muestran las lineas enteras que caben,
+  // sin partir ninguna por la mitad y sin puntos suspensivos. null = caben todas.
+  const [lineasSalon, setLineasSalon] = useState(null);
+  const [medida, setMedida] = useState("");
+
+  useLayoutEffect(() => {
+    const box = contenidoRef.current, salon = salonRef.current, wrap = salonWrapRef.current;
+    if (!box || !salon || !wrap) return;
+    const clave = [
+      box.clientWidth, box.clientHeight, clase.materiaId, clase.grupo || "",
+      duracion, materia?.nombre || "", clase.profesor || "", clase.salonLabel || "",
+    ].join("|");
+    if (clave === medida) return;
+    // Al cambiar de tamano o de contenido hay que medir con el salon entero.
+    if (lineasSalon !== null) { setLineasSalon(null); return; }
+    const altoLinea = parseFloat(window.getComputedStyle(salon).lineHeight) || 14;
+    // Lo que va arriba del salon, sin margenes: el hueco flexible de la hora no
+    // se come lineas que el salon si puede usar.
+    let fijo = 0;
+    for (const el of box.children) if (el !== wrap) fijo += el.offsetHeight;
+    const caben = Math.floor((box.clientHeight - fijo + 0.5) / altoLinea);
+    const naturales = Math.ceil(salon.scrollHeight / altoLinea);
+    setMedida(clave);
+    setLineasSalon(caben < naturales ? Math.max(caben, 0) : null);
+  });
+
   return (
     <div className={`${styles.claseBloque} ${isConflict?styles.claseBloqueConflict:""}`}
       style={{top,height,"--clase-color":color}} onClick={onClick}
       title={`${materia?.id||clase.materiaId}${clase.grupo?` - ${clase.grupo}`:""}${clase.profesor?` · ${clase.profesor}`:""} | ${toViewHora(clase.horaInicio)}–${toViewHora(clase.horaFin)} | ${clase.salonLabel||""}`}>
-      <div className={styles.claseBloqueContent}>
+      <div className={styles.claseBloqueContent} ref={contenidoRef}>
         <span className={styles.claseId}>{materia?.id||clase.materiaId}{clase.grupo ? ` - ${clase.grupo}` : ""}</span>
         {showName && materia?.nombre && <span className={styles.claseNombre}>{materia.nombre}</span>}
         {clase.profesor && <span className={styles.claseProfesor}>{clase.profesor}</span>}
@@ -499,10 +531,13 @@ function ClaseBloque({ clase, materia, color, horaStart, duracion, onClick, isCo
           <IconSchedule size={11} className={styles.claseIcon} />
           {toViewHora(clase.horaInicio)}–{toViewHora(clase.horaFin)}
         </span>
-        {clase.salonLabel && (
-          <span className={styles.claseSalon} title={clase.salonLabel}>
+        {showSalon && lineasSalon !== 0 && (
+          <span className={styles.claseSalon} ref={salonWrapRef} title={clase.salonLabel}>
             <IconLocation size={11} className={styles.claseIcon} />
-            {clase.salonLabel}
+            <span ref={salonRef} className={styles.claseSalonTexto}
+              style={lineasSalon != null ? { WebkitLineClamp: lineasSalon } : undefined}>
+              {clase.salonLabel}
+            </span>
           </span>
         )}
       </div>
