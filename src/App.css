@@ -58,6 +58,9 @@ input, textarea, select,
   --accent:     #c8a96e;
   --accent2:    #8b6f3a;
   --accent-rgb: 200,169,110;
+  /* Texto/iconos que van encima de un fondo --accent. Los temas oscuros
+     (p. ej. el rojo) lo cambian a claro desde applyTheme. */
+  --accent-ink: #14101f;
 
   --mesh-opacity: 0.10;
   --grain-opacity: 0.05;

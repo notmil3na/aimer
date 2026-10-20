@@ -16,14 +16,14 @@
       (function () {
         try {
           var THEMES = {
-            rojo:      ["#FF3B4D", "#D1212F", "255,59,77"],
+            rojo:      ["#9C0D14", "#7A0A10", "156,13,20", "#FFF5F4"],
             naranja:   ["#FF7A1A", "#E35E00", "255,122,26"],
             ambar:     ["#FFC94D", "#F2A900", "255,201,77"],
             verde:     ["#2BD06E", "#0FA84F", "43,208,110"],
             turquesa:  ["#00D1B2", "#00A28A", "0,209,178"],
             azul:      ["#3B82F6", "#1D4ED8", "59,130,246"],
             violeta:   ["#8B5CF6", "#6D28D9", "139,92,246"],
-            rosa:      ["#FE4040", "#D62B2B", "254,64,64"],
+            rosa:      ["#FF2A6D", "#D6245C", "255,42,109"],
             gris:      ["#9AA5B8", "#5F6B82", "154,165,184"],
           };
           var s = JSON.parse(localStorage.getItem("malla_session") || "null");
@@ -35,6 +35,7 @@
           r.style.setProperty("--accent", c[0]);
           r.style.setProperty("--accent2", c[1]);
           r.style.setProperty("--accent-rgb", c[2]);
+          r.style.setProperty("--accent-ink", c[3] || "#14101F");
           if (u && u.fontBody && u.fontBody !== "DM Sans") r.style.setProperty("--font-body", "'" + u.fontBody + "', system-ui, sans-serif");
         } catch (e) {}
       })();
@@ -65,9 +66,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Aimer" />
-    <script type="module" crossorigin src="/assets/index-2c016112.js"></script>
+    <script type="module" crossorigin src="/assets/index-ec7836ce.js"></script>
     <link rel="modulepreload" crossorigin href="/assets/vendor-653562d3.js">
-    <link rel="stylesheet" href="/assets/index-e52542c8.css">
+    <link rel="stylesheet" href="/assets/index-1e3f3338.css">
   </head>
   <body>
     

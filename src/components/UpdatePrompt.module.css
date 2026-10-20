@@ -86,7 +86,7 @@
   display: inline-flex;
   align-items: center;
   background: linear-gradient(135deg, var(--accent), var(--accent2));
-  color: #14101f;
+  color: var(--accent-ink);
   border: none;
   border-radius: var(--radius-md);
   font-family: var(--font-body);

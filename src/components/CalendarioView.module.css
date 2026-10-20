@@ -7,7 +7,7 @@
 .title { font-family: var(--font-display); font-size: 26px; font-weight: 500; color: var(--text); }
 .subtitle { font-size: 13px; color: var(--text-muted); margin-top: 3px; }
 .addBtn {
-  background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #14101f;
+  background: linear-gradient(135deg, var(--accent), var(--accent2)); color: var(--accent-ink);
   border: none; border-radius: var(--radius-sm);
   font-family: var(--font-body); font-size: 13px; font-weight: 600;
   padding: 9px 20px; cursor: pointer; transition: all 0.2s; flex-shrink: 0;
@@ -345,7 +345,7 @@
 .removeBtn:hover { color: #e07070; background: rgba(224,112,112,0.08); }
 
 .btnPrimary {
-  background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #14101f;
+  background: linear-gradient(135deg, var(--accent), var(--accent2)); color: var(--accent-ink);
   border: none; border-radius: var(--radius-sm);
   font-family: var(--font-body); font-size: 13px; font-weight: 600;
   padding: 10px 22px; cursor: pointer; transition: all 0.2s;

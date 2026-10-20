@@ -39,7 +39,7 @@
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, var(--accent), var(--accent2));
-  color: #14101f;
+  color: var(--accent-ink);
   box-shadow: 0 4px 14px rgba(var(--accent-rgb), 0.32);
 }
 
@@ -255,7 +255,7 @@
   align-items: center;
   gap: 7px;
   background: linear-gradient(135deg, var(--accent), var(--accent2));
-  color: #14101f;
+  color: var(--accent-ink);
   border: none;
   border-radius: 9px;
   font-family: var(--font-body);
@@ -702,7 +702,7 @@
 .checkboxChecked {
   background: var(--accent);
   border-color: var(--accent);
-  color: #14101f;
+  color: var(--accent-ink);
 }
 
 .checkboxChecked:hover { opacity: 0.88; }

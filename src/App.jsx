@@ -11,9 +11,10 @@ import "./App.css";
 export const APP_THEMES = {
   rojo: {
     name: "Rojo",
-    accent: "#FF3B4D",
-    accent2: "#D1212F",
-    accentRgb: "255,59,77",
+    accent: "#9C0D14",
+    accent2: "#7A0A10",
+    accentRgb: "156,13,20",
+    accentInk: "#FFF5F4",
   },
   naranja: {
     name: "Naranja",
@@ -53,9 +54,9 @@ export const APP_THEMES = {
   },
   rosa: {
     name: "Rosa",
-    accent: "#FE4040",
-    accent2: "#D62B2B",
-    accentRgb: "254,64,64",
+    accent: "#FF2A6D",
+    accent2: "#D6245C",
+    accentRgb: "255,42,109",
   },
   gris: {
     name: "Gris",
@@ -75,6 +76,7 @@ export function applyTheme(themeKey, mode, fontBody) {
   root.style.setProperty("--accent",     t.accent);
   root.style.setProperty("--accent2",    t.accent2);
   root.style.setProperty("--accent-rgb", t.accentRgb);
+  root.style.setProperty("--accent-ink", t.accentInk || "#14101F");
   if (fontBody) {
     root.style.setProperty("--font-body", `'${fontBody}', system-ui, sans-serif`);
     ensureFont(fontBody);

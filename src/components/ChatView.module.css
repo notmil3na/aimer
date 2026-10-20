@@ -75,7 +75,7 @@
   font-family: var(--font-body);
   font-size: 11px;
   font-weight: 700;
-  color: #14101f;
+  color: var(--accent-ink);
   background: linear-gradient(135deg, var(--accent), var(--accent2));
   border-radius: 999px;
   padding: 4px 11px;
@@ -254,7 +254,7 @@
   gap: 7px;
   margin-top: 12px;
   background: linear-gradient(135deg, var(--accent), var(--accent2));
-  color: #14101f;
+  color: var(--accent-ink);
   border: none;
   border-radius: 10px;
   font-family: var(--font-body);
@@ -367,7 +367,7 @@
 
 .bubbleMine {
   background: linear-gradient(135deg, var(--accent), var(--accent2));
-  color: #14101f;
+  color: var(--accent-ink);
   border-bottom-right-radius: 5px;
 }
 
@@ -540,7 +540,7 @@
   font-size: 11.5px;
   font-weight: 700;
   background: linear-gradient(135deg, var(--accent), var(--accent2));
-  color: #14101f;
+  color: var(--accent-ink);
   transition: all 0.15s;
 }
 .academicAdd:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(var(--accent-rgb), 0.35); }
@@ -581,7 +581,7 @@
   border-radius: 50%;
   flex-shrink: 0;
   background: linear-gradient(135deg, var(--accent), var(--accent2));
-  color: #14101f;
+  color: var(--accent-ink);
   border: none;
   cursor: pointer;
   transition: all 0.15s;
@@ -771,7 +771,7 @@
   font-size: 12.5px;
   font-weight: 700;
   background: linear-gradient(135deg, var(--accent), var(--accent2));
-  color: #14101f;
+  color: var(--accent-ink);
   transition: all 0.15s;
 }
 .shareSend:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(var(--accent-rgb), 0.35); }
@@ -812,7 +812,7 @@
   flex-shrink: 0;
   overflow: hidden;
   background: linear-gradient(135deg, var(--accent), var(--accent2));
-  color: #14101f;
+  color: var(--accent-ink);
   font-weight: 700;
   font-size: 15px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);

@@ -852,7 +852,7 @@
 .confirmBtn {
   background: linear-gradient(135deg, var(--accent, #c8a96e), var(--accent2, #8b6f3a));
   border: none;
-  color: #14101f;
+  color: var(--accent-ink);
   border-radius: var(--radius-sm, 10px);
   padding: 9px 20px;
   min-height: 44px;
@@ -935,7 +935,7 @@
   background: var(--accent);
   border: none;
   border-radius: var(--radius-sm);
-  color: #14101f;
+  color: var(--accent-ink);
   font-family: var(--font-body);
   font-size: calc(12px * var(--fs, 1));
   font-weight: 700;

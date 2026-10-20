@@ -95,7 +95,7 @@
   width: 42px; height: 42px; border-radius: 50%;
   background: linear-gradient(135deg, var(--accent), var(--accent2));
   display: flex; align-items: center; justify-content: center;
-  font-size: 18px; font-weight: 600; color: #0e0e14;
+  font-size: 18px; font-weight: 600; color: var(--accent-ink);
 }
 
 .avatarRing {
@@ -159,11 +159,11 @@
 .navBtn.active {
   background: rgba(var(--accent-rgb), 0.85);
   border-color: transparent;
-  color: #16121f;
+  color: var(--accent-ink);
   font-weight: 600;
   box-shadow: 0 4px 16px rgba(var(--accent-rgb), 0.35);
 }
-[data-theme="dark"] .navBtn.active { color: #14101f; }
+[data-theme="dark"] .navBtn.active { color: var(--accent-ink); }
 
 .navIcon { font-size: 16px; width: 20px; text-align: center; }
 
