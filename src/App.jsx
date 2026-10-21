@@ -11,9 +11,16 @@ import "./App.css";
 export const APP_THEMES = {
   rojo: {
     name: "Rojo",
-    accent: "#9C0D14",
-    accent2: "#7A0A10",
-    accentRgb: "156,13,20",
+    accent: "#E10600",
+    accent2: "#A80000",
+    accentRgb: "225,6,0",
+    accentInk: "#FFF5F4",
+  },
+  burdeos: {
+    name: "Burdeos",
+    accent: "#800020",
+    accent2: "#560016",
+    accentRgb: "128,0,32",
     accentInk: "#FFF5F4",
   },
   naranja: {
