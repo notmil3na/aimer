@@ -602,11 +602,17 @@
 
 /* ---------- Responsive ---------- */
 
-/* Portátiles bajos: el calendario decorativo es lo primero que se sacrifica
-   para que el formulario y el titular quepan sin scroll. */
-@media (min-width: 901px) and (max-height: 800px) {
-  .mock { display: none; }
-  .panel { gap: 32px; }
+/* Portátiles bajos: en vez de esconder el calendario, se compacta para que
+   el panel siga completo sin scroll. */
+@media (min-width: 901px) and (max-height: 840px) {
+  .panel {
+    gap: 18px;
+    padding-top: 26px;
+    padding-bottom: 26px;
+  }
+  .heroBrand { font-size: clamp(54px, 6.6vw, 88px); }
+  .heroSub { margin-top: 8px; font-size: 15px; }
+  .mock { zoom: 0.72; max-width: 420px; }
 }
 
 @media (max-width: 900px) {
