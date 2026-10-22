@@ -1,18 +1,39 @@
 const BASE = "/api";
 
 function readSession() {
-  try {
-    const raw = localStorage.getItem("malla_session");
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
+  for (const store of [localStorage, sessionStorage]) {
+    try {
+      const raw = store.getItem("malla_session");
+      if (raw) return JSON.parse(raw);
+    } catch {}
   }
+  return null;
 }
 
-export function saveSession(token, user, data) {
+/* `persist` decide dónde vive la sesión: localStorage (sobrevive al cerrar el
+   navegador) o sessionStorage (solo esta pestaña). Sin `persist` se conserva el
+   almacén que ya tenía la sesión, para no moverla al actualizar el perfil. */
+export function saveSession(token, user, data, persist) {
   const prev = readSession();
   const nextData = data !== undefined ? data : (prev && prev.data) || null;
-  localStorage.setItem("malla_session", JSON.stringify({ token, user, data: nextData }));
+  const keepLocal = (() => {
+    if (typeof persist === "boolean") return persist;
+    try {
+      return !sessionStorage.getItem("malla_session") || !!localStorage.getItem("malla_session");
+    } catch {
+      return true;
+    }
+  })();
+  const payload = JSON.stringify({ token, user, data: nextData });
+  try {
+    if (keepLocal) {
+      localStorage.setItem("malla_session", payload);
+      sessionStorage.removeItem("malla_session");
+    } else {
+      sessionStorage.setItem("malla_session", payload);
+      localStorage.removeItem("malla_session");
+    }
+  } catch {}
 }
 
 export function getSessionData() {
@@ -26,12 +47,17 @@ export function updateSessionData(patch) {
     const s = readSession();
     if (!s) return;
     const data = { ...(s.data || {}), ...patch };
-    localStorage.setItem("malla_session", JSON.stringify({ ...s, data }));
+    const payload = JSON.stringify({ ...s, data });
+    const store = localStorage.getItem("malla_session") ? localStorage : sessionStorage;
+    store.setItem("malla_session", payload);
   } catch (_) {}
 }
 
 export function clearSession() {
-  localStorage.removeItem("malla_session");
+  try {
+    localStorage.removeItem("malla_session");
+    sessionStorage.removeItem("malla_session");
+  } catch (_) {}
 }
 
 export function getToken() {

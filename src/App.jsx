@@ -165,9 +165,9 @@ export default function App() {
     return () => { cancelled = true; };
   }, []);
 
-  const handleLogin = (auth) => {
+  const handleLogin = (auth, remember = true) => {
     if (!auth?.token || !auth?.user) return;
-    saveSession(auth.token, auth.user, auth.data);
+    saveSession(auth.token, auth.user, auth.data, remember);
     setUser(auth.user);
     applyTheme(auth.user.appTheme || "ambar", auth.user.appMode || "light", auth.user.fontBody);
   };

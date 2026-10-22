@@ -4,8 +4,7 @@ import { SEMESTER_CORTE } from "../utils/semesterCountdown";
 import { UNIVERSITIES, autoSemester } from "../utils/academic";
 import { api, prewarm } from "../api";
 import styles from "./Login.module.css";
-import { IconCheck, BrandStar, IconWarning } from "../components/Icons";
-import AnimatedFace from "../components/AnimatedFace";
+import { IconCheck, IconWarning } from "../components/Icons";
 import useBodyScrollLock from "../hooks/useBodyScrollLock";
 
 const DEFAULT_THEME_COLORS = {
@@ -40,6 +39,41 @@ function EyeIcon({ off }) {
       <circle cx="12" cy="12" r="3" />
       {off && <path d="M4 4l16 16" />}
     </svg>
+  );
+}
+
+/* Calendario decorativo del panel visual. Los bloques imitan una semana de
+   clases; es puramente gráfico (aria-hidden), así que no necesita datos reales. */
+const MOCK_WEEK = [
+  { day: "Lun", blocks: [{ top: 16, height: 64, color: "#F4D27A" }, { top: 120, height: 80, color: "#1F1A17" }] },
+  { day: "Mar", blocks: [{ top: 48, height: 96, color: "#2F6F6A" }, { top: 180, height: 56, color: "#F2B8B0" }] },
+  { day: "Mié", blocks: [{ top: 16, height: 64, color: "#F4D27A" }, { top: 120, height: 80, color: "#1F1A17" }] },
+  { day: "Jue", blocks: [{ top: 48, height: 96, color: "#2F6F6A" }, { top: 168, height: 64, color: "#A4262C" }] },
+  { day: "Vie", blocks: [{ top: 80, height: 72, color: "#F2B8B0" }, { top: 176, height: 48, color: "#F4D27A" }] },
+];
+
+function ScheduleMock() {
+  return (
+    <div className={styles.mock} aria-hidden="true">
+      <div className={styles.mockHead}>
+        {MOCK_WEEK.map((d) => (
+          <div key={d.day} className={styles.mockDay}>{d.day}</div>
+        ))}
+      </div>
+      <div className={styles.mockGrid}>
+        {MOCK_WEEK.map((d) => (
+          <div key={d.day} className={styles.mockCol}>
+            {d.blocks.map((b) => (
+              <span
+                key={`${d.day}-${b.top}`}
+                className={styles.mockBlock}
+                style={{ top: b.top, height: b.height, background: b.color }}
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -178,6 +212,7 @@ export default function Login({ onLogin }) {
     securityQuestion: "", securityAnswer: "",
   });
   const [showPw, setShowPw] = useState(false);
+  const [remember, setRemember] = useState(true);
   const [error, setError] = useState("");
   const [shake, setShake] = useState(false);
   const [success, setSuccess] = useState("");
@@ -241,7 +276,7 @@ export default function Login({ onLogin }) {
         skipAuth: true,
         body: { username: form.username, password: form.password },
       });
-      onLogin(auth);
+      onLogin(auth, remember);
     } catch (err) {
       setLoading(false);
       return triggerError(err.message || "Error al iniciar sesión");
@@ -324,70 +359,54 @@ export default function Login({ onLogin }) {
   const availableCareers = UNIVERSITIES[form.university] || [];
 
   return (
-    <div className={`${styles.wrap} ${isRegister ? styles.wrapRegister : styles.wrapLogin}`}>
-      <div className={`${styles.card} ${isRegister ? styles.cardRegister : styles.cardLogin} ${shake ? styles.shake : ""}`}>
+    <div className={styles.wrap}>
+      <div className={styles.layout}>
 
-        {/* ===== Panel visual (cambiar el fondo por la imagen cuando se decida) ===== */}
-        <aside className={`${styles.panel} ${isRegister ? styles.panelRegister : styles.panelLogin}`}>
-          <div className={styles.brand}>
-            <BrandStar size={22} />
-            <span className={styles.brandName}>Aimer</span>
-            <span className={styles.brandSep}>·</span>
-            <span className={styles.brandTag}>por y para estudiantes</span>
-          </div>
+        {/* ===== Panel visual ===== */}
+        <aside className={styles.panel}>
+          <div className={styles.wordmark}>Aimer</div>
 
-          {/* Carita animada, en un círculo centrado sobre un aro de acento plano */}
-          <div className={styles.faceWrap}>
-            <span className={styles.faceHalo} aria-hidden="true" />
-            <div className={styles.faceCircle}>
-              <AnimatedFace className={styles.faceSvg} />
-            </div>
-            <div className={styles.thought} aria-hidden="true">¡Hola!</div>
-          </div>
-
-          <div className={styles.headline}>
+          <div className={styles.hero}>
             {isRegister ? (
-              <>
-                <p className={styles.hSerif}>Empieza,</p>
-                <p className={styles.hSans}>todo en uno.</p>
-              </>
+              <h1 className={styles.heroTitle}>Empieza, <em>todo en uno.</em></h1>
             ) : (
               <>
-                <p className={styles.hSerif}>Aimer,</p>
-                <p className={styles.hSans}>tu compañera académica.</p>
-                <p className={styles.hCopy}>Para llegar a donde quieres llegar.</p>
+                <h1 className={styles.heroTitle}>Tu compañera <em>académica.</em></h1>
+                <p className={styles.heroSub}>Para llegar a donde quieres llegar.</p>
               </>
             )}
           </div>
+
+          <ScheduleMock />
+
+          <p className={styles.heroFoot}>por y para estudiantes</p>
         </aside>
 
         {/* ===== Panel del formulario ===== */}
         <main className={styles.formSide}>
-          <div className={styles.formInner}>
-            <span className={styles.formStar}><BrandStar size={30} /></span>
-
+          <div className={`${styles.formInner} ${shake ? styles.shake : ""}`}>
             {!isRegister ? (
-              <h1 className={styles.title}>Hola, <em>de nuevo</em></h1>
+              <>
+                <h2 className={styles.title}>Hola, <em>de nuevo</em></h2>
+                <p className={styles.sub}>Entra para seguir donde lo dejaste.</p>
+              </>
             ) : (
-              <h1 className={styles.title}>Crea tu <em>cuenta</em></h1>
-            )}
-
-            <p className={styles.switchLine}>
-              o{" "}
-              <button type="button" className={styles.linkBtn}
-                onClick={() => switchTab(isRegister ? "login" : "register")}>
-                {isRegister ? "inicia sesión" : "crea una cuenta"}
-              </button>
-            </p>
-
-            {isRegister && (
-              <div className={styles.steps} aria-label={`Paso ${step} de 2`}>
-                <span>Paso {step} de 2</span>
-                <div className={styles.stepBars} aria-hidden="true">
-                  <i className={styles.stepOn} />
-                  <i className={step === 2 ? styles.stepOn : ""} />
+              <>
+                <h2 className={styles.title}>Crea tu <em>cuenta</em></h2>
+                <p className={styles.switchLine}>
+                  o{" "}
+                  <button type="button" className={styles.linkBtn} onClick={() => switchTab("login")}>
+                    inicia sesión
+                  </button>
+                </p>
+                <div className={styles.steps} aria-label={`Paso ${step} de 2`}>
+                  <span>Paso {step} de 2</span>
+                  <div className={styles.stepBars} aria-hidden="true">
+                    <i className={styles.stepOn} />
+                    <i className={step === 2 ? styles.stepOn : ""} />
+                  </div>
                 </div>
-              </div>
+              </>
             )}
 
             {success && <p className={styles.successMsg} role="status"><IconCheck size={13} /> {success}</p>}
@@ -405,18 +424,38 @@ export default function Login({ onLogin }) {
                   <label htmlFor={fid("l-pw")}>Contraseña</label>
                   <div className={styles.pwWrap}>
                     <input id={fid("l-pw")} type={showPw ? "text" : "password"} value={form.password}
-                      onChange={set("password")} placeholder="••••••••" autoComplete="current-password" />
+                      onChange={set("password")} placeholder="tu contraseña" autoComplete="current-password" />
                     <button type="button" className={styles.eyeBtn} onClick={() => setShowPw((v) => !v)}
                       aria-label={showPw ? "Ocultar contraseña" : "Mostrar contraseña"} aria-pressed={showPw}>
                       <EyeIcon off={showPw} />
                     </button>
                   </div>
                 </div>
-                <button type="submit" className={styles.btn} disabled={loading}>
-                  {loading ? "Cargando..." : <>Entrar <ArrowRight /></>}
+
+                <div className={styles.metaRow}>
+                  <label className={styles.remember} htmlFor={fid("l-remember")}>
+                    <input id={fid("l-remember")} type="checkbox" checked={remember}
+                      onChange={(e) => setRemember(e.target.checked)} />
+                    Mantener sesión
+                  </label>
+                  <button type="button" className={styles.forgotLink} onClick={() => setShowForgot(true)}>
+                    ¿Olvidaste tu contraseña?
+                  </button>
+                </div>
+
+                <button type="submit" className={styles.enterBtn} disabled={loading}>
+                  <span>{loading ? "Cargando..." : "Entrar"}</span>
+                  <ArrowRight />
                 </button>
-                <button type="button" className={styles.forgotBtn} onClick={() => setShowForgot(true)}>
-                  ¿Olvidaste tu contraseña?
+
+                <div className={styles.firstTime}>
+                  <span aria-hidden="true" />
+                  ¿Primera vez?
+                  <span aria-hidden="true" />
+                </div>
+
+                <button type="button" className={styles.createBtn} onClick={() => switchTab("register")}>
+                  Crear una cuenta
                 </button>
               </form>
             )}
