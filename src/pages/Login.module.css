@@ -59,6 +59,7 @@
 
 .wordmark {
   font-family: var(--serif);
+  font-style: italic;
   font-weight: 500;
   font-size: 30px;
   letter-spacing: -0.01em;
@@ -67,6 +68,17 @@
 
 .hero {
   max-width: 620px;
+}
+
+.heroBrand {
+  margin: 0;
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(64px, 8.5vw, 124px);
+  line-height: 0.95;
+  letter-spacing: -0.025em;
+  color: var(--paper);
 }
 
 .heroTitle {
@@ -605,6 +617,7 @@
     padding: max(20px, calc(env(safe-area-inset-top) + 14px)) 22px 24px;
   }
   .wordmark { font-size: 26px; }
+  .heroBrand { font-size: clamp(56px, 16vw, 88px); }
   .heroTitle { font-size: clamp(30px, 7.4vw, 42px); }
   .heroSub { margin-top: 10px; font-size: 16px; }
   .heroFoot { font-size: 13px; }

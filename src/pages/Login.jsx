@@ -371,7 +371,7 @@ export default function Login({ onLogin }) {
               <h1 className={styles.heroTitle}>Empieza, <em>todo en uno.</em></h1>
             ) : (
               <>
-                <h1 className={styles.heroTitle}>Tu compañera <em>académica.</em></h1>
+                <h1 className={styles.heroBrand}>Aimer</h1>
                 <p className={styles.heroSub}>Para llegar a donde quieres llegar.</p>
               </>
             )}
