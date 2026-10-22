@@ -197,11 +197,11 @@
 }
 
 .title em {
-  font-family: var(--serif);
-  font-style: italic;
-  font-weight: 500;
-  font-size: 1.06em;
-  letter-spacing: -0.01em;
+  font-family: var(--sans);
+  font-style: normal;
+  font-weight: 700;
+  font-size: 1em;
+  letter-spacing: inherit;
   color: var(--accent);
 }
 
