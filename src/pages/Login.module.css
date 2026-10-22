@@ -58,7 +58,8 @@
 }
 
 .hero {
-  max-width: 620px;
+  max-width: 490px;
+  text-align: center;
   transform: translateY(clamp(20px, 5vh, 52px));
 }
 
@@ -604,7 +605,10 @@
   }
   .heroBrand { font-size: clamp(54px, 6.6vw, 88px); }
   .heroSub { margin-top: 8px; font-size: 15px; }
-  .mock { zoom: 0.84; }
+  .mock {
+    transform: scale(0.84);
+    transform-origin: center;
+  }
 }
 
 @media (max-width: 900px) {
