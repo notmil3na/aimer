@@ -364,8 +364,6 @@ export default function Login({ onLogin }) {
 
         {/* ===== Panel visual ===== */}
         <aside className={styles.panel}>
-          <div className={styles.wordmark}>Aimer</div>
-
           <div className={styles.hero}>
             {isRegister ? (
               <h1 className={styles.heroTitle}>Empieza, <em>todo en uno.</em></h1>
