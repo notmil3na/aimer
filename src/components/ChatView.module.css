@@ -429,18 +429,32 @@
 .fileCard {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
   min-width: 220px;
+  max-width: 100%;
   padding: 8px 10px;
   border-radius: 12px;
-  cursor: pointer;
-  transition: opacity 0.15s;
-  color: inherit;
-  text-decoration: none;
 }
-.fileCard:hover { opacity: 0.85; }
 .bubbleMine .fileCard { background: rgba(20, 16, 31, 0.10); }
 .bubble:not(.bubbleMine) .fileCard { background: var(--surface); border: 1px solid var(--border); }
+
+.fileOpen {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: opacity 0.15s;
+}
+.fileOpen:hover { opacity: 0.85; }
+.fileOpen:disabled { cursor: default; opacity: 0.6; }
 
 .fileIcon {
   display: flex;
@@ -462,7 +476,24 @@
   text-overflow: ellipsis;
 }
 .fileSize { font-size: 10.5px; opacity: 0.7; }
-.fileDl { flex-shrink: 0; opacity: 0.7; }
+.fileViewIcon { flex-shrink: 0; opacity: 0.5; }
+.fileOpen:hover .fileViewIcon { opacity: 0.8; }
+
+.fileDlBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 10px;
+  background: rgba(var(--accent-rgb), 0.16);
+  color: var(--accent);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.fileDlBtn:hover { background: rgba(var(--accent-rgb), 0.28); }
 
 
 .academicCard {
@@ -885,18 +916,29 @@
 .infoFile {
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 4px;
   width: 100%;
-  text-align: left;
-  background: transparent;
-  border: none;
   border-radius: 9px;
-  padding: 6px;
-  cursor: pointer;
-  font-family: var(--font-body);
+  padding: 2px;
   transition: background 0.12s;
 }
 .infoFile:hover { background: var(--surface2); }
+.infoFileOpen {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 4px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+  font-family: var(--font-body);
+}
+.infoFileOpen:disabled { cursor: default; opacity: 0.6; }
 .infoFileIcon {
   display: flex;
   align-items: center;
@@ -918,7 +960,24 @@
   text-overflow: ellipsis;
 }
 .infoFileDate { font-size: 10.5px; color: var(--text-muted); }
-.infoFileDl { flex-shrink: 0; color: var(--text-muted); opacity: 0.75; }
+.infoFileDlBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+.infoFileDlBtn:hover {
+  background: rgba(var(--accent-rgb), 0.16);
+  color: var(--accent);
+}
 
 .infoAcademic {
   display: flex;

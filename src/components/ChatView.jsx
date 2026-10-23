@@ -1,7 +1,7 @@
 import { useState, useEffect, useLayoutEffect, useRef, useMemo, useCallback } from "react";
 import styles from "./ChatView.module.css";
 import {
-  IconSend, IconPaperclip, IconArrowLeft, IconDownload,
+  IconSend, IconPaperclip, IconArrowLeft, IconDownload, IconEye,
   IconClipboard, IconImage, IconUser, IconSparkle, IconCheck, IconClose, IconSearch,
   IconPin, IconEraser, IconTrash,
 } from "./Icons";
@@ -229,24 +229,52 @@ function attachmentDownloadUrl(att) {
   return `${att.url}${att.url.includes("?") ? "&" : "?"}download=1`;
 }
 
-function downloadAttachment(att) {
-  const href = attachmentDownloadUrl(att);
-  if (!href) return;
+function triggerDownload(href, name) {
   const a = document.createElement("a");
   a.href = href;
-  a.download = att.file_name || "";
+  if (name) a.download = name;
   a.rel = "noopener";
   document.body.appendChild(a);
   a.click();
   a.remove();
 }
 
+// Descarga real del adjunto: se pide el archivo como blob y se guarda desde un
+// object URL. Así el visor de PDF del navegador (iOS/PWA sobre todo) no se
+// queda con el archivo: una URL blob con download no se puede abrir en línea.
+// Si el fetch falla, se cae al enlace directo firmado.
+async function downloadAttachment(att) {
+  const href = attachmentDownloadUrl(att);
+  if (!href) return;
+  const name = att.file_name || "archivo";
+  try {
+    const res = await fetch(href);
+    if (!res.ok) throw new Error("No se pudo descargar");
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    triggerDownload(url, name);
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+  } catch (_) {
+    triggerDownload(href, name);
+  }
+}
+
+function openAttachment(att) {
+  if (att && att.url) window.open(att.url, "_blank", "noopener");
+}
+
+// tipo legible para la tarjeta del archivo (PDF, DOCX, ZIP…)
+function attachmentKind(att) {
+  const mime = String((att && att.mime_type) || "");
+  if (mime === "application/pdf") return "PDF";
+  const name = String((att && att.file_name) || "");
+  const ext = name.includes(".") ? name.split(".").pop().toUpperCase() : "";
+  return ext && ext.length <= 5 ? ext : "Archivo";
+}
+
 function MessageBubble({ msg, mine, sender, onAddAssignment, onAddNote }) {
   const t = msg.message_type;
   const att = msg.attachment || {};
-  const openAtt = () => {
-    if (att.url) window.open(att.url, "_blank", "noopener");
-  };
 
   return (
     <div className={`${styles.bubbleRow} ${mine ? styles.bubbleRowMine : ""}`}>
@@ -262,7 +290,7 @@ function MessageBubble({ msg, mine, sender, onAddAssignment, onAddNote }) {
           <div className={styles.bubbleImgWrap}>
             <div className={styles.bubbleImgBox}>
               {att.url ? (
-                <img src={att.url} alt={att.file_name || "Imagen adjunta"} className={styles.bubbleImg} onClick={openAtt} />
+                <img src={att.url} alt={att.file_name || "Imagen adjunta"} className={styles.bubbleImg} onClick={() => openAttachment(att)} />
               ) : (
                 <div className={styles.bubbleImgMissing}>Imagen no disponible</div>
               )}
@@ -283,21 +311,37 @@ function MessageBubble({ msg, mine, sender, onAddAssignment, onAddNote }) {
         )}
 
         {t === "file" && (
-          <a
-            className={styles.fileCard}
-            href={att.url ? attachmentDownloadUrl(att) : undefined}
-            download={att.file_name || "archivo"}
-            title={att.url ? `Descargar ${att.file_name || "archivo"}` : "Archivo no disponible"}
-            aria-label={att.url ? `Descargar ${att.file_name || "archivo"}` : "Archivo no disponible"}
-            onClick={(e) => { if (!att.url) e.preventDefault(); }}
-          >
-            <span className={styles.fileIcon}><IconPaperclip size={15} /></span>
-            <div className={styles.fileInfo}>
-              <span className={styles.fileName}>{att.file_name || "Archivo"}</span>
-              {att.file_size ? <span className={styles.fileSize}>{(att.file_size / 1024).toFixed(0)} KB</span> : null}
-            </div>
-            <IconDownload size={14} className={styles.fileDl} />
-          </a>
+          <div className={styles.fileCard}>
+            <button
+              type="button"
+              className={styles.fileOpen}
+              onClick={() => openAttachment(att)}
+              disabled={!att.url}
+              title={att.url ? `Ver ${att.file_name || "archivo"}` : "Archivo no disponible"}
+              aria-label={att.url ? `Ver ${att.file_name || "archivo"}` : "Archivo no disponible"}
+            >
+              <span className={styles.fileIcon}><IconPaperclip size={15} /></span>
+              <span className={styles.fileInfo}>
+                <span className={styles.fileName}>{att.file_name || "Archivo"}</span>
+                <span className={styles.fileSize}>
+                  {attachmentKind(att)}
+                  {att.file_size ? ` · ${(att.file_size / 1024).toFixed(0)} KB` : ""}
+                </span>
+              </span>
+              <IconEye size={14} className={styles.fileViewIcon} />
+            </button>
+            {att.url && (
+              <button
+                type="button"
+                className={styles.fileDlBtn}
+                onClick={() => downloadAttachment(att)}
+                title={`Descargar ${att.file_name || "archivo"}`}
+                aria-label={`Descargar ${att.file_name || "archivo"}`}
+              >
+                <IconDownload size={15} />
+              </button>
+            )}
+          </div>
         )}
 
         {t === "assignment" && <AssignmentCard msg={msg} mine={mine} onAdd={onAddAssignment} />}
@@ -810,24 +854,38 @@ function InfoPanel({ friend, messages, onClose }) {
         {shared.length === 0 ? (
           <div className={styles.infoEmpty}>Aún no comparten archivos.</div>
         ) : (
-          shared.slice(0, 12).map((m) => (
-            <button
-              key={m.id}
-              className={styles.infoFile}
-              onClick={() => {
-                if (!m.attachment || !m.attachment.url) return;
-                if (m.message_type === "file") downloadAttachment(m.attachment);
-                else window.open(m.attachment.url, "_blank", "noopener");
-              }}
-            >
-              <span className={styles.infoFileIcon}>{m.message_type === "image" ? <IconImage size={14} /> : <IconPaperclip size={14} />}</span>
-              <span className={styles.infoFileTxt}>
-                <span className={styles.infoFileTitle}>{m.attachment && m.attachment.file_name ? m.attachment.file_name : (m.message_type === "image" ? "Imagen" : "Archivo")}</span>
-                <span className={styles.infoFileDate}>{fmtTimeFull(m.created_at)}</span>
-              </span>
-              {m.message_type === "file" && <IconDownload size={13} className={styles.infoFileDl} />}
-            </button>
-          ))
+          shared.slice(0, 12).map((m) => {
+            const att = m.attachment || {};
+            const isImage = m.message_type === "image";
+            return (
+              <div key={m.id} className={styles.infoFile}>
+                <button
+                  type="button"
+                  className={styles.infoFileOpen}
+                  onClick={() => openAttachment(att)}
+                  disabled={!att.url}
+                  title={att.url ? `Ver ${att.file_name || (isImage ? "imagen" : "archivo")}` : "Archivo no disponible"}
+                >
+                  <span className={styles.infoFileIcon}>{isImage ? <IconImage size={14} /> : <IconPaperclip size={14} />}</span>
+                  <span className={styles.infoFileTxt}>
+                    <span className={styles.infoFileTitle}>{att.file_name || (isImage ? "Imagen" : "Archivo")}</span>
+                    <span className={styles.infoFileDate}>{fmtTimeFull(m.created_at)}</span>
+                  </span>
+                </button>
+                {att.url && (
+                  <button
+                    type="button"
+                    className={styles.infoFileDlBtn}
+                    onClick={() => downloadAttachment(att)}
+                    title={`Descargar ${att.file_name || (isImage ? "imagen" : "archivo")}`}
+                    aria-label={`Descargar ${att.file_name || (isImage ? "imagen" : "archivo")}`}
+                  >
+                    <IconDownload size={14} />
+                  </button>
+                )}
+              </div>
+            );
+          })
         )}
       </div>
 
