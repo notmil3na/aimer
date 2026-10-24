@@ -2,7 +2,6 @@ import { Suspense, lazy, useState, useEffect } from "react";
 const Login = lazy(() => import("./pages/Login"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const UpdatePrompt = lazy(() => import("./components/UpdatePrompt"));
-const CustomCursor = lazy(() => import("./components/CustomCursor"));
 import { api, saveSession, clearSession, getToken, prewarm } from "./api";
 import { ensureFont } from "./utils/fonts";
 import { getPhoto } from "./utils/photo";
@@ -221,7 +220,6 @@ export default function App() {
         <Login onLogin={handleLogin} />
       )}
       {user && <UpdatePrompt />}
-      <CustomCursor />
     </Suspense>
   );
 }
