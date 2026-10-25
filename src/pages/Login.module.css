@@ -871,7 +871,7 @@
     height: 100%;
     min-height: 0;
     margin: 0;
-    grid-template-rows: 156px minmax(0, 1fr);
+    grid-template-rows: 190px minmax(0, 1fr);
     border-radius: 0;
     box-shadow: none;
   }
@@ -886,6 +886,8 @@
 
   .hero,
   .panelArt { display: none; }
+
+  .sub { margin-top: 2px; }
 
   .formSide {
     min-height: 0;
