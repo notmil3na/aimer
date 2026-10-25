@@ -5,6 +5,7 @@ import { UNIVERSITIES, autoSemester } from "../utils/academic";
 import { api, prewarm } from "../api";
 import styles from "./Login.module.css";
 import { IconCheck, IconWarning } from "../components/Icons";
+import AnimatedFace from "../components/AnimatedFace";
 import useBodyScrollLock from "../hooks/useBodyScrollLock";
 
 const DEFAULT_THEME_COLORS = {
@@ -357,7 +358,7 @@ export default function Login({ onLogin }) {
 
           <header className={styles.panelHead}>
             <div className={styles.logoBadge}>
-              <img src="/aimer.svg" alt="" width="68" height="68" />
+              <AnimatedFace className={styles.animatedFace} />
             </div>
             <div className={styles.brandBlock}>
               <p className={styles.brand}>Aimer</p>
