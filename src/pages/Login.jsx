@@ -13,6 +13,18 @@ const DEFAULT_THEME_COLORS = {
   faltante: "#7c8cff",
 };
 
+// Contenido de la mini tarjeta del panel de bienvenida (reemplázalo a gusto).
+// Los puntos de color usan los mismos tonos que los temas por defecto de la app.
+const MINI_CARD = {
+  title: <>Una semana <em>sin enredos</em></>,
+  text: "Horario, notas y asignaciones en un solo lugar.",
+  chips: [
+    { label: "Horario", color: DEFAULT_THEME_COLORS.cursando },
+    { label: "Notas", color: DEFAULT_THEME_COLORS.aprobada },
+    { label: "Tareas", color: DEFAULT_THEME_COLORS.faltante },
+  ],
+};
+
 // Preguntas de seguridad para la recuperación de cuenta (paso 2 del registro).
 const SECURITY_QUESTIONS = [
   "¿Cómo se llamaba tu primera mascota?",
@@ -339,7 +351,6 @@ export default function Login({ onLogin }) {
 
         {/* ===== Panel de bienvenida ===== */}
         <aside className={styles.panel}>
-          <span className={styles.panelGlow} aria-hidden="true" />
           <p className={styles.eyebrow}>
             <svg aria-hidden="true" viewBox="0 0 16 16" width="13" height="13">
               <path d="m8 1 1.8 4.6L14.5 7l-4.7 1.5L8 13l-1.8-4.5L1.5 7l4.7-1.4L8 1Z" fill="currentColor" />
@@ -358,6 +369,26 @@ export default function Login({ onLogin }) {
             </p>
           </div>
 
+          <div className={styles.miniCard}>
+            <span className={styles.miniStar} aria-hidden="true">
+              <svg viewBox="0 0 16 16" width="18" height="18">
+                <path d="m8 1 1.8 4.6L14.5 7l-4.7 1.5L8 13l-1.8-4.5L1.5 7l4.7-1.4L8 1Z" fill="currentColor" />
+              </svg>
+            </span>
+            <p className={styles.miniTitle}>{MINI_CARD.title}</p>
+            <p className={styles.miniText}>{MINI_CARD.text}</p>
+            <ul className={styles.miniChips}>
+              {MINI_CARD.chips.map((c) => (
+                <li key={c.label}>
+                  <span className={styles.miniDot} style={{ background: c.color }} aria-hidden="true" />
+                  {c.label}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <span className={styles.waveEcho2} aria-hidden="true" />
+          <span className={styles.waveEcho} aria-hidden="true" />
           <span className={styles.wave} aria-hidden="true" />
         </aside>
 

@@ -1,7 +1,9 @@
 /* ============================================================
    Login — "tarjeta de bienvenida"
-   Una tarjeta centrada sobre un fondo cálido: panel de marca a la
-   izquierda (con borde ondulado) y formulario sobre papel a la derecha.
+   Una tarjeta centrada sobre un fondo de halos con grano: panel de marca
+   (color plano) a la izquierda con borde ondulado y formulario sobre papel
+   a la derecha. Cada forma importante lleva debajo una "sombra gemela": la
+   misma forma, movida y con el mismo color a baja opacidad.
    En móvil los paneles se apilan y la onda pasa al pie del panel.
    Paleta propia, independiente del tema de la app (el login ocurre antes
    de saber quién entra).
@@ -15,11 +17,12 @@
   --muted: #6b5f55;
   --line: #e6dccb;
   --line-strong: #cdbfa9;
-  --wine-top: #ad2f38;
   --wine: #9c2029;
   --wine-deep: #7d121a;
   --wine-rgb: 156, 32, 41;
+  --field: #f3ebdd;
   --ok: #2f6b49;
+  --ok-soft: #e8f2ea;
   --danger: #a62432;
 
   --serif: 'Sentient', Georgia, 'Times New Roman', serif;
@@ -30,15 +33,23 @@
   flex: 1 1 auto;
   min-height: 0;
   display: flex;
-  padding: 32px;
+  padding: 40px 72px 72px 40px;
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
-  background:
-    radial-gradient(90% 80% at 12% 0%, #f7f1e7 0%, rgba(247, 241, 231, 0) 60%),
-    radial-gradient(85% 90% at 100% 100%, #d8cab5 0%, rgba(216, 202, 181, 0) 60%),
-    #e9e0d2;
+  /* Halos de color + grano fuerte. El grano es ruido SVG mezclado en
+     "overlay" sobre los halos, así se nota en cualquier tono. */
+  background-color: #efe3d1;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='g' x='0' y='0' width='100%25' height='100%25' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='2.4 0 0 0 -0.7 2.4 0 0 0 -0.7 2.4 0 0 0 -0.7 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E"),
+    radial-gradient(38% 46% at 6% 10%, rgba(244, 210, 122, 0.95) 0%, rgba(244, 210, 122, 0) 72%),
+    radial-gradient(36% 46% at 94% 6%, rgba(236, 118, 128, 0.85) 0%, rgba(236, 118, 128, 0) 72%),
+    radial-gradient(circle 380px at 90% 62%, rgba(173, 47, 56, 0) 0%, rgba(173, 47, 56, 0) 55%, rgba(173, 47, 56, 0.34) 78%, rgba(173, 47, 56, 0) 100%),
+    radial-gradient(42% 52% at 80% 100%, rgba(156, 32, 41, 0.8) 0%, rgba(156, 32, 41, 0) 72%),
+    radial-gradient(38% 48% at 2% 96%, rgba(246, 160, 120, 0.95) 0%, rgba(246, 160, 120, 0) 72%);
+  background-size: 200px 200px, auto, auto, auto, auto, auto;
+  background-blend-mode: overlay, normal, normal, normal, normal, normal;
   color: var(--ink);
   font-family: var(--sans);
 }
@@ -57,9 +68,11 @@
   overflow: hidden;
   border-radius: 26px;
   background: var(--paper);
+  /* Sombra gemela: la misma tarjeta, movida, en vino a baja opacidad. */
   box-shadow:
-    0 40px 90px -35px rgba(58, 24, 20, 0.55),
-    0 12px 28px -18px rgba(58, 24, 20, 0.35);
+    14px 16px 0 0 rgba(var(--wine-rgb), 0.2),
+    28px 32px 0 0 rgba(var(--wine-rgb), 0.1),
+    0 40px 90px -35px rgba(58, 24, 20, 0.5);
 }
 
 /* ---------- Panel de marca ---------- */
@@ -71,19 +84,8 @@
   align-items: center;
   text-align: center;
   padding: 48px 42px 34px;
-  background: linear-gradient(180deg, var(--wine-top) 0%, var(--wine) 52%, var(--wine-deep) 100%);
+  background: var(--wine);
   color: var(--paper);
-}
-
-/* Brillos suaves sobre el vino. Se quedan lejos del borde derecho para que
-   la onda (que usa el mismo degradado) empalme sin costuras. */
-.panelGlow {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(80% 62% at 16% 0%, rgba(244, 210, 122, 0.17) 0%, rgba(244, 210, 122, 0) 62%),
-    radial-gradient(70% 58% at 8% 100%, rgba(31, 26, 23, 0.22) 0%, rgba(31, 26, 23, 0) 70%);
 }
 
 .eyebrow {
@@ -112,12 +114,15 @@
 
 .logoBadge {
   box-sizing: border-box;
-  width: 116px;
-  height: 116px;
+  width: 128px;
+  height: 128px;
   padding: 7px;
   border-radius: 50%;
   background: var(--paper);
-  box-shadow: 0 14px 32px -12px rgba(31, 26, 23, 0.6);
+  box-shadow:
+    9px 10px 0 0 rgba(251, 248, 241, 0.2),
+    18px 20px 0 0 rgba(251, 248, 241, 0.1),
+    0 16px 30px -14px rgba(31, 26, 23, 0.55);
 }
 
 .logoBadge img {
@@ -158,26 +163,135 @@
   color: var(--paper);
 }
 
-/* Borde ondulado: una tira del mismo degradado del panel, recortada en
-   semicírculos con una máscara repetida. En escritorio cae al costado
-   derecho; en móvil, al pie. */
-.wave {
+/* Borde ondulado: una tira del color del panel, recortada en semicírculos
+   con una máscara repetida. En escritorio cae al costado derecho; en móvil,
+   al pie. Las dos "ecos" son la misma forma movida 12 y 24px, en vino a baja
+   opacidad: se leen como una sombra de la onda. */
+.wave,
+.waveEcho,
+.waveEcho2 {
   position: absolute;
-  top: 0;
   right: 0;
-  z-index: 2;
   width: 54px;
-  height: 100%;
-  /* Se solapa 2px con el panel para que no quede una línea clara en la unión. */
-  transform: translateX(calc(100% - 2px));
   pointer-events: none;
-  background: linear-gradient(180deg, var(--wine-top) 0%, var(--wine) 52%, var(--wine-deep) 100%);
   -webkit-mask-image: radial-gradient(circle at 2px 50%, #000 0 52px, transparent 53px);
   -webkit-mask-size: 100% 104px;
   -webkit-mask-repeat: repeat-y;
   mask-image: radial-gradient(circle at 2px 50%, #000 0 52px, transparent 53px);
   mask-size: 100% 104px;
   mask-repeat: repeat-y;
+}
+
+.wave {
+  top: 0;
+  z-index: 2;
+  height: 100%;
+  /* Se solapa 2px con el panel para que no quede una línea clara en la unión. */
+  transform: translateX(calc(100% - 2px));
+  background: var(--wine);
+}
+
+/* top negativo = múltiplo del periodo (104px) menos el desplazamiento, así
+   los festones quedan desplazados en vertical sin cortarse. */
+.waveEcho {
+  top: -92px;
+  z-index: 0;
+  height: calc(100% + 140px);
+  transform: translateX(calc(100% + 10px));
+  background: rgba(var(--wine-rgb), 0.3);
+}
+
+.waveEcho2 {
+  top: -80px;
+  z-index: 0;
+  height: calc(100% + 140px);
+  transform: translateX(calc(100% + 22px));
+  background: rgba(var(--wine-rgb), 0.14);
+}
+
+/* ---------- Mini tarjeta flotante ---------- */
+
+.miniCard {
+  position: relative;
+  box-sizing: border-box;
+  align-self: flex-end;
+  width: min(100%, 300px);
+  margin: 0 20px 6px 0;
+  padding: 18px 20px;
+  border-radius: 22px;
+  background: var(--paper);
+  color: var(--ink);
+  text-align: left;
+  transform: rotate(-2deg);
+  box-shadow:
+    8px 9px 0 0 rgba(251, 248, 241, 0.2),
+    16px 18px 0 0 rgba(251, 248, 241, 0.1),
+    0 18px 30px -14px rgba(31, 26, 23, 0.55);
+}
+
+.miniStar {
+  position: absolute;
+  top: -15px;
+  right: -12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--paper);
+  color: var(--wine);
+  box-shadow: 4px 5px 0 0 rgba(251, 248, 241, 0.25);
+}
+
+.miniTitle {
+  margin: 0;
+  padding-right: 16px;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.miniTitle em {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 500;
+  color: var(--wine);
+}
+
+.miniText {
+  margin: 8px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.miniChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.miniChips li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px 5px 9px;
+  border-radius: 999px;
+  background: var(--field);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.miniDot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
 }
 
 /* ---------- Panel del formulario ---------- */
@@ -188,8 +302,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 52px 58px;
-  background: var(--paper);
+  padding: 52px 58px 52px 76px;
+  /* Transparente: el papel lo pone la tarjeta, así las ecos de la onda
+     quedan visibles por debajo del formulario. */
+  background: transparent;
 }
 
 .formInner {
@@ -280,7 +396,7 @@
 
 .field label {
   display: block;
-  margin-bottom: 2px;
+  margin-bottom: 7px;
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.01em;
@@ -290,32 +406,43 @@
 .inputWrap { position: relative; }
 .pwWrap { position: relative; }
 
+/* Campos rellenos, bordes redondeados y una sombra gemela muy suave. */
 .field input,
 .selectInput {
   box-sizing: border-box;
   width: 100%;
-  height: 45px;
-  padding: 0 28px 0 0;
-  border: 0;
-  border-bottom: 1px solid var(--line-strong);
-  border-radius: 0;
-  background: transparent;
+  height: 50px;
+  padding: 0 44px 0 18px;
+  border: 1.5px solid transparent;
+  border-radius: 16px;
+  background-color: var(--field);
   color: var(--ink);
   font-family: var(--sans);
   font-size: 16px;
   outline: none;
-  transition: border-color 0.18s, box-shadow 0.18s;
+  box-shadow: 3px 4px 0 0 rgba(var(--wine-rgb), 0.07);
+  transition: border-color 0.18s, box-shadow 0.18s, background-color 0.18s;
 }
 
-.field input::placeholder { color: #a2958a; opacity: 1; }
+.field input::placeholder { color: #766a5f; opacity: 1; }
 
 .field input:hover,
-.selectInput:hover { border-bottom-color: var(--muted); }
+.selectInput:hover { border-color: var(--line-strong); }
+
+/* Campo válido: se tiñe de verde suave (el check lo pone <FieldCheck />). */
+.inputWrap:has(.fieldCheck) input,
+.pwWrap:has(.fieldCheck) input {
+  background-color: var(--ok-soft);
+  border-color: rgba(47, 107, 73, 0.35);
+}
 
 .field input:focus,
 .selectInput:focus {
-  border-bottom-color: var(--wine);
-  box-shadow: 0 1px 0 0 var(--wine);
+  background-color: #fff;
+  border-color: var(--wine);
+  box-shadow:
+    3px 4px 0 0 rgba(var(--wine-rgb), 0.22),
+    0 0 0 4px rgba(var(--wine-rgb), 0.1);
 }
 
 /* El autocompletado de Chrome no debe pintar el campo de amarillo. */
@@ -329,23 +456,23 @@
 .selectInput {
   appearance: none;
   -webkit-appearance: none;
-  padding-right: 30px;
+  padding-right: 44px;
   cursor: pointer;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7' viewBox='0 0 11 7'%3E%3Cpath d='M1 1l4.5 4.5L10 1' stroke='%236b5f55' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 2px center;
+  background-position: right 18px center;
   background-size: 11px 7px;
 }
 .selectInput option { background: var(--paper); color: var(--ink); }
 
-.pwWrap input { padding-right: 68px; }
+.pwWrap input { padding-right: 84px; }
 
 .eyeBtn {
   position: absolute;
-  right: 0;
-  bottom: 6px;
-  width: 32px;
-  height: 32px;
+  top: 50%;
+  right: 8px;
+  width: 34px;
+  height: 34px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -354,19 +481,27 @@
   background: transparent;
   color: var(--muted);
   cursor: pointer;
+  transform: translateY(-50%);
   transition: background-color 0.15s, color 0.15s;
 }
-.eyeBtn:hover { color: var(--ink); background: rgba(31, 26, 23, 0.06); }
+.eyeBtn:hover { color: var(--ink); background: rgba(31, 26, 23, 0.07); }
 
 .fieldCheck {
   position: absolute;
-  right: 2px;
-  bottom: 14px;
+  top: 50%;
+  right: 14px;
   display: flex;
-  color: var(--ok);
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--ok);
+  color: #fff;
   pointer-events: none;
+  transform: translateY(-50%);
 }
-.pwWrap .fieldCheck { right: 36px; }
+.pwWrap .fieldCheck { right: 48px; }
 
 .hint { margin-top: 6px; font-size: 11.5px; line-height: 1.4; color: var(--muted); }
 .hintOk { margin-top: 6px; font-size: 11.5px; font-weight: 600; color: var(--ok); }
@@ -417,8 +552,8 @@
 .btnRow {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-top: 8px;
+  gap: 14px;
+  margin-top: 10px;
 }
 
 .btn,
@@ -428,28 +563,39 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  min-height: 47px;
+  min-height: 50px;
   padding: 0 16px;
   border-radius: 999px;
   font-family: var(--sans);
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.18s, color 0.18s, border-color 0.18s, opacity 0.2s;
+  transition: background-color 0.18s, color 0.18s, border-color 0.18s, opacity 0.2s, transform 0.12s, box-shadow 0.12s;
 }
 
 .btn {
   border: 0;
   background: var(--wine);
   color: var(--paper);
+  /* Sombra gemela: el mismo botón, movido, a baja opacidad. */
+  box-shadow: 4px 5px 0 0 rgba(var(--wine-rgb), 0.28);
 }
-.btn:hover:not(:disabled) { background: var(--wine-deep); }
+.btn:hover:not(:disabled) {
+  background: var(--wine-deep);
+  transform: translate(2px, 2px);
+  box-shadow: 2px 3px 0 0 rgba(var(--wine-rgb), 0.28);
+}
+.btn:active:not(:disabled) {
+  transform: translate(4px, 5px);
+  box-shadow: 0 0 0 0 rgba(var(--wine-rgb), 0);
+}
 .btn:disabled { opacity: 0.6; cursor: default; }
 
 .btnGhost {
   border: 1.5px solid rgba(var(--wine-rgb), 0.5);
   background: transparent;
   color: var(--wine);
+  box-shadow: 4px 5px 0 0 rgba(var(--wine-rgb), 0.1);
 }
 .btnGhost:hover { border-color: var(--wine); background: rgba(var(--wine-rgb), 0.06); }
 
@@ -510,7 +656,9 @@
   border-radius: 22px;
   background: var(--paper);
   color: var(--ink);
-  box-shadow: 0 30px 70px -20px rgba(31, 26, 23, 0.55);
+  box-shadow:
+    10px 12px 0 0 rgba(251, 248, 241, 0.18),
+    0 30px 70px -20px rgba(31, 26, 23, 0.55);
 }
 
 .modalClose {
@@ -551,7 +699,7 @@
 /* ---------- Responsive ---------- */
 
 @media (max-width: 900px) {
-  .wrap { padding: 16px; }
+  .wrap { padding: 16px 30px 34px 16px; }
 
   .card {
     max-width: 440px;
@@ -559,7 +707,13 @@
     margin: auto;
     grid-template-columns: 1fr;
     border-radius: 22px;
+    box-shadow:
+      8px 9px 0 0 rgba(var(--wine-rgb), 0.2),
+      16px 18px 0 0 rgba(var(--wine-rgb), 0.1),
+      0 30px 60px -30px rgba(58, 24, 20, 0.5);
   }
+
+  .miniCard { display: none; }
 
   .panel { padding: 28px 24px 44px; }
   .eyebrow { font-size: 9.5px; }
@@ -569,27 +723,37 @@
   .tagline { max-width: 300px; margin-top: 7px; font-size: 13px; line-height: 1.5; }
 
   /* La onda pasa al pie del panel y se superpone al formulario. */
-  .wave {
+  .wave,
+  .waveEcho,
+  .waveEcho2 {
     top: auto;
     right: 0;
     bottom: 0;
     left: 0;
     width: 100%;
     height: 44px;
-    transform: translateY(calc(100% - 2px));
-    background: var(--wine-deep);
     -webkit-mask-image: radial-gradient(circle at 50% 2px, #000 0 42px, transparent 43px);
     -webkit-mask-size: 86px 100%;
     -webkit-mask-repeat: repeat-x;
     mask-image: radial-gradient(circle at 50% 2px, #000 0 42px, transparent 43px);
     mask-size: 86px 100%;
     mask-repeat: repeat-x;
-    filter: drop-shadow(0 7px 12px rgba(58, 24, 20, 0.10));
+  }
+  .wave { transform: translateY(calc(100% - 2px)); }
+  .waveEcho {
+    transform: translateY(calc(100% + 8px));
+    -webkit-mask-position: 22px 0;
+    mask-position: 22px 0;
+  }
+  .waveEcho2 {
+    transform: translateY(calc(100% + 16px));
+    -webkit-mask-position: 44px 0;
+    mask-position: 44px 0;
   }
 
   .formSide {
     align-items: flex-start;
-    padding: 58px 26px 34px;
+    padding: 68px 26px 34px;
   }
   .formInner { max-width: 360px; margin: 0 auto; }
   .title { font-size: 27px; }
@@ -597,13 +761,19 @@
 }
 
 @media (max-width: 420px) {
-  .wrap { padding: 10px; }
-  .card { border-radius: 20px; }
+  .wrap { padding: 10px 22px 26px 10px; }
+  .card {
+    border-radius: 20px;
+    box-shadow:
+      6px 7px 0 0 rgba(var(--wine-rgb), 0.2),
+      12px 14px 0 0 rgba(var(--wine-rgb), 0.1),
+      0 24px 50px -26px rgba(58, 24, 20, 0.5);
+  }
   .panel { padding: 24px 20px 40px; }
   .logoBadge { width: 76px; height: 76px; }
   .brand { font-size: 34px; }
   .tagline { font-size: 12.5px; }
-  .formSide { padding: 54px 20px 30px; }
+  .formSide { padding: 64px 20px 30px; }
   .title { font-size: 25px; }
   .btn,
   .btnGhost { padding: 0 10px; font-size: 13.5px; }
@@ -614,20 +784,20 @@
   .logoBadge { width: 68px; height: 68px; padding: 4px; margin-top: 10px; }
   .brand { margin-top: 8px; font-size: 30px; }
   .tagline { display: none; }
-  .formSide { padding: 50px 26px 28px; }
+  .formSide { padding: 62px 26px 28px; }
   .title { font-size: 25px; }
   .form { margin-top: 20px; gap: 14px; }
 }
 
 /* Portátiles bajos: se compacta la tarjeta para que quepa sin scroll. */
 @media (min-width: 901px) and (max-height: 760px) {
-  .wrap { padding: 18px; }
+  .wrap { padding: 18px 46px 46px 18px; }
   .card { min-height: 540px; }
   .panel { padding: 28px 32px 22px; }
-  .logoBadge { width: 88px; height: 88px; }
+  .logoBadge { width: 92px; height: 92px; }
   .brand { margin-top: 12px; font-size: 44px; }
   .tagline { margin-top: 7px; font-size: 13px; }
-  .formSide { padding: 30px 46px; }
+  .formSide { padding: 30px 46px 30px 66px; }
   .title { font-size: 27px; }
   .form { margin-top: 20px; gap: 13px; }
 }
@@ -635,6 +805,9 @@
 @media (prefers-reduced-motion: reduce) {
   .formInner,
   .shake { animation: none; }
+
+  .btn:hover:not(:disabled),
+  .btn:active:not(:disabled) { transform: none; }
 
   .btn,
   .btnGhost,
