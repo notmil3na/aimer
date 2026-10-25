@@ -22,15 +22,6 @@ const SECURITY_QUESTIONS = [
   "¿Cómo se llamaba tu mejor amigo de la infancia?",
 ];
 
-function ArrowRight() {
-  return (
-    <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M5 12h14M13 6l6 6-6 6" />
-    </svg>
-  );
-}
-
 function EyeIcon({ off }) {
   return (
     <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none"
@@ -42,38 +33,13 @@ function EyeIcon({ off }) {
   );
 }
 
-/* Calendario decorativo del panel visual. Los bloques imitan una semana de
-   clases; es puramente gráfico (aria-hidden), así que no necesita datos reales. */
-const MOCK_WEEK = [
-  { day: "Lun", blocks: [{ top: 16, height: 64, color: "#F4D27A" }, { top: 120, height: 80, color: "#1F1A17" }] },
-  { day: "Mar", blocks: [{ top: 48, height: 96, color: "#2F6F6A" }, { top: 180, height: 56, color: "#F2B8B0" }] },
-  { day: "Mié", blocks: [{ top: 16, height: 64, color: "#F4D27A" }, { top: 120, height: 80, color: "#1F1A17" }] },
-  { day: "Jue", blocks: [{ top: 48, height: 96, color: "#2F6F6A" }, { top: 168, height: 64, color: "#A4262C" }] },
-  { day: "Vie", blocks: [{ top: 80, height: 72, color: "#F2B8B0" }, { top: 176, height: 48, color: "#F4D27A" }] },
-];
-
-function ScheduleMock() {
+/* Marca verde que aparece cuando el campo ya tiene un valor válido.
+   Es solo un apoyo visual: la validación real sigue en validateStep1/2. */
+function FieldCheck() {
   return (
-    <div className={styles.mock} aria-hidden="true">
-      <div className={styles.mockHead}>
-        {MOCK_WEEK.map((d) => (
-          <div key={d.day} className={styles.mockDay}>{d.day}</div>
-        ))}
-      </div>
-      <div className={styles.mockGrid}>
-        {MOCK_WEEK.map((d) => (
-          <div key={d.day} className={styles.mockCol}>
-            {d.blocks.map((b) => (
-              <span
-                key={`${d.day}-${b.top}`}
-                className={styles.mockBlock}
-                style={{ top: b.top, height: b.height, background: b.color }}
-              />
-            ))}
-          </div>
-        ))}
-      </div>
-    </div>
+    <span className={styles.fieldCheck} aria-hidden="true">
+      <IconCheck size={15} />
+    </span>
   );
 }
 
@@ -160,12 +126,15 @@ function ForgotPasswordModal({ onClose }) {
             <p className={styles.modalText}>Escribe tu usuario para ver tu pregunta de seguridad.</p>
             <div className={styles.field}>
               <label htmlFor={`${uid}-user`}>Usuario</label>
-              <input id={`${uid}-user`} value={username} onChange={(e) => setUsername(e.target.value)}
-                placeholder="tu usuario" autoComplete="username" autoFocus />
+              <div className={styles.inputWrap}>
+                <input id={`${uid}-user`} value={username} onChange={(e) => setUsername(e.target.value)}
+                  placeholder="tu usuario" autoComplete="username" autoFocus />
+                {username.trim() && <FieldCheck />}
+              </div>
             </div>
             {error && <p className={styles.error} role="alert"><IconWarning size={12} /> {error}</p>}
             <button type="submit" className={styles.btn} disabled={loading}>
-              {loading ? "Buscando..." : <>Continuar <ArrowRight /></>}
+              {loading ? "Buscando..." : "Continuar"}
             </button>
           </form>
         )}
@@ -175,20 +144,26 @@ function ForgotPasswordModal({ onClose }) {
             <p className={styles.modalText}>{question}</p>
             <div className={styles.field}>
               <label htmlFor={`${uid}-answer`}>Tu respuesta</label>
-              <input id={`${uid}-answer`} type="password" value={answer}
-                onChange={(e) => setAnswer(e.target.value)}
-                placeholder="la que configuraste" autoComplete="off" autoFocus />
+              <div className={styles.inputWrap}>
+                <input id={`${uid}-answer`} type="password" value={answer}
+                  onChange={(e) => setAnswer(e.target.value)}
+                  placeholder="la que configuraste" autoComplete="off" autoFocus />
+                {answer.trim().length >= 4 && <FieldCheck />}
+              </div>
             </div>
             <div className={styles.field}>
               <label htmlFor={`${uid}-newpw`}>Nueva contraseña</label>
-              <input id={`${uid}-newpw`} type="password" value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="mín. 6 caracteres" autoComplete="new-password" />
+              <div className={styles.inputWrap}>
+                <input id={`${uid}-newpw`} type="password" value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="mín. 6 caracteres" autoComplete="new-password" />
+                {newPassword.length >= 6 && <FieldCheck />}
+              </div>
             </div>
             {error && <p className={styles.error} role="alert"><IconWarning size={12} /> {error}</p>}
             {success && <p className={styles.successMsg} role="status"><IconCheck size={12} /> {success}</p>}
             <button type="submit" className={styles.btn} disabled={loading || !!success}>
-              {loading ? "Restableciendo..." : <>Restablecer contraseña <ArrowRight /></>}
+              {loading ? "Restableciendo..." : "Restablecer contraseña"}
             </button>
           </form>
         )}
@@ -360,24 +335,26 @@ export default function Login({ onLogin }) {
 
   return (
     <div className={styles.wrap}>
-      <div className={styles.layout}>
+      <div className={styles.card}>
 
-        {/* ===== Panel visual ===== */}
+        {/* ===== Panel de bienvenida ===== */}
         <aside className={styles.panel}>
+          <span className={styles.panelGlow} aria-hidden="true" />
+          <p className={styles.welcome}>Bienvenido a</p>
+
           <div className={styles.hero}>
-            {isRegister ? (
-              <h1 className={styles.heroTitle}>Empieza, <em>todo en uno.</em></h1>
-            ) : (
-              <>
-                <h1 className={styles.heroBrand}>Aimer</h1>
-                <p className={styles.heroSub}>Para llegar a donde quieres llegar.</p>
-              </>
-            )}
+            <div className={styles.logoBadge}>
+              <img src="/aimer.svg" alt="" width="96" height="96" />
+            </div>
+            <h1 className={styles.brand}>Aimer</h1>
+            <p className={styles.tagline}>
+              Tu semestre, en orden. Plan de estudios, horarios, notas y todo
+              lo que necesitas para llegar más lejos.
+            </p>
           </div>
 
-          <ScheduleMock />
-
           <p className={styles.heroFoot}>por y para estudiantes</p>
+          <span className={styles.wave} aria-hidden="true" />
         </aside>
 
         {/* ===== Panel del formulario ===== */}
@@ -391,12 +368,7 @@ export default function Login({ onLogin }) {
             ) : (
               <>
                 <h2 className={styles.title}>Crea tu <em>cuenta</em></h2>
-                <p className={styles.switchLine}>
-                  o{" "}
-                  <button type="button" className={styles.linkBtn} onClick={() => switchTab("login")}>
-                    inicia sesión
-                  </button>
-                </p>
+                <p className={styles.sub}>Solo toma un minuto.</p>
                 <div className={styles.steps} aria-label={`Paso ${step} de 2`}>
                   <span>Paso {step} de 2</span>
                   <div className={styles.stepBars} aria-hidden="true">
@@ -415,14 +387,19 @@ export default function Login({ onLogin }) {
               <form onSubmit={handleLogin} className={styles.form}>
                 <div className={styles.field}>
                   <label htmlFor={fid("l-user")}>Usuario</label>
-                  <input id={fid("l-user")} value={form.username} onChange={set("username")}
-                    placeholder="tu usuario" autoComplete="username" />
+                  <div className={styles.inputWrap}>
+                    <input id={fid("l-user")} value={form.username} onChange={set("username")}
+                      placeholder="tu usuario" autoComplete="username" />
+                    {form.username.trim() && <FieldCheck />}
+                  </div>
                 </div>
+
                 <div className={styles.field}>
                   <label htmlFor={fid("l-pw")}>Contraseña</label>
                   <div className={styles.pwWrap}>
                     <input id={fid("l-pw")} type={showPw ? "text" : "password"} value={form.password}
                       onChange={set("password")} placeholder="tu contraseña" autoComplete="current-password" />
+                    {form.password.length >= 6 && <FieldCheck />}
                     <button type="button" className={styles.eyeBtn} onClick={() => setShowPw((v) => !v)}
                       aria-label={showPw ? "Ocultar contraseña" : "Mostrar contraseña"} aria-pressed={showPw}>
                       <EyeIcon off={showPw} />
@@ -441,20 +418,14 @@ export default function Login({ onLogin }) {
                   </button>
                 </div>
 
-                <button type="submit" className={styles.enterBtn} disabled={loading}>
-                  <span>{loading ? "Cargando..." : "Entrar"}</span>
-                  <ArrowRight />
-                </button>
-
-                <div className={styles.firstTime}>
-                  <span aria-hidden="true" />
-                  ¿Primera vez?
-                  <span aria-hidden="true" />
+                <div className={styles.btnRow}>
+                  <button type="submit" className={styles.btn} disabled={loading}>
+                    {loading ? "Entrando..." : "Entrar"}
+                  </button>
+                  <button type="button" className={styles.btnGhost} onClick={() => switchTab("register")}>
+                    Crear cuenta
+                  </button>
                 </div>
-
-                <button type="button" className={styles.createBtn} onClick={() => switchTab("register")}>
-                  Crear una cuenta
-                </button>
               </form>
             )}
 
@@ -463,38 +434,55 @@ export default function Login({ onLogin }) {
               <form onSubmit={handleRegister} className={styles.form} noValidate>
                 {step === 1 && (
                   <>
-                    <div className={styles.row2}>
-                      <div className={styles.field}>
-                        <label htmlFor={fid("r-name")}>Nombre</label>
+                    <div className={styles.field}>
+                      <label htmlFor={fid("r-name")}>Nombre</label>
+                      <div className={styles.inputWrap}>
                         <input id={fid("r-name")} value={form.name} onChange={set("name")}
                           placeholder="tu nombre" autoComplete="name" />
+                        {form.name.trim() && <FieldCheck />}
                       </div>
-                      <div className={styles.field}>
-                        <label htmlFor={fid("r-user")}>Usuario</label>
+                    </div>
+
+                    <div className={styles.field}>
+                      <label htmlFor={fid("r-user")}>Usuario</label>
+                      <div className={styles.inputWrap}>
                         <input id={fid("r-user")} value={form.username} onChange={set("username")}
                           placeholder="sin espacios" autoComplete="username" />
+                        {usernameStatus === "available" && <FieldCheck />}
+                      </div>
+                      {usernameStatus === "checking" && <span className={styles.hint}>Verificando...</span>}
+                      {usernameStatus === "available" && <span className={styles.hintOk}>Usuario disponible</span>}
+                      {usernameStatus === "taken" && <span className={styles.hintError}>Ese usuario ya está en uso</span>}
+                    </div>
+
+                    <div className={styles.field}>
+                      <label htmlFor={fid("r-pw")}>Contraseña</label>
+                      <div className={styles.pwWrap}>
+                        <input id={fid("r-pw")} type={showPw ? "text" : "password"} value={form.password}
+                          onChange={set("password")} placeholder="mín. 6 caracteres" autoComplete="new-password" />
+                        {form.password.length >= 6 && <FieldCheck />}
+                        <button type="button" className={styles.eyeBtn} onClick={() => setShowPw((v) => !v)}
+                          aria-label={showPw ? "Ocultar contraseña" : "Mostrar contraseña"} aria-pressed={showPw}>
+                          <EyeIcon off={showPw} />
+                        </button>
                       </div>
                     </div>
-                    <div className={styles.hintSlot} aria-live="polite">
-                      {usernameStatus === "checking" && <span className={styles.fieldHint}>Verificando...</span>}
-                      {usernameStatus === "available" && <span className={styles.fieldOk}>Usuario disponible</span>}
-                      {usernameStatus === "taken" && <span className={styles.fieldError}>Ese usuario ya está en uso</span>}
-                    </div>
-                    <div className={styles.row2}>
-                      <div className={styles.field}>
-                        <label htmlFor={fid("r-pw")}>Contraseña</label>
-                        <input id={fid("r-pw")} type="password" value={form.password} onChange={set("password")}
-                          placeholder="mín. 6 caracteres" autoComplete="new-password" />
-                      </div>
-                      <div className={styles.field}>
-                        <label htmlFor={fid("r-pc")}>Confirmar</label>
+
+                    <div className={styles.field}>
+                      <label htmlFor={fid("r-pc")}>Confirmar contraseña</label>
+                      <div className={styles.inputWrap}>
                         <input id={fid("r-pc")} type="password" value={form.confirm} onChange={set("confirm")}
                           placeholder="repítela" autoComplete="new-password" />
+                        {form.confirm && form.confirm === form.password && <FieldCheck />}
                       </div>
                     </div>
-                    <button type="submit" className={styles.btn}>
-                      Continuar <ArrowRight />
-                    </button>
+
+                    <div className={styles.btnRow}>
+                      <button type="submit" className={styles.btn}>Continuar</button>
+                      <button type="button" className={styles.btnGhost} onClick={() => switchTab("login")}>
+                        Iniciar sesión
+                      </button>
+                    </div>
                   </>
                 )}
 
@@ -533,18 +521,22 @@ export default function Login({ onLogin }) {
                         ))}
                       </select>
                     </div>
+
                     <div className={styles.field}>
                       <label htmlFor={fid("r-sa")}>Tu respuesta</label>
-                      <input id={fid("r-sa")} type="password" value={form.securityAnswer} onChange={set("securityAnswer")}
-                        placeholder="mín. 4 caracteres" autoComplete="off" />
+                      <div className={styles.inputWrap}>
+                        <input id={fid("r-sa")} type="password" value={form.securityAnswer} onChange={set("securityAnswer")}
+                          placeholder="mín. 4 caracteres" autoComplete="off" />
+                        {form.securityAnswer.trim().length >= 4 && <FieldCheck />}
+                      </div>
                     </div>
 
                     <div className={styles.btnRow}>
+                      <button type="submit" className={styles.btn} disabled={loading}>
+                        {loading ? "Creando..." : "Crear cuenta"}
+                      </button>
                       <button type="button" className={styles.btnGhost} onClick={() => { setStep(1); setError(""); }}>
                         Atrás
-                      </button>
-                      <button type="submit" className={styles.btn} disabled={loading}>
-                        {loading ? "Creando cuenta..." : <>Crear cuenta <ArrowRight /></>}
                       </button>
                     </div>
                   </>
