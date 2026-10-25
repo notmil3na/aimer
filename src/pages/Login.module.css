@@ -859,6 +859,21 @@
 }
 
 @media (max-width: 600px) {
+  .wrap {
+    padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+    background-color: var(--paper);
+    background-image: none;
+  }
+
+  .card {
+    width: 100%;
+    max-width: none;
+    min-height: 100%;
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
   .panel {
     gap: 0;
     padding: 18px 20px;
