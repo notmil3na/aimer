@@ -135,8 +135,10 @@
 .tagline {
   max-width: 320px;
   margin: 14px auto 0;
+  font-weight: 700;
   font-size: 14.5px;
   line-height: 1.7;
+  text-align: center;
   color: rgba(251, 248, 241, 0.72);
 }
 

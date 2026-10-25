@@ -348,8 +348,7 @@ export default function Login({ onLogin }) {
             </div>
             <h1 className={styles.brand}>Aimer</h1>
             <p className={styles.tagline}>
-              Tu semestre, en orden. Plan de estudios, horarios, notas y todo
-              lo que necesitas para llegar más lejos.
+              Sobrevive al semestre con un poquito más de orden
             </p>
           </div>
 
