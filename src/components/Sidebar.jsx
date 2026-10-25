@@ -38,6 +38,31 @@ export default function Sidebar({ user, tabs, activeTab, onTabChange, onLogout, 
     return () => window.removeEventListener("resize", measure);
   }, [measure]);
 
+  // ── Ocultar la barra al bajar, mostrarla al subir ─────────────────────────
+  const wrapRef = useRef(null);
+  const [navHidden, setNavHidden] = useState(false);
+
+  useEffect(() => {
+    const lastTop = new WeakMap(); // último scrollTop visto, por cada elemento con scroll
+    const onScroll = (e) => {
+      const el = e.target;
+      if (!(el instanceof Element)) return;          // ignora el scroll del documento
+      if (wrapRef.current?.contains(el)) return;     // ignora el scroll horizontal de la propia barra
+      const top  = el.scrollTop;
+      const prev = lastTop.get(el) ?? top;
+      const delta = top - prev;
+      if (Math.abs(delta) < 8) return;               // evita parpadeos por movimientos mínimos
+      lastTop.set(el, top);
+      if (top < 40) setNavHidden(false);             // cerca del inicio: siempre visible
+      else setNavHidden(delta > 0);                  // bajando = oculta, subiendo = muestra
+    };
+    // scroll no "burbujea", pero sí se puede escuchar en fase de captura
+    document.addEventListener("scroll", onScroll, true);
+    return () => document.removeEventListener("scroll", onScroll, true);
+  }, []);
+
+  useEffect(() => { setNavHidden(false); }, [activeTab]); // al cambiar de pestaña, reaparece
+
   return (
     <>
     <aside className={styles.sidebar}>
@@ -105,7 +130,7 @@ export default function Sidebar({ user, tabs, activeTab, onTabChange, onLogout, 
     </aside>
 
     {/* Barra inferior: solo se muestra en pantallas ≤ 900px (ver CSS) */}
-    <div className={styles.bottomWrap}>
+    <div ref={wrapRef} className={`${styles.bottomWrap} ${navHidden ? styles.bottomHidden : ""}`}>
       <nav className={styles.bottomNav} ref={navRef} aria-label="Navegación principal">
         <div className={styles.bottomTrack}>
           <span

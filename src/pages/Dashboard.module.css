@@ -256,7 +256,7 @@
     padding: 0;
     gap: 0;
     background: var(--bg);
-    --bottom-nav-h: 70px; /* alto de la barra inferior (8 + 52 + 10) */
+    --bottom-nav-h: 76px; /* espacio que ocupa la barra flotante: 52 (píldora) + 10 (margen) + 14 (aire) */
   }
 
   .main {
@@ -269,7 +269,7 @@
     border: none;
     border-top: 1px solid var(--border);
     box-shadow: none;
-    padding-bottom: 0;
+    padding-bottom: calc(env(safe-area-inset-bottom) + var(--bottom-nav-h)); /* para que la barra no tape el final del contenido */
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
   }
