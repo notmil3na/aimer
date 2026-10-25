@@ -14,15 +14,13 @@ const DEFAULT_THEME_COLORS = {
 };
 
 // Contenido de la mini tarjeta del panel de bienvenida (reemplázalo a gusto).
-// Los puntos de color usan los mismos tonos que los temas por defecto de la app.
+// Los círculos de colores usan los mismos tonos que los temas por defecto.
 const MINI_CARD = {
-  title: <>Una semana <em>sin enredos</em></>,
+  line1: "Una semana",
+  line2: ["sin", "enredos"],
+  icon: "/aimer.svg",
   text: "Horario, notas y asignaciones en un solo lugar.",
-  chips: [
-    { label: "Horario", color: DEFAULT_THEME_COLORS.cursando },
-    { label: "Notas", color: DEFAULT_THEME_COLORS.aprobada },
-    { label: "Tareas", color: DEFAULT_THEME_COLORS.faltante },
-  ],
+  dots: [DEFAULT_THEME_COLORS.cursando, DEFAULT_THEME_COLORS.aprobada, DEFAULT_THEME_COLORS.faltante],
 };
 
 // Preguntas de seguridad para la recuperación de cuenta (paso 2 del registro).
@@ -351,40 +349,57 @@ export default function Login({ onLogin }) {
 
         {/* ===== Panel de bienvenida ===== */}
         <aside className={styles.panel}>
-          <p className={styles.eyebrow}>
-            <svg aria-hidden="true" viewBox="0 0 16 16" width="13" height="13">
-              <path d="m8 1 1.8 4.6L14.5 7l-4.7 1.5L8 13l-1.8-4.5L1.5 7l4.7-1.4L8 1Z" fill="currentColor" />
-            </svg>
-            <span>Por y para estudiantes</span>
-          </p>
+          <span className={styles.panelArt} aria-hidden="true">
+            <span className={styles.artA} />
+            <span className={styles.artB} />
+            <span className={styles.artRing} />
+          </span>
+
+          <header className={styles.panelHead}>
+            <div className={styles.logoBadge}>
+              <img src="/aimer.svg" alt="" width="68" height="68" />
+            </div>
+            <div className={styles.brandBlock}>
+              <p className={styles.brand}>Aimer</p>
+              <p className={styles.eyebrow}>
+                <svg aria-hidden="true" viewBox="0 0 16 16" width="13" height="13">
+                  <path d="m8 1 1.8 4.6L14.5 7l-4.7 1.5L8 13l-1.8-4.5L1.5 7l4.7-1.4L8 1Z" fill="currentColor" />
+                </svg>
+                <span>Por y para estudiantes</span>
+              </p>
+            </div>
+          </header>
 
           <div className={styles.hero}>
-            <div className={styles.logoBadge}>
-              <img src="/aimer.svg" alt="" width="96" height="96" />
-            </div>
-            <h1 className={styles.brand}>Aimer</h1>
-            <p className={styles.tagline}>
-              Sobrevive al semestre
-              <span className={styles.taglineAccent}>con un poquito más de orden</span>
-            </p>
+            <h1 className={styles.headline}>
+              <span>Sobrevive</span>
+              <span className={styles.headlineIt}>al semestre</span>
+            </h1>
+            <p className={styles.tagline}>con un poquito más de orden</p>
           </div>
 
-          <div className={styles.miniCard}>
+          <div className={styles.miniWrap}>
+            <div className={styles.miniCard}>
+              <p className={styles.miniTitle}>
+                {MINI_CARD.line1}
+                <br />
+                <em>{MINI_CARD.line2[0]}</em>
+                {MINI_CARD.icon && <img className={styles.miniIcon} src={MINI_CARD.icon} alt="" />}
+                <em>{MINI_CARD.line2[1]}</em>
+              </p>
+              <div className={styles.miniFoot}>
+                <p className={styles.miniText}>{MINI_CARD.text}</p>
+                <span className={styles.miniStack} aria-hidden="true">
+                  {MINI_CARD.dots.map((d) => <i key={d} style={{ background: d }} />)}
+                  <i className={styles.miniMore}>+</i>
+                </span>
+              </div>
+            </div>
             <span className={styles.miniStar} aria-hidden="true">
               <svg viewBox="0 0 16 16" width="18" height="18">
                 <path d="m8 1 1.8 4.6L14.5 7l-4.7 1.5L8 13l-1.8-4.5L1.5 7l4.7-1.4L8 1Z" fill="currentColor" />
               </svg>
             </span>
-            <p className={styles.miniTitle}>{MINI_CARD.title}</p>
-            <p className={styles.miniText}>{MINI_CARD.text}</p>
-            <ul className={styles.miniChips}>
-              {MINI_CARD.chips.map((c) => (
-                <li key={c.label}>
-                  <span className={styles.miniDot} style={{ background: c.color }} aria-hidden="true" />
-                  {c.label}
-                </li>
-              ))}
-            </ul>
           </div>
 
           <span className={styles.waveEcho2} aria-hidden="true" />
