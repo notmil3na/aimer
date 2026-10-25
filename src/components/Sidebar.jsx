@@ -33,7 +33,7 @@ export default function Sidebar({ user, tabs, activeTab, onTabChange, onLogout, 
       {}
       <div className={styles.themeIndicator}>
         <span className={styles.themeDot} style={{ background: theme.accent }} />
-        <span className={styles.themeLabel}>Tema {theme.name}</span>
+        <span className={styles.themeLabel}>{theme.name}</span>
       </div>
 
       {}
