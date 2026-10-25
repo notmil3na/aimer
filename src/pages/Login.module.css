@@ -199,16 +199,13 @@
 }
 .headline span { display: block; }
 .headlineIt {
-  padding-left: 0.7em;
   font-style: italic;
   color: #f4d27a;
 }
 
 .tagline {
-  position: relative;
   max-width: 320px;
-  margin: 26px 0 0;
-  padding-top: 18px;
+  margin: 6px 0 0;
   font-family: var(--serif);
   font-style: italic;
   font-weight: 400;
@@ -216,14 +213,10 @@
   line-height: 1.25;
   color: rgba(251, 248, 241, 0.92);
 }
-.tagline::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 44px;
-  height: 2px;
-  background: #f4d27a;
+.taglineUnderline {
+  text-decoration: underline;
+  text-decoration-color: #f4d27a;
+  text-underline-offset: 3px;
 }
 
 /* Borde ondulado: una tira del color del panel, recortada en semicírculos
@@ -796,7 +789,7 @@
   .eyebrow { font-size: 12px; }
   .hero { margin: 0; }
   .headline { font-size: 44px; }
-  .tagline { margin-top: 16px; padding-top: 14px; font-size: 18px; }
+  .tagline { margin-top: 6px; font-size: 18px; }
 
   /* La onda pasa al pie del panel y se superpone al formulario. */
   .wave,
@@ -873,7 +866,7 @@
   .logoBadge { width: 56px; height: 56px; }
   .brand { font-size: 34px; }
   .headline { font-size: 56px; }
-  .tagline { margin-top: 18px; padding-top: 14px; font-size: 19px; }
+  .tagline { margin-top: 6px; font-size: 19px; }
   .formSide { padding: 30px 46px 30px 66px; }
   .title { font-size: 27px; }
   .form { margin-top: 20px; gap: 13px; }

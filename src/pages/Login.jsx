@@ -375,7 +375,9 @@ export default function Login({ onLogin }) {
               <span>Sobrevive</span>
               <span className={styles.headlineIt}>al semestre</span>
             </h1>
-            <p className={styles.tagline}>con un poquito más de orden</p>
+            <p className={styles.tagline}>
+              con un <span className={styles.taglineUnderline}>poquito más</span> de orden
+            </p>
           </div>
 
           <div className={styles.miniWrap}>
