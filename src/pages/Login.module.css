@@ -223,7 +223,7 @@
   height: 0.65em;
   margin-left: 0.18em;
   color: #f4d27a;
-  vertical-align: 0.08em;
+  vertical-align: middle;
 }
 
 /* Borde ondulado: una tira del color del panel, recortada en semicírculos
