@@ -340,7 +340,12 @@ export default function Login({ onLogin }) {
         {/* ===== Panel de bienvenida ===== */}
         <aside className={styles.panel}>
           <span className={styles.panelGlow} aria-hidden="true" />
-          <p className={styles.welcome}>Bienvenido a</p>
+          <p className={styles.eyebrow}>
+            <svg aria-hidden="true" viewBox="0 0 16 16" width="13" height="13">
+              <path d="m8 1 1.8 4.6L14.5 7l-4.7 1.5L8 13l-1.8-4.5L1.5 7l4.7-1.4L8 1Z" fill="currentColor" />
+            </svg>
+            <span>Por y para estudiantes</span>
+          </p>
 
           <div className={styles.hero}>
             <div className={styles.logoBadge}>
@@ -348,11 +353,11 @@ export default function Login({ onLogin }) {
             </div>
             <h1 className={styles.brand}>Aimer</h1>
             <p className={styles.tagline}>
-              Sobrevive al semestre con un poquito más de orden
+              Sobrevive al semestre
+              <span className={styles.taglineAccent}>con un poquito más de orden</span>
             </p>
           </div>
 
-          <p className={styles.heroFoot}>por y para estudiantes</p>
           <span className={styles.wave} aria-hidden="true" />
         </aside>
 
