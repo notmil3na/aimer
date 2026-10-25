@@ -217,6 +217,14 @@
   text-decoration-color: #f4d27a;
   text-underline-offset: 3px;
 }
+.taglineStar {
+  display: inline-block;
+  width: 0.65em;
+  height: 0.65em;
+  margin-left: 0.18em;
+  color: #f4d27a;
+  vertical-align: 0.08em;
+}
 
 /* Borde ondulado: una tira del color del panel, recortada en semicírculos
    con una máscara repetida. En escritorio cae al costado derecho; en móvil,

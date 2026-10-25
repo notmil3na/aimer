@@ -378,6 +378,9 @@ export default function Login({ onLogin }) {
             </h1>
             <p className={styles.tagline}>
               con un <span className={styles.taglineUnderline}>poquito más</span> de orden
+              <svg className={styles.taglineStar} aria-hidden="true" viewBox="0 0 16 16">
+                <path d="m8 1 1.8 4.6L14.5 7l-4.7 1.5L8 13l-1.8-4.5L1.5 7l4.7-1.4L8 1Z" fill="currentColor" />
+              </svg>
             </p>
           </div>
 

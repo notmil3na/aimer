@@ -1,0 +1,1 @@
+import{C as n}from"./index-c78d12dc.js";import{S as i}from"./semesterCountdown-a51eb9e3.js";const s={"Universidad del Magdalena":["Ingeniería de Sistemas","Hotelería y Turismo","Ingeniería Industrial","Negocios Internacionales"]};function d(r){const e=n.indexOf(r),a=n.indexOf(i);return e===-1||a===-1?1:Math.max(1,a-e+1)}export{s as U,d as a};
