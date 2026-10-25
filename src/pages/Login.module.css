@@ -860,7 +860,7 @@
 
 @media (max-width: 600px) {
   .wrap {
-    padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+    padding: 0;
     background-color: var(--paper);
     background-image: none;
   }
@@ -870,19 +870,24 @@
     max-width: none;
     min-height: 100%;
     margin: 0;
+    grid-template-rows: auto auto;
+    align-content: start;
     border-radius: 0;
     box-shadow: none;
   }
 
   .panel {
+    box-sizing: border-box;
+    min-height: 120px;
+    justify-content: center;
     gap: 0;
-    padding: 18px 20px;
+    padding: calc(env(safe-area-inset-top) + 14px) 20px 14px;
   }
 
   .hero,
   .panelArt { display: none; }
 
-  .formSide { padding: 68px 20px 28px; }
+  .formSide { padding: 68px 20px calc(28px + env(safe-area-inset-bottom)); }
 }
 
 /* Portátiles bajos: se compacta la tarjeta para que quepa sin scroll. */
