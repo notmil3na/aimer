@@ -1,3 +1,4 @@
+import { useRef, useState, useCallback, useEffect, useLayoutEffect } from "react";
 import { APP_THEMES } from "../App";
 import styles from "./Sidebar.module.css";
 import { IconStar, IconSun, IconMoon, IconLogout } from "./Icons";
@@ -14,7 +15,31 @@ export default function Sidebar({ user, tabs, activeTab, onTabChange, onLogout, 
     onUpdateUser({ ...user, appMode: next });
   };
 
+  // ── Barra inferior (móvil): indicador deslizante ──────────────────────────
+  const navRef  = useRef(null);   // contenedor con scroll horizontal
+  const btnRefs = useRef({});     // un ref por botón, indexado por tab.id
+  const [pill, setPill] = useState({ x: 0, w: 0, ready: false });
+
+  const measure = useCallback(() => {
+    const btn = btnRefs.current[activeTab];
+    const nav = navRef.current;
+    if (!btn || !nav || btn.offsetWidth === 0) return; // en escritorio la barra está oculta
+    setPill({ x: btn.offsetLeft, w: btn.offsetWidth, ready: true });
+    // centra la pestaña activa dentro de la barra
+    const target = btn.offsetLeft - (nav.clientWidth - btn.offsetWidth) / 2;
+    nav.scrollTo({ left: Math.max(0, target), behavior: "smooth" });
+  }, [activeTab]);
+
+  useLayoutEffect(() => { measure(); }, [measure, tabs]);
+
+  useEffect(() => {
+    window.addEventListener("resize", measure);
+    if (document.fonts?.ready) document.fonts.ready.then(measure);
+    return () => window.removeEventListener("resize", measure);
+  }, [measure]);
+
   return (
+    <>
     <aside className={styles.sidebar}>
       {}
       <div className={styles.brandRow}>
@@ -78,5 +103,41 @@ export default function Sidebar({ user, tabs, activeTab, onTabChange, onLogout, 
         })}
       </nav>
     </aside>
+
+    {/* Barra inferior: solo se muestra en pantallas ≤ 900px (ver CSS) */}
+    <div className={styles.bottomWrap}>
+      <nav className={styles.bottomNav} ref={navRef} aria-label="Navegación principal">
+        <div className={styles.bottomTrack}>
+          <span
+            className={styles.bottomIndicator}
+            aria-hidden="true"
+            style={{
+              width: pill.w,
+              transform: `translateX(${pill.x}px)`,
+              opacity: pill.ready ? 1 : 0,
+            }}
+          />
+          {tabs.map(t => {
+            const IconComp = t.icon;
+            const isActive = activeTab === t.id;
+            return (
+              <button
+                key={t.id}
+                ref={el => { btnRefs.current[t.id] = el; }}
+                className={`${styles.bottomBtn} ${isActive ? styles.bottomActive : ""}`}
+                onClick={() => onTabChange(t.id)}
+                aria-current={isActive ? "page" : undefined}
+                aria-label={t.label}
+                title={t.label}
+              >
+                {IconComp ? <IconComp size={18} /> : t.icon}
+                {isActive && <span className={styles.bottomLabel}>{t.label}</span>}
+              </button>
+            );
+          })}
+        </div>
+      </nav>
+    </div>
+    </>
   );
 }

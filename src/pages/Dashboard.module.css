@@ -21,7 +21,7 @@
 .toast {
   position: fixed;
   right: 20px;
-  bottom: calc(env(safe-area-inset-bottom) + 20px);
+  bottom: calc(env(safe-area-inset-bottom) + var(--bottom-nav-h, 0px) + 20px);
   z-index: 999;
   background: color-mix(in srgb, var(--modal-bg) 90%, transparent);
   color: var(--text);
@@ -36,7 +36,7 @@
   position: fixed;
   left: 50%;
   transform: translateX(-50%);
-  bottom: calc(env(safe-area-inset-bottom) + 18px);
+  bottom: calc(env(safe-area-inset-bottom) + var(--bottom-nav-h, 0px) + 18px);
   z-index: 1000;
   display: flex;
   align-items: center;
@@ -256,6 +256,7 @@
     padding: 0;
     gap: 0;
     background: var(--bg);
+    --bottom-nav-h: 70px; /* alto de la barra inferior (8 + 52 + 10) */
   }
 
   .main {
@@ -268,7 +269,7 @@
     border: none;
     border-top: 1px solid var(--border);
     box-shadow: none;
-    padding-bottom: env(safe-area-inset-bottom);
+    padding-bottom: 0;
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
   }
@@ -302,7 +303,7 @@
 .toast {
     left: 12px;
     right: 12px;
-    bottom: calc(env(safe-area-inset-bottom) + 12px);
+    bottom: calc(env(safe-area-inset-bottom) + var(--bottom-nav-h, 0px) + 12px);
     text-align: center;
     justify-content: center;
   }
@@ -311,7 +312,7 @@
     left: 12px;
     right: 12px;
     transform: none;
-    bottom: calc(env(safe-area-inset-bottom) + 12px);
+    bottom: calc(env(safe-area-inset-bottom) + var(--bottom-nav-h, 0px) + 12px);
     justify-content: center;
     text-align: center;
     white-space: normal;
