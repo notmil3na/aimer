@@ -212,7 +212,7 @@
       max(12px, env(safe-area-inset-right))
       calc(10px + env(safe-area-inset-bottom))
       max(12px, env(safe-area-inset-left));
-    background: var(--bg);
+    background: transparent;
   }
 
   .bottomNav {
