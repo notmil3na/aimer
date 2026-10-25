@@ -865,12 +865,9 @@
   }
 
   .hero,
-  .panelArt,
-  .wave,
-  .waveEcho,
-  .waveEcho2 { display: none; }
+  .panelArt { display: none; }
 
-  .formSide { padding: 28px 20px; }
+  .formSide { padding: 68px 20px 28px; }
 }
 
 /* Portátiles bajos: se compacta la tarjeta para que quepa sin scroll. */
