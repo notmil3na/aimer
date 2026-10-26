@@ -1,4 +1,4 @@
-import { useState, useMemo, lazy, Suspense } from "react";
+import { useState, useMemo, useEffect, lazy, Suspense } from "react";
 import styles from "./AsignacionesView.module.css";
 import {
   IconExamen, IconQuiz, IconTarea, IconProyecto, IconForo, IconLaboratorio, IconInforme, IconTaller, IconClose, IconEdit, IconTrash, IconClipboard, IconCheck, IconChevronUp, IconChevronDown, IconEye, IconArrowLeft
@@ -81,11 +81,16 @@ function migrateCortes(cortes) {
 
 function AsignacionCard({ item, allMaterias, onUpdate, onDelete, onEdit, onSyncCalendar, cortesData }) {
   const [expanded, setExpanded] = useState(false);
+  const [gradeDraft, setGradeDraft] = useState(item.nota ?? "");
   const info = TIPO_INFO[item.tipo] || TIPO_INFO.tarea;
   const mat = allMaterias.find(m => m.id === item.materiaId);
   const isExamenQuiz = item.tipo === "examen" || item.tipo === "quiz";
   const status = getAssignmentStatus(item);
   const dueIso = item.fechaExamen || item.fechaEntrega || item.fechaFin;
+  useEffect(() => {
+    setGradeDraft(item.nota ?? "");
+  }, [item.nota]);
+
   const statusClass = status.tone === "done"
     ? styles.cardStatusDone
     : status.tone === "overdue"
@@ -112,9 +117,12 @@ function AsignacionCard({ item, allMaterias, onUpdate, onDelete, onEdit, onSyncC
   };
 
   const handleGrade = (nota) => {
+    const notaGuardada = item.nota === "" || item.nota == null ? undefined : Number(item.nota);
+    const notaNueva = nota === "" ? undefined : Number(nota);
+    if (notaGuardada === notaNueva) return;
     const val = Number(item.valoracion) || 100;
     const completada = nota !== "";
-    const updated = { ...item, nota: nota === "" ? undefined : Number(nota), completada };
+    const updated = { ...item, nota: notaNueva, completada };
     onUpdate(updated);
     if (item.corteIdx !== undefined && item.materiaId) {
       const corteIdx = item.corteIdx;
@@ -125,7 +133,7 @@ function AsignacionCard({ item, allMaterias, onUpdate, onDelete, onEdit, onSyncC
         if (nota === "") {
           cortes[corteIdx].items = (cortes[corteIdx].items || []).filter(it => it.nombre !== nombre);
         } else {
-          const newItem = { nombre, nota: Number(nota), notaMax: val };
+          const newItem = { nombre, nota: notaNueva, notaMax: val };
           const existingItemIdx = cortes[corteIdx].items.findIndex(it => it.nombre === nombre);
           if (existingItemIdx >= 0) {
             cortes[corteIdx].items[existingItemIdx] = newItem;
@@ -185,8 +193,11 @@ function AsignacionCard({ item, allMaterias, onUpdate, onDelete, onEdit, onSyncC
             <div className={styles.formField}>
               <label>Nota /{item.valoracion || "?"}</label>
               <input type="number" min={0} max={Number(item.valoracion) || 500} step="0.1"
-                className={styles.gradeInput} value={item.nota ?? ""}
-                placeholder="—" onChange={e => handleGrade(e.target.value)} />
+                className={styles.gradeInput} value={gradeDraft}
+                placeholder="—"
+                onChange={e => setGradeDraft(e.target.value)}
+                onBlur={() => handleGrade(gradeDraft)}
+                onKeyDown={e => { if (e.key === "Enter") e.currentTarget.blur(); }} />
             </div>
             {item.nota !== undefined && item.nota !== null && (
               <span className={styles.gradeBadge}
