@@ -5,6 +5,19 @@
   display: flex; align-items: flex-start; justify-content: space-between;
   gap: 14px; margin-bottom: 22px; flex-wrap: wrap;
 }
+.headerLeft { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.backBtn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; flex-shrink: 0;
+  border-radius: 10px; border: 1px solid var(--border);
+  background: var(--surface); color: var(--text);
+  cursor: pointer; transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+.backBtn:hover {
+  border-color: var(--accent);
+  color: var(--accent-text);
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+}
 .title { font-family: var(--font-display); font-size: 26px; font-weight: 500; color: var(--text); }
 
 .headerBadge {
@@ -398,101 +411,6 @@
 }
 
 
-.dispCard {
-  background: linear-gradient(135deg, color-mix(in srgb, var(--surface) 94%, transparent), color-mix(in srgb, var(--surface2) 90%, transparent));
-  border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
-  border-radius: 20px;
-  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.07);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  padding: 16px 18px;
-}
-.dispHeader {
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  padding-bottom: 12px; margin-bottom: 6px;
-  border-bottom: 1px solid var(--border);
-}
-.dispHeaderMain { display: flex; align-items: center; gap: 10px; min-width: 0; }
-.dispIcon {
-  flex-shrink: 0;
-  width: 32px; height: 32px; border-radius: 10px;
-  display: grid; place-items: center;
-  background: color-mix(in srgb, var(--accent) 15%, var(--surface));
-  border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--border));
-  color: var(--accent-text);
-}
-.dispTitle {
-  display: block; font-family: var(--font-display);
-  font-size: 16px; font-weight: 500; color: var(--text); line-height: 1.2;
-}
-.dispTitle em { font-family: 'Sentient-MediumItalic'; font-style: italic; font-weight: 500; color: var(--accent-text); }
-.dispSub {
-  display: block; font-size: 12px; color: var(--text-muted); margin-top: 1px;
-}
-.dispLive {
-  display: inline-flex; align-items: center; gap: 6px;
-  font-size: 11px; font-weight: 700; color: #6ec88a;
-  background: rgba(110, 200, 138, 0.12);
-  border: 1px solid rgba(110, 200, 138, 0.35);
-  border-radius: 999px; padding: 3px 10px; white-space: nowrap;
-}
-.dispLiveDot {
-  width: 7px; height: 7px; border-radius: 50%;
-  background: #6ec88a;
-  animation: dispPulse 1.4s ease-in-out infinite;
-}
-@keyframes dispPulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(110, 200, 138, 0.5); }
-  50%      { box-shadow: 0 0 0 5px rgba(110, 200, 138, 0); }
-}
-.dispWall {
-  display: flex; gap: 6px; padding-top: 4px;
-  overflow-x: auto; overflow-y: hidden;
-  scrollbar-width: thin; scrollbar-color: var(--border) transparent;
-  scroll-snap-type: x proximity;
-  -webkit-overflow-scrolling: touch;
-}
-.dispWall > .dispChip { flex-shrink: 0; scroll-snap-align: start; }
-.dispChip {
-  display: flex; flex-direction: column; align-items: center; gap: 5px;
-  width: 82px; padding: 10px 4px 8px;
-  border-radius: var(--radius-md); border: 1px solid transparent;
-  transition: background 0.15s, border-color 0.15s;
-}
-.dispChip:hover { background: var(--surface2); border-color: var(--border); }
-.dispRing { position: relative; border-radius: 50%; flex-shrink: 0; }
-.dispChipLibre .dispRing {
-  box-shadow: 0 0 0 2px #6ec88a, 0 0 0 5px rgba(110, 200, 138, 0.14);
-}
-.dispChipOcupado .dispRing {
-  box-shadow: 0 0 0 2px var(--accent), 0 0 0 4px rgba(var(--accent-rgb), 0.14);
-}
-.dispChipNodata .dispRing,
-.dispChipFuera .dispRing {
-  box-shadow: 0 0 0 2px var(--border);
-  opacity: 0.8;
-}
-.dispChipNodata .avatar,
-.dispChipFuera .avatar { filter: saturate(0.55); }
-.dispChipName {
-  font-size: 11.5px; font-weight: 600; color: var(--text);
-  max-width: 74px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.dispChipStatus {
-  display: inline-flex; align-items: center; gap: 3px;
-  font-size: 10px; font-weight: 600; line-height: 1.2;
-  max-width: 74px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.dispChipLibre .dispChipStatus { color: #6ec88a; font-weight: 700; }
-.dispChipOcupado .dispChipStatus { color: var(--accent-text); }
-.dispChipMateria { font-weight: 800; }
-.dispChipNodata .dispChipStatus,
-.dispChipFuera .dispChipStatus { color: var(--text-muted); }
-.dispEmpty {
-  display: flex; align-items: center; gap: 8px;
-  font-size: 13px; color: var(--text-muted); padding: 8px 2px;
-}
-
 @media (max-width: 1100px) {
   .compareBody { grid-template-columns: 1fr; }
 }
@@ -508,13 +426,10 @@
   .personCard { flex-wrap: wrap; }
   .personActions { width: 100%; justify-content: flex-end; }
   .loading { min-height: 60vh; }
-  .dispCard { padding: 14px; }
 }
 
 @media (max-width: 360px) {
   .wrap { padding: 12px 8px; }
   .title { font-size: 18px; }
   .personCard { padding: 14px; gap: 10px; }
-  .dispChip { width: 74px; padding: 8px 2px 6px; }
-  .dispTitle { font-size: 15px; }
 }

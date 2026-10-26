@@ -1,8 +1,10 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import styles from "./ColaboracionView.module.css";
+import AvailableFriends from "./AvailableFriends";
+import useFriendAvailability from "../hooks/useFriendAvailability";
 import {
   IconUsers, IconSearch, IconUserPlus, IconCheck, IconClose, IconWarning,
-  IconTrash, IconSchedule, IconStar, IconScale,
+  IconTrash, IconSchedule, IconStar, IconScale, IconArrowLeft,
 } from "./Icons";
 import { buildColorMap } from "../utils/horarioHelpers.js";
 import { usePhoto } from "../utils/photo";
@@ -22,110 +24,6 @@ const STATUS_LABEL = { libre: "Libre en común", yo: "Solo tú", amigo: "Solo tu
 
 // la búsqueda de personas necesita al menos 2 caracteres (igual que el worker)
 const BUSQUEDA_MIN = 2;
-
-const NOW_DIA = { 0: "D", 1: "L", 2: "M", 3: "X", 4: "J", 5: "V", 6: "S" };
-
-function currentHourIdx(now) {
-  const mins = now.getHours() * 60 + now.getMinutes();
-  const idx = Math.floor((mins - 360) / 60);
-  if (idx < WINDOW_START || idx >= WINDOW_END) return -1;
-  return idx;
-}
-
-function claseAhora(clases, diaKey, hourIdx) {
-  if (hourIdx < 0) return null;
-  return (clases || []).find(
-    (c) => c.dia === diaKey && horaIdx(c.horaInicio) <= hourIdx && horaIdx(c.horaFin) > hourIdx
-  );
-}
-
-const STATUS_RANK = { libre: 0, ocupado: 1, nodata: 2, fuera: 3 };
-
-function DisponiblesWidget({ amigos, horarios, loading }) {
-  const [now, setNow] = useState(() => new Date());
-  useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 60 * 1000);
-    return () => clearInterval(id);
-  }, []);
-
-  const diaKey = NOW_DIA[now.getDay()];
-  const hourIdx = currentHourIdx(now);
-  const timeStr = now.toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" });
-
-  const statusOf = (u) => {
-    const info = horarios[u];
-    const hayDatos = !!(info && (info.clases || []).length > 0);
-    if (hourIdx < 0) return { key: "fuera", hayDatos };
-    if (!hayDatos) return { key: "nodata" };
-    const ocupado = info.busy[diaKey] && info.busy[diaKey].some(([s, e]) => s <= hourIdx && hourIdx < e);
-    if (ocupado) return { key: "ocupado", clase: claseAhora(info.clases, diaKey, hourIdx) };
-    return { key: "libre" };
-  };
-
-  const sorted = [...amigos].sort((a, b) => {
-    const ra = STATUS_RANK[statusOf(a).key];
-    const rb = STATUS_RANK[statusOf(b).key];
-    if (ra !== rb) return ra - rb;
-    return (a.name || a.username).localeCompare(b.name || b.username);
-  });
-
-  const libres = amigos.filter((u) => statusOf(u).key === "libre").length;
-  const resumen = hourIdx < 0
-    ? "fuera de horario"
-    : amigos.length > 0
-      ? `${libres} de ${amigos.length} libres`
-      : "";
-
-  return (
-    <div className={styles.dispCard}>
-      <div className={styles.dispHeader}>
-        <div className={styles.dispHeaderMain}>
-          <span className={styles.dispIcon}><IconSchedule size={15} /></span>
-          <div>
-            <span className={styles.dispTitle}>¿Quién está <em>disponible</em>?</span>
-            <span className={styles.dispSub}>
-              Ahora · {timeStr}{resumen ? ` · ${resumen}` : ""}
-            </span>
-          </div>
-        </div>
-        <span className={styles.dispLive}><span className={styles.dispLiveDot} /> En vivo</span>
-      </div>
-      <div className={styles.dispWall}>
-        {amigos.length === 0 ? (
-          <p className={styles.dispEmpty}>Agrega amigos para ver quién está disponible.</p>
-        ) : loading ? (
-          <p className={styles.dispEmpty}><span className={styles.loadingSpinner} /> Consultando horarios…</p>
-        ) : (
-          sorted.map((u) => {
-            const st = statusOf(u.username);
-            const clase = st.clase;
-            const key = st.key;
-            return (
-              <div
-                key={u.username}
-                className={`${styles.dispChip} ${styles["dispChip" + key.charAt(0).toUpperCase() + key.slice(1)]}`}
-                title={clase
-                  ? `${clase.materiaId} · ${formatHourIdx(horaIdx(clase.horaInicio))}–${formatHourIdx(horaIdx(clase.horaFin))}`
-                  : key === "nodata" ? "Sin horario guardado" : key === "fuera" ? "Fuera de la ventana de clases" : "Disponible ahora"}
-              >
-                <span className={styles.dispRing}>
-                  <Avatar u={u} size={42} />
-                </span>
-                <span className={styles.dispChipName}>{u.name || u.username}</span>
-                <span className={styles.dispChipStatus}>
-                  {key === "libre" && (<><IconCheck size={9} /> Disponible</>)}
-                  {key === "ocupado" && <span className={styles.dispChipMateria}>{clase.materiaId}</span>}
-                  {key === "nodata" && "Sin horario"}
-                  {key === "fuera" && "Fuera de horario"}
-                </span>
-              </div>
-            );
-          })
-        )}
-      </div>
-    </div>
-  );
-}
 
 function Avatar({ u, size = 40 }) {
   const initial = ((u?.name || u?.username || "?").trim()[0] || "?").toUpperCase();
@@ -515,7 +413,7 @@ function ComparisonSection({ me, perfil, data, myHorario, myMalla, myName, onClo
 }
 
 export default function ColaboracionView({
-  user, malla, horarioData, onNotify,
+  user, malla, horarioData, onNotify, onBack, hideAvailability = false,
 }) {
   const [users, setUsers] = useState(null);
   const [friendships, setFriendships] = useState({});
@@ -526,8 +424,6 @@ export default function ColaboracionView({
   const [selectedUser, setSelectedUser] = useState(null);
   const [friendData, setFriendData] = useState(null);
   const [comparing, setComparing] = useState(false);
-  const [friendHorarios, setFriendHorarios] = useState({});
-  const [dispLoading, setDispLoading] = useState(false);
   const [searching, setSearching] = useState(false);
 
   const reloadFriendships = useCallback(async () => {
@@ -653,37 +549,7 @@ export default function ColaboracionView({
     ? (users || []).filter((u) => u.username !== user.username)
     : [];
 
-  const amigosKey = amigos.map((u) => u.username).join(",");
-
-  useEffect(() => {
-    if (!amigos.length) {
-      setFriendHorarios({});
-      setDispLoading(false);
-      return;
-    }
-    let active = true;
-    setDispLoading(true);
-    Promise.all(
-      amigos.map(async (u) => {
-        const res = await fetchFriendData(u.username);
-        if (res.error) return { u: u.username, horario: null };
-        return { u: u.username, horario: res.data?.horario || null };
-      })
-    )
-      .then((results) => {
-        if (!active) return;
-        const map = {};
-        for (const r of results) {
-          map[r.u] = r.horario
-            ? { busy: buildBusyByDay(r.horario.clases || []), clases: r.horario.clases || [] }
-            : { busy: {}, clases: [] };
-        }
-        setFriendHorarios(map);
-        setDispLoading(false);
-      })
-      .catch(() => { if (active) setDispLoading(false); });
-    return () => { active = false; };
-  }, [amigosKey, amigos.length, user.username]);
+  const { horarios: friendHorarios, loading: dispLoading } = useFriendAvailability(amigos);
 
   const selectedProfile = userList.find((u) => u.username === selectedUser);
   const selectedRel = selectedUser ? rel(selectedUser) : null;
@@ -699,7 +565,18 @@ export default function ColaboracionView({
   return (
     <div className={`${styles.wrap} view-fade`}>
       <div className={styles.header}>
-        <div>
+        <div className={styles.headerLeft}>
+          {onBack && (
+            <button
+              type="button"
+              className={styles.backBtn}
+              onClick={onBack}
+              aria-label="Volver a chats"
+              title="Volver"
+            >
+              <IconArrowLeft size={18} />
+            </button>
+          )}
           <h2 className={styles.title}>Amigos</h2>
         </div>
         <div className={styles.headerBadge}>
@@ -724,10 +601,11 @@ export default function ColaboracionView({
       )}
 
       {!tableMissing && (<>
-        {}
-        <div className={styles.section}>
-          <DisponiblesWidget amigos={amigos} horarios={friendHorarios} loading={dispLoading} />
-        </div>
+        {!hideAvailability && (
+          <div className={styles.section}>
+            <AvailableFriends amigos={amigos} horarios={friendHorarios} loading={dispLoading} />
+          </div>
+        )}
 
         {}
         <section className={styles.section}>

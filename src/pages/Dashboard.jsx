@@ -4,6 +4,7 @@ import ErrorBoundary from "../components/ErrorBoundary";
 import NotificationBell from "../components/NotificationBell";
 import SecuritySetupModal from "../components/SecuritySetupModal";
 import useReminders from "../hooks/useReminders";
+import useMediaQuery from "../hooks/useMediaQuery";
 import { getMallaByCareer } from "../data/malla.js";
 import { MALLA_SISTEMAS_2022, aplicaPlan2022, claveEstado, traducirDatosGuardados } from "../data/malla2022.js";
 import { api, getSessionData, updateSessionData } from "../api";
@@ -102,6 +103,7 @@ export default function Dashboard({ user, onLogout, onUpdateUser }) {
     } catch (_) {}
     return "horario";
   });
+  const isPhone = useMediaQuery("(max-width: 800px)");
   const cachedRef = useRef(null);
   if (cachedRef.current === null) cachedRef.current = getSessionData();
   const cached = cachedRef.current;
@@ -371,7 +373,7 @@ export default function Dashboard({ user, onLogout, onUpdateUser }) {
     if (updated) persistColumn("malla", updated, setMalla);
   }, [persistColumn, notify]);
 
-  const tabs = useMemo(() => [
+  const allTabs = useMemo(() => [
     { id: "horario", label: "Horario", icon: IconSchedule },
     { id: "asignaciones", label: "Asignaciones", icon: IconClipboard },
     { id: "cursando", label: "Semestre", icon: IconSemester },
@@ -382,6 +384,17 @@ export default function Dashboard({ user, onLogout, onUpdateUser }) {
     { id: "chat", label: "Chats", icon: IconChat },
     { id: "config", label: "Configuración", icon: IconSettings },
   ], []);
+
+  // En el teléfono Amigos y Chats son una sola vista: Chats es la principal y
+  // los amigos se abren desde el icono de la cabecera.
+  const tabs = useMemo(
+    () => (isPhone ? allTabs.filter((t) => t.id !== "colaboracion") : allTabs),
+    [allTabs, isPhone]
+  );
+
+  useEffect(() => {
+    if (isPhone && tab === "colaboracion") setTab("chat");
+  }, [isPhone, tab]);
 
   return (
     <div className={styles.layout}>
@@ -538,6 +551,7 @@ export default function Dashboard({ user, onLogout, onUpdateUser }) {
               <ChatView
                 user={user}
                 malla={malla}
+                horarioData={horarioData}
                 notasClaseData={notasClaseData}
                 asignacionesData={asignacionesData}
                 onSaveAsignaciones={saveAsignaciones}

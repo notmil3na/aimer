@@ -1,9 +1,12 @@
-import { useState, useEffect, useLayoutEffect, useRef, useMemo, useCallback } from "react";
+import { useState, useEffect, useLayoutEffect, useRef, useMemo, useCallback, lazy, Suspense } from "react";
 import styles from "./ChatView.module.css";
+import AvailableFriends from "./AvailableFriends";
+import useFriendAvailability from "../hooks/useFriendAvailability";
+import useMediaQuery from "../hooks/useMediaQuery";
 import {
   IconSend, IconPaperclip, IconArrowLeft, IconDownload, IconEye,
   IconClipboard, IconImage, IconUser, IconSparkle, IconCheck, IconClose, IconSearch,
-  IconPin, IconEraser, IconTrash,
+  IconPin, IconEraser, IconTrash, IconUserPlus,
 } from "./Icons";
 import { usePhoto } from "../utils/photo";
 import { fetchFriendships, fetchUsersBrief } from "../utils/friendsApi";
@@ -17,6 +20,8 @@ import {
   subjectName,
 } from "../utils/chatShare";
 import { uuid } from "../utils/notasClase";
+
+const FriendsView = lazy(() => import("./ColaboracionView"));
 
 const POLL_MIN_MS = 4000;    // conversación abierta y visible: sondeo rápido
 const POLL_MAX_MS = 30000;   // sin novedades el intervalo se alarga hasta aquí
@@ -913,7 +918,7 @@ function InfoPanel({ friend, messages, onClose }) {
   );
 }
 
-export default function ChatView({ user, malla, notasClaseData, asignacionesData, onSaveAsignaciones, onSaveNotasClase, onNotify }) {
+export default function ChatView({ user, malla, horarioData, notasClaseData, asignacionesData, onSaveAsignaciones, onSaveNotasClase, onNotify }) {
   const [users, setUsers] = useState([]);
   const [friendships, setFriendships] = useState({});
   const [overview, setOverview] = useState([]);
@@ -925,18 +930,21 @@ export default function ChatView({ user, malla, notasClaseData, asignacionesData
   const [search, setSearch] = useState("");
   const [menu, setMenu] = useState(null);
   const [threadNonce, setThreadNonce] = useState(0);
+  const [friendsOpen, setFriendsOpen] = useState(false);
+
+  const isPhone = useMediaQuery("(max-width: 800px)");
 
   const pressRef = useRef({ timer: null, x: 0, y: 0 });
   const suppressClickRef = useRef(0);
 
   useEffect(() => () => clearTimeout(pressRef.current.timer), []);
 
-  useEffect(() => {
-    let active = true;
-    fetchUsersBrief().then((res) => { if (active && !res.error) setUsers(res.data || []); }).catch(() => {});
-    fetchFriendships(user.username).then((res) => { if (active && !res.error) setFriendships(res.data || {}); }).catch(() => {});
-    return () => { active = false; };
+  const refreshContacts = useCallback(() => {
+    fetchUsersBrief().then((res) => { if (!res.error) setUsers(res.data || []); }).catch(() => {});
+    fetchFriendships(user.username).then((res) => { if (!res.error) setFriendships(res.data || {}); }).catch(() => {});
   }, [user.username]);
+
+  useEffect(() => { refreshContacts(); }, [refreshContacts]);
 
   const loadOverview = useCallback(async () => {
     const res = await fetchChatOverview();
@@ -997,6 +1005,32 @@ export default function ChatView({ user, malla, notasClaseData, asignacionesData
 
   const activeFriend = amigos.find((u) => u.username === activeOther) || null;
   const totalUnread = list.reduce((a, r) => a + r.unread, 0);
+
+  const pendingCount = useMemo(
+    () => Object.values(friendships || {}).filter(
+      (f) => f && f.status === "pendiente" && f.requestedBy !== user.username
+    ).length,
+    [friendships, user.username]
+  );
+
+  const { horarios: friendHorarios, loading: dispLoading } = useFriendAvailability(isPhone ? amigos : []);
+
+  useEffect(() => {
+    if (!isPhone) setFriendsOpen(false);
+  }, [isPhone]);
+
+  const closeFriends = useCallback(() => {
+    setFriendsOpen(false);
+    refreshContacts();
+    loadOverview();
+  }, [refreshContacts, loadOverview]);
+
+  const openChatWith = (friend) => {
+    if (!friend) return;
+    setFriendsOpen(false);
+    setSearch("");
+    setActiveOther(friend.username);
+  };
 
 
   const previewOf = (row) => {
@@ -1087,9 +1121,23 @@ export default function ChatView({ user, malla, notasClaseData, asignacionesData
           <div className={styles.sidebarHeader}>
             <div className={styles.sidebarTitleRow}>
               <h2 className={styles.sidebarTitle}>Chats</h2>
-              {totalUnread > 0 && (
-                <span className={styles.headerBadge}>{totalUnread} sin leer</span>
-              )}
+              <div className={styles.titleActions}>
+                {totalUnread > 0 && (
+                  <span className={styles.headerBadge}>{totalUnread} sin leer</span>
+                )}
+                {isPhone && (
+                  <button
+                    type="button"
+                    className={styles.friendsBtn}
+                    onClick={() => setFriendsOpen(true)}
+                    aria-label="Amigos"
+                    title="Amigos"
+                  >
+                    <IconUserPlus size={17} />
+                    {pendingCount > 0 && <span className={styles.friendsBtnBadge}>{pendingCount}</span>}
+                  </button>
+                )}
+              </div>
             </div>
             <div className={styles.searchRow}>
               <IconSearch size={15} />
@@ -1105,6 +1153,15 @@ export default function ChatView({ user, malla, notasClaseData, asignacionesData
                 </button>
               )}
             </div>
+            {isPhone && (
+              <AvailableFriends
+                amigos={amigos}
+                horarios={friendHorarios}
+                loading={dispLoading}
+                onSelect={openChatWith}
+                compact
+              />
+            )}
           </div>
           {needsMig ? (
             <div className={styles.chatEmpty}>
@@ -1119,6 +1176,11 @@ export default function ChatView({ user, malla, notasClaseData, asignacionesData
               <span className={styles.threadEmptyIcon}><IconUser size={26} /></span>
               <p>Agrega amigos para chatear.</p>
               <p className={styles.threadEmptySub}>Solo puedes conversar con personas que ya son tus amigos.</p>
+              {isPhone && (
+                <button type="button" className={styles.chatEmptyBtn} onClick={() => setFriendsOpen(true)}>
+                  <IconUserPlus size={13} /> Buscar amigos
+                </button>
+              )}
             </div>
           ) : filteredList.length === 0 ? (
             <div className={styles.chatEmpty}>
@@ -1195,6 +1257,27 @@ export default function ChatView({ user, malla, notasClaseData, asignacionesData
           ) : null}
         </div>
       </div>
+
+      {isPhone && friendsOpen && (
+        <div className={`${styles.friendsSheet} view-fade`}>
+          <Suspense
+            fallback={(
+              <div className={styles.friendsLoading}>
+                <span className={styles.loadingSpinner} /> Cargando amigos…
+              </div>
+            )}
+          >
+            <FriendsView
+              user={user}
+              malla={malla}
+              horarioData={horarioData}
+              onNotify={onNotify}
+              onBack={closeFriends}
+              hideAvailability
+            />
+          </Suspense>
+        </div>
+      )}
 
       {menu && (
         <ChatMenu
