@@ -11,7 +11,7 @@ import { api, getSessionData, updateSessionData } from "../api";
 import { getPendingSaves, hasPendingSaves, queueSave, clearPendingSave } from "../utils/offlineQueue.js";
 import styles from "./Dashboard.module.css";
 import {
-  IconSchedule, IconCalendar, IconClipboard, IconSemester,
+  IconSchedule, IconClipboard, IconSemester,
   IconMalla, IconSettings, IconUsers, IconChat,
   IconCheck
 } from "../components/Icons";
@@ -29,7 +29,6 @@ const VIEW_LOADERS = {
   cursando:     () => import("../components/CursandoView"),
   horario:      () => import("../components/HorarioView"),
   config:        () => import("../components/SettingsView"),
-  calendario:   () => import("../components/CalendarioView"),
   asignaciones: () => import("../components/AsignacionesView"),
   colaboracion: () => import("../components/ColaboracionView"),
   chat:         () => import("../components/ChatView"),
@@ -39,7 +38,6 @@ const MallaView = lazy(() => loadView(VIEW_LOADERS.malla));
 const CursandoView = lazy(() => loadView(VIEW_LOADERS.cursando));
 const HorarioView = lazy(() => loadView(VIEW_LOADERS.horario));
 const SettingsView = lazy(() => loadView(VIEW_LOADERS.config));
-const CalendarioView = lazy(() => loadView(VIEW_LOADERS.calendario));
 const AsignacionesView = lazy(() => loadView(VIEW_LOADERS.asignaciones));
 const ColaboracionView = lazy(() => loadView(VIEW_LOADERS.colaboracion));
 const ChatView = lazy(() => loadView(VIEW_LOADERS.chat));
@@ -375,7 +373,6 @@ export default function Dashboard({ user, onLogout, onUpdateUser }) {
     { id: "horario", label: "Horario", icon: IconSchedule },
     { id: "asignaciones", label: "Asignaciones", icon: IconClipboard },
     { id: "cursando", label: "Semestre", icon: IconSemester },
-    { id: "calendario", label: "Calendario", icon: IconCalendar },
     { id: "malla", label: "Malla", icon: IconMalla },
     { id: "colaboracion", label: "Amigos", icon: IconUsers },
     { id: "chat", label: "Chats", icon: IconChat },
@@ -392,6 +389,9 @@ export default function Dashboard({ user, onLogout, onUpdateUser }) {
   useEffect(() => {
     if (isPhone && tab === "colaboracion") setTab("chat");
   }, [isPhone, tab]);
+  useEffect(() => {
+    if (tab === "calendario") setTab("asignaciones");
+  }, [tab]);
 
   return (
     <div className={styles.layout}>
@@ -471,17 +471,6 @@ export default function Dashboard({ user, onLogout, onUpdateUser }) {
                   user={user}
                   onEnrollMaterias={enrollMateriasFromPlan}
                 />
-            )}
-            {tab === "calendario" && (
-              <CalendarioView
-                malla={malla}
-                calendarioData={calendarioData}
-                onSave={saveCalendario}
-                user={user}
-                horarioData={horarioData}
-                asignacionesData={asignacionesData}
-                onSaveAsignaciones={saveAsignaciones}
-              />
             )}
             {tab === "asignaciones" && (
               <AsignacionesView

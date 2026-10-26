@@ -35,6 +35,7 @@
 }
 
 .headerIntro { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.titleRow { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .headerBadge {
   display: inline-flex;
   align-items: center;
@@ -63,6 +64,31 @@
   margin-top: 1px;
 }
 .headerActions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.calendarBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 38px;
+  padding: 8px 14px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: var(--accent-ink);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(var(--accent-rgb), 0.2);
+  transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+}
+.calendarBtn:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(var(--accent-rgb), 0.3);
+}
+.calendarBtn:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 2px; }
 .addBtn {
   background: linear-gradient(135deg, var(--accent), var(--accent2));
   color: var(--accent-ink);

@@ -243,7 +243,7 @@ function EventoModal({ onClose, onSave, evento, materias, cortes }) {
   );
 }
 
-export default function CalendarioView({ malla, calendarioData, onSave, asignacionesData, onSaveAsignaciones }) {
+export default function CalendarioView({ malla, calendarioData, onSave, asignacionesData, onSaveAsignaciones, hideTitle = false }) {
   const [year, setYear] = useState(() => new Date().getFullYear());
   const [month, setMonth] = useState(() => new Date().getMonth());
   const [selectedDay, setSelectedDay] = useState(null);
@@ -404,10 +404,12 @@ export default function CalendarioView({ malla, calendarioData, onSave, asignaci
   return (
     <div className={styles.wrap}>
       <div className={styles.header}>
-        <div>
-          <h2 className={styles.title}>Calendario</h2>
-          <p className={styles.subtitle}>{MESES[month]} {year}</p>
-        </div>
+        {!hideTitle && (
+          <div>
+            <h2 className={styles.title}>Calendario</h2>
+            <p className={styles.subtitle}>{MESES[month]} {year}</p>
+          </div>
+        )}
         <button className={styles.addBtn} onClick={() => { setModalEvent(null); setShowModal(true); }}>
           + Evento
         </button>

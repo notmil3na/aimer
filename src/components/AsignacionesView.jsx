@@ -1,13 +1,15 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, lazy, Suspense } from "react";
 import styles from "./AsignacionesView.module.css";
 import {
-  IconExamen, IconQuiz, IconTarea, IconProyecto, IconForo, IconLaboratorio, IconInforme, IconTaller, IconClose, IconEdit, IconTrash, IconClipboard, IconCheck, IconChevronUp, IconChevronDown
+  IconExamen, IconQuiz, IconTarea, IconProyecto, IconForo, IconLaboratorio, IconInforme, IconTaller, IconClose, IconEdit, IconTrash, IconClipboard, IconCheck, IconChevronUp, IconChevronDown, IconEye, IconArrowLeft
 } from "./Icons";
 import { HORAS_FORM } from "../utils/horarioHelpers";
 import { semesterDatesFor, semesterCorteFor } from "../utils/semesterCountdown";
 import { REMINDER_OPTIONS } from "../utils/reminders";
 import { uuid } from "../utils/notasClase";
 import useBodyScrollLock from "../hooks/useBodyScrollLock";
+
+const CalendarioView = lazy(() => import("./CalendarioView"));
 
 const NOTA_PASS_PCT = 0.6;
 
@@ -236,6 +238,7 @@ export default function AsignacionesView({ malla, asignacionesData, onSave, curs
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState(null);
   const [showCompleted, setShowCompleted] = useState(true);
+  const [showCalendar, setShowCalendar] = useState(false);
 
   const anioSemestre = semesterDatesFor(semestre).start.getFullYear();
   const corteSemestre = semesterCorteFor(semestre);
@@ -362,15 +365,40 @@ export default function AsignacionesView({ malla, asignacionesData, onSave, curs
     <div className={styles.wrap}>
       <div className={styles.header}>
         <div className={styles.headerIntro}>
-          <span className={styles.headerBadge}><IconClipboard size={13} /> Gestor de tareas</span>
-          <h2 className={styles.title}>Asignaciones</h2>
-          <p className={styles.subtitle}>{items.length} asignación{items.length !== 1 ? "es" : ""}</p>
+          {!showCalendar && <span className={styles.headerBadge}><IconClipboard size={13} /> Gestor de tareas</span>}
+          <div className={styles.titleRow}>
+            <h2 className={styles.title}>{showCalendar ? "Calendario" : "Asignaciones"}</h2>
+            <button
+              type="button"
+              className={styles.calendarBtn}
+              onClick={() => setShowCalendar((visible) => !visible)}
+            >
+              {showCalendar ? <IconArrowLeft size={15} /> : <IconEye size={15} />}
+              {showCalendar ? "Ver asignaciones" : "Ver calendario"}
+            </button>
+          </div>
+          {!showCalendar && <p className={styles.subtitle}>{items.length} asignación{items.length !== 1 ? "es" : ""}</p>}
         </div>
-        <div className={styles.headerActions}>
-          <button className={styles.addBtn} onClick={() => setShowModal(true)}>+ Asignación</button>
-        </div>
+        {!showCalendar && (
+          <div className={styles.headerActions}>
+            <button className={styles.addBtn} onClick={() => setShowModal(true)}>+ Asignación</button>
+          </div>
+        )}
       </div>
 
+      {showCalendar ? (
+        <Suspense fallback={<div className={styles.emptyState}>Cargando calendario…</div>}>
+          <CalendarioView
+            malla={malla}
+            calendarioData={calendarioData}
+            onSave={onSaveCalendario}
+            asignacionesData={asignacionesData}
+            onSaveAsignaciones={onSave}
+            hideTitle
+          />
+        </Suspense>
+      ) : (
+      <>
       <div className={styles.filters}>
         <div className={styles.filterGroup}>
           <span className={styles.filterLabel}>Tipo:</span>
@@ -456,6 +484,8 @@ export default function AsignacionesView({ malla, asignacionesData, onSave, curs
           corteSemestre={corteSemestre}
           initial={editing}
         />
+      )}
+      </>
       )}
     </div>
   );
