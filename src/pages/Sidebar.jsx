@@ -4,7 +4,7 @@ import styles from "./Sidebar.module.css";
 import { IconStar, IconSun, IconMoon, IconLogout } from "../components/Icons";
 import { usePhoto } from "../utils/photo";
 
-export default function Sidebar({ user, tabs, activeTab, onTabChange, onLogout, onUpdateUser, bell }) {
+export default function Sidebar({ user, tabs, activeTab, onTabChange, onLogout, onUpdateUser, bell, hideTopBar = false }) {
   const initial = user.name ? user.name[0].toUpperCase() : "U";
   const photo   = usePhoto(user.username, !!user.hasPhoto);
   const mode    = user.appMode || "light";
@@ -73,7 +73,7 @@ export default function Sidebar({ user, tabs, activeTab, onTabChange, onLogout, 
     const root = document.documentElement;
     const mq = window.matchMedia("(max-width: 900px)");
     const update = () => {
-      if (!mq.matches) { root.style.removeProperty("--top-nav-h"); return; } // escritorio: sin reserva
+      if (!mq.matches || hideTopBar) { root.style.removeProperty("--top-nav-h"); return; } // escritorio o cabecera oculta: sin reserva
       const marginTop = parseFloat(getComputedStyle(el).marginTop) || 0;
       root.style.setProperty("--top-nav-h", `${Math.ceil(el.offsetHeight + marginTop) + 12}px`);
     };
@@ -86,11 +86,14 @@ export default function Sidebar({ user, tabs, activeTab, onTabChange, onLogout, 
       mq.removeEventListener("change", update);
       root.style.removeProperty("--top-nav-h");
     };
-  }, []);
+  }, [hideTopBar]);
 
   return (
     <>
-    <aside ref={asideRef} className={`${styles.sidebar} ${navHidden ? styles.sidebarHidden : ""}`}>
+    <aside
+      ref={asideRef}
+      className={`${styles.sidebar} ${navHidden ? styles.sidebarHidden : ""} ${hideTopBar ? styles.sidebarChatHidden : ""}`}
+    >
       {}
       <div className={styles.brandRow}>
         <div className={styles.brand}>

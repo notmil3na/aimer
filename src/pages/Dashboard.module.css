@@ -279,6 +279,7 @@
     display: flex;
     flex-direction: column;
     overscroll-behavior: none;
+    padding-top: env(safe-area-inset-top);
     padding-bottom: 0;
   }
 

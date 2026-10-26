@@ -199,6 +199,7 @@
       background 0.3s,
       border-color 0.3s;
   }
+  .sidebar.sidebarChatHidden { display: none; }
   /* Oculto: sube fuera de pantalla junto con la barra inferior */
   .sidebar.sidebarHidden {
     transform: translateY(calc(-100% - env(safe-area-inset-top) - 24px));

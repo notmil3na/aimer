@@ -403,6 +403,7 @@ export default function Dashboard({ user, onLogout, onUpdateUser }) {
         onLogout={onLogout}
         onUpdateUser={onUpdateUser}
         bell={<NotificationBell {...reminders} />}
+        hideTopBar={tab === "chat"}
       />
       <main className={`${styles.main}${tab === "chat" ? ` ${styles.mainChat}` : ""}`}>
         {showOnboarding && (
