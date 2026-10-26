@@ -7,7 +7,7 @@
 
 .wrap::before {
   content: "";
-  position: absolute;
+  position: fixed;
   inset: 0;
   background:
     radial-gradient(circle at 0% 0%, color-mix(in srgb, var(--accent) 16%, transparent) 0, transparent 28%),
