@@ -31,7 +31,7 @@
 }
 
 .brandIcon {
-  font-size: 20px; color: var(--accent);
+  font-size: 20px; color: var(--accent-text);
   display: inline-block;
   animation: brandSpin 10s linear infinite, brandPulse 3s ease-in-out infinite;
   filter: drop-shadow(0 0 6px rgba(var(--accent-rgb), 0.5));
@@ -47,7 +47,7 @@
   font-size: 28px; font-weight: 500; color: var(--text);
   letter-spacing: 0.01em;
 }
-.brandText em { color: var(--accent); font-style: italic; font-weight: 500; }
+.brandText em { color: var(--accent-text); font-style: italic; font-weight: 500; }
 
 .modeToggle {
   background: var(--surface2); border: 1px solid var(--border);

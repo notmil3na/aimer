@@ -67,7 +67,7 @@ export default class ErrorBoundary extends React.Component {
         <span
           style={{
             fontSize: isChunk ? "30px" : "32px",
-            color: "var(--accent)",
+            color: "var(--accent-text)",
             animation: isChunk ? "aimerSpin 2.4s linear infinite" : undefined,
           }}
         >

@@ -58,6 +58,10 @@ input, textarea, select,
   --accent:     #c8a96e;
   --accent2:    #8b6f3a;
   --accent-rgb: 200,169,110;
+  /* Acento legible como texto sobre el fondo del modo actual. applyTheme lo
+     recalcula: con acentos muy oscuros en modo oscuro (p. ej. burdeos) usa un
+     tono claro para que "Mi horario", chips y etiquetas se lean. */
+  --accent-text: var(--accent);
   /* Texto/iconos que van encima de un fondo --accent. Los temas oscuros
      (p. ej. el rojo) lo cambian a claro desde applyTheme. */
   --accent-ink: #14101f;
@@ -113,7 +117,7 @@ h1 > em, h2 > em, h3 > em {
   font-family: 'Sentient-MediumItalic';
   font-style: italic;
   font-weight: 500;
-  color: var(--accent);
+  color: var(--accent-text);
 }
 
 /* SIN alturas medidas: nada de 100vh / 100dvh / -webkit-fill-available / --app-h.
@@ -295,7 +299,7 @@ select option {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--accent);
+  color: var(--accent-text);
   flex-shrink: 0;
   line-height: 0;
 }

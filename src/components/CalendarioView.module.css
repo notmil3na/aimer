@@ -81,7 +81,7 @@
   background: color-mix(in srgb, var(--range-color) 22%, rgba(var(--accent-rgb), 0.12));
 }
 .calDayNum { font-size: 13px; font-weight: 500; color: var(--text); }
-.calCellToday .calDayNum { color: var(--accent); font-weight: 700; }
+.calCellToday .calDayNum { color: var(--accent-text); font-weight: 700; }
 .calDots { display: flex; gap: 3px; }
 .calDot { width: 5px; height: 5px; border-radius: 50%; }
 
@@ -96,7 +96,7 @@
 .selectedDayTitle { font-size: 14px; font-weight: 600; color: var(--text); }
 .addSmallBtn {
   background: transparent; border: 1px dashed var(--border);
-  border-radius: var(--radius-sm); color: var(--accent);
+  border-radius: var(--radius-sm); color: var(--accent-text);
   font-family: var(--font-body); font-size: 11px; font-weight: 600;
   padding: 4px 10px; cursor: pointer; transition: all 0.15s;
 }
@@ -123,7 +123,7 @@
 .eventoIcon { font-size: 14px; flex-shrink: 0; margin-top: 2px; }
 .eventoBadgeInfo { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
 .eventoBadgeTitle { font-size: 12px; font-weight: 600; color: var(--text); }
-.eventoBadgeMateria { font-size: 10px; color: var(--accent); font-weight: 600; }
+.eventoBadgeMateria { font-size: 10px; color: var(--accent-text); font-weight: 600; }
 .eventoBadgeHora { font-size: 10px; color: var(--text-muted); }
 .eventoBadgeLugar { font-size: 10px; color: var(--text-muted); }
 
@@ -152,7 +152,7 @@
 .sidebarItemDot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .sidebarItemInfo { display: flex; flex-direction: column; gap: 1px; flex: 1; min-width: 0; }
 .sidebarItemTitle { font-size: 12px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.sidebarItemMateria { font-size: 10px; color: var(--accent); font-weight: 600; }
+.sidebarItemMateria { font-size: 10px; color: var(--accent-text); font-weight: 600; }
 .sidebarItemDate { font-size: 10px; color: var(--text-muted); }
 .sidebarItemIcon { font-size: 13px; flex-shrink: 0; }
 
@@ -206,13 +206,13 @@
   background: color-mix(in srgb, var(--t-color) 12%, var(--modal-bg)) !important;
 }
 .modal .toggleBtn { background: var(--modal-bg2); border-color: var(--modal-border); color: var(--modal-muted); }
-.modal .toggleBtnOn { border-color: var(--accent) !important; color: var(--accent) !important; }
+.modal .toggleBtnOn { border-color: var(--accent) !important; color: var(--accent-text) !important; }
 .modal .temaRow { background: var(--modal-bg2); border-color: var(--modal-border); }
 .modal .temaRow .textInput { background: transparent; border-color: var(--modal-border); color: var(--modal-text); }
 .modal .removeBtn { color: var(--modal-muted); }
 .modal .removeBtn:hover { color: #e07070; background: rgba(224,112,112,0.08); }
 .modal .addItemBtn { color: var(--modal-muted); border-color: var(--modal-border); }
-.modal .addItemBtn:hover { border-color: var(--accent); color: var(--accent); }
+.modal .addItemBtn:hover { border-color: var(--accent); color: var(--accent-text); }
 @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
 .modalHeader {
@@ -318,7 +318,7 @@
   cursor: pointer; font-family: var(--font-body); font-size: 13px;
   color: var(--text-muted); transition: all 0.15s;
 }
-.toggleBtnOn { border-color: var(--accent) !important; color: var(--accent) !important; }
+.toggleBtnOn { border-color: var(--accent) !important; color: var(--accent-text) !important; }
 
 .notifyRow { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
 .notifyRow .toggleBtn { flex-shrink: 0; }
@@ -335,7 +335,7 @@
   font-family: var(--font-body); font-size: 11px;
   padding: 5px 10px; cursor: pointer; transition: all 0.15s; text-align: center;
 }
-.addItemBtn:hover { border-color: var(--accent); color: var(--accent); }
+.addItemBtn:hover { border-color: var(--accent); color: var(--accent-text); }
 
 .removeBtn {
   background: transparent; border: 1px solid transparent;

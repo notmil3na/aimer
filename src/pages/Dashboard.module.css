@@ -136,7 +136,7 @@
 .onboardingSubtitle {
   font-size: 12px;
   font-weight: 600;
-  color: var(--accent);
+  color: var(--accent-text);
 }
 
 .onboardingDismiss {
@@ -233,7 +233,7 @@
   text-align: left;
   transition: color 0.15s;
 }
-.onboardingStepLabel:hover { color: var(--accent); }
+.onboardingStepLabel:hover { color: var(--accent-text); }
 .onboardingStepDone { text-decoration: line-through; color: var(--text-muted); }
 
 .onboardingStepDesc {

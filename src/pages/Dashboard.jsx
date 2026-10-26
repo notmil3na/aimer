@@ -446,7 +446,7 @@ export default function Dashboard({ user, onLogout, onUpdateUser }) {
         <ErrorBoundary key={tab} view>
           <Suspense fallback={
             <div className={styles.tabLoading}>
-              <span style={{ fontSize: "20px", color: "var(--accent)" }}>✦</span>
+              <span style={{ fontSize: "20px", color: "var(--accent-text)" }}>✦</span>
               <span>Cargando...</span>
             </div>
           }>

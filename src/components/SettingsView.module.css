@@ -111,7 +111,7 @@
 .careerVal {
   font-family: var(--font-display);
   font-size: 22px;
-  color: var(--accent);
+  color: var(--accent-text);
   line-height: 1.2;
 }
 
@@ -180,7 +180,7 @@
 .avatarName { font-size: 18px; font-weight: 600; color: var(--text); }
 .avatarSub { font-size: 13px; color: var(--text-muted); margin-top: 3px; }
 .avatarCorte {
-  font-size: 11px; color: var(--accent);
+  font-size: 11px; color: var(--accent-text);
   background: rgba(var(--accent-rgb), 0.1);
   border: 1px solid rgba(var(--accent-rgb), 0.2);
   border-radius: 5px; padding: 2px 8px;
@@ -225,7 +225,7 @@
 }
 
 .semesterHint {
-  font-size: 11px; color: var(--accent);
+  font-size: 11px; color: var(--accent-text);
   background: rgba(var(--accent-rgb), 0.08);
   border: 1px solid rgba(var(--accent-rgb), 0.2);
   border-radius: var(--radius-sm); padding: 7px 10px; line-height: 1.5;
@@ -267,7 +267,7 @@
   text-transform: uppercase; letter-spacing: 0.06em;
 }
 .cursandoBadge {
-  font-size: 11px; color: var(--accent);
+  font-size: 11px; color: var(--accent-text);
   background: rgba(var(--accent-rgb), 0.1);
   border: 1px solid rgba(var(--accent-rgb), 0.2);
   border-radius: 5px; padding: 2px 8px;
@@ -278,7 +278,7 @@
   padding: 10px 20px;
   border-bottom: 1px solid var(--border);
 }
-.corteChip strong { color: var(--accent); }
+.corteChip strong { color: var(--accent-text); }
 
 .cursandoEmpty {
   padding: 28px 20px; text-align: center;
@@ -300,7 +300,7 @@
   flex: 1; padding: 10px 14px;
   display: flex; flex-direction: column; gap: 2px;
 }
-.cursandoItemId { font-size: 10px; font-weight: 700; color: var(--accent); letter-spacing: 0.05em; }
+.cursandoItemId { font-size: 10px; font-weight: 700; color: var(--accent-text); letter-spacing: 0.05em; }
 .cursandoItemNombre { font-size: 13px; color: var(--text); }
 
 .cursandoItemCred {
@@ -316,7 +316,7 @@
 }
 .cursandoTotalVal {
   font-family: var(--font-display); font-size: 20px; font-weight: 400;
-  color: var(--accent);
+  color: var(--accent-text);
 }
 
 
@@ -329,9 +329,9 @@
   font-family: var(--font-body); padding: 11px 18px;
   transition: border-color 0.2s, color 0.2s, background 0.2s;
 }
-.semDateToggle:hover { border-color: var(--accent); color: var(--accent); background: rgba(var(--accent-rgb), 0.06); }
-.semDateToggleOpen { border-color: var(--accent); color: var(--accent); }
-.semDateToggle svg { color: var(--accent); flex-shrink: 0; }
+.semDateToggle:hover { border-color: var(--accent); color: var(--accent-text); background: rgba(var(--accent-rgb), 0.06); }
+.semDateToggleOpen { border-color: var(--accent); color: var(--accent-text); }
+.semDateToggle svg { color: var(--accent-text); flex-shrink: 0; }
 
 .semDateMenu {
   margin: 8px 12px 14px;
@@ -409,7 +409,7 @@
 .modeBtn:hover { border-color: var(--accent); color: var(--text); }
 .modeBtnActive {
   border-color: var(--accent) !important;
-  color: var(--accent) !important;
+  color: var(--accent-text) !important;
   background: rgba(var(--accent-rgb), 0.06) !important;
   box-shadow: 0 0 0 1px var(--accent);
 }
@@ -473,7 +473,7 @@
 }
 .fontOptionCheck {
   position: absolute; top: 10px; right: 12px;
-  font-size: 12px; color: var(--accent); font-weight: 700;
+  font-size: 12px; color: var(--accent-text); font-weight: 700;
 }
 
 
@@ -506,14 +506,14 @@
 .borderPreviewRow { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
 .borderBtn { background: var(--surface2); border: 1px solid var(--border); color: var(--text-muted); font-family: var(--font-body); font-size: 11px; padding: 8px 12px; cursor: pointer; transition: border-color 0.15s, color 0.15s; }
 .borderBtn:hover { border-color: var(--accent); color: var(--text); }
-.borderBtnActive { border-color: var(--accent) !important; color: var(--accent) !important; }
+.borderBtnActive { border-color: var(--accent) !important; color: var(--accent-text) !important; }
 .rangeInput { width: 100%; accent-color: var(--accent); }
 
 
 .fontScaleRow { display: flex; gap: 8px; }
 .fontBtn { background: var(--surface2); border: 1px solid var(--border); color: var(--text-muted); font-family: var(--font-body); padding: 8px 16px; cursor: pointer; border-radius: var(--radius-sm); transition: border-color 0.15s, color 0.15s; }
 .fontBtn:hover { border-color: var(--accent); color: var(--text); }
-.fontBtnActive { border-color: var(--accent) !important; color: var(--accent) !important; }
+.fontBtnActive { border-color: var(--accent) !important; color: var(--accent-text) !important; }
 
 
 .preview { display: flex; gap: 10px; flex-wrap: wrap; }

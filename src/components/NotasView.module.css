@@ -85,7 +85,7 @@
   transition: all 0.15s;
 }
 .toggleBtn:hover { color: var(--text); }
-.toggleActive { background: var(--surface) !important; color: var(--accent) !important; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+.toggleActive { background: var(--surface) !important; color: var(--accent-text) !important; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
 
 
 .saveBtnDone {
@@ -252,7 +252,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: var(--accent);
+  color: var(--accent-text);
   margin: 0 0 8px;
 }
 
@@ -288,7 +288,7 @@
 .projectionNota {
   font-family: var(--font-display);
   font-size: 18px;
-  color: var(--accent);
+  color: var(--accent-text);
   min-width: 48px;
   text-align: right;
 }
@@ -357,7 +357,7 @@
 }
 
 .materiaId {
-  font-size: 11px; font-weight: 700; color: var(--accent);
+  font-size: 11px; font-weight: 700; color: var(--accent-text);
   letter-spacing: 0.05em; margin-right: 6px;
 }
 .materiaNombre { font-size: 14px; font-weight: 500; color: var(--text); }
@@ -368,7 +368,7 @@
   margin-top: 4px;
   font-size: 10px;
   font-weight: 700;
-  color: var(--accent);
+  color: var(--accent-text);
   text-transform: uppercase;
   letter-spacing: 0.06em;
   padding: 4px 8px;
@@ -467,7 +467,7 @@
   background: transparent;
   border: 1px solid color-mix(in srgb, var(--accent) 24%, var(--border));
   border-radius: 999px;
-  color: var(--accent);
+  color: var(--accent-text);
   font-family: var(--font-body);
   font-size: 11px;
   font-weight: 600;
@@ -709,7 +709,7 @@
 
 .failSimArrow {
   font-size: 20px;
-  color: var(--accent);
+  color: var(--accent-text);
 }
 
 .failSimDelta {

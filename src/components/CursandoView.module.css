@@ -37,7 +37,7 @@
 }
 .subNavBtn:hover { color: var(--text); }
 .subNavActive { background: var(--surface); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,0.18); }
-.subNavStar { color: var(--accent); font-size: 11px; }
+.subNavStar { color: var(--accent-text); font-size: 11px; }
 
 .header {
   position: relative;
@@ -199,7 +199,7 @@
 .corteNameInput:focus { border-bottom-color: var(--accent); box-shadow: 0 1px 0 0 var(--accent); }
 .corteChip {
   flex-shrink: 0; font-size: 10px; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.08em; color: var(--accent);
+  letter-spacing: 0.08em; color: var(--accent-text);
   background: color-mix(in srgb, var(--accent) 14%, transparent);
   padding: 3px 7px; border-radius: 999px;
 }
@@ -225,7 +225,7 @@
 .itemDot {
   width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
-  background: rgba(var(--accent-rgb), 0.12); color: var(--accent);
+  background: rgba(var(--accent-rgb), 0.12); color: var(--accent-text);
   font-size: 10px; font-weight: 700; margin-bottom: 6px;
 }
 .itemNameInput {
@@ -243,7 +243,7 @@
   cursor: pointer; transition: all 0.15s;
   text-align: center;
 }
-.addItemBtn:hover { border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.addItemBtn:hover { border-color: var(--accent); color: var(--accent-text); background: color-mix(in srgb, var(--accent) 10%, transparent); }
 
 .corteTotal {
   display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
@@ -336,7 +336,7 @@
 
 .addBtn {
   background: transparent; border: 1px solid var(--border);
-  border-radius: var(--radius-sm); color: var(--accent);
+  border-radius: var(--radius-sm); color: var(--accent-text);
   font-family: var(--font-body); font-size: 11px; font-weight: 600;
   padding: 5px 10px; min-height: 44px;
   cursor: pointer; transition: all 0.15s;
@@ -377,7 +377,7 @@
 .table td { padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 13px; }
 .table tr:last-child td { border-bottom: none; }
 .tableCenter { text-align: center; }
-.tableId { font-size: 11px; font-weight: 700; color: var(--accent); margin-right: 8px; }
+.tableId { font-size: 11px; font-weight: 700; color: var(--accent-text); margin-right: 8px; }
 .tableNombre { font-size: 13px; color: var(--text); }
 .tableBadge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 5px; }
 .tableNone { color: var(--border); }

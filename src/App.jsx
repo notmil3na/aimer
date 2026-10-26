@@ -74,15 +74,29 @@ export const APP_THEMES = {
 
 export { generateCortes, CORTES, corteForSemester } from "./utils/cortes";
 
+function accentLuminance(hex) {
+  const raw = String(hex || "").replace("#", "");
+  const full = raw.length === 3 ? raw.split("").map((c) => c + c).join("") : raw;
+  const [r, g, b] = [0, 2, 4]
+    .map((i) => parseInt(full.slice(i, i + 2), 16) / 255)
+    .map((c) => (c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)));
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
 export function applyTheme(themeKey, mode, fontBody) {
   const t = APP_THEMES[themeKey] || APP_THEMES.ambar;
   const m = mode || "dark";
   const root = document.documentElement;
+  const accentInk = t.accentInk || "#14101F";
   root.setAttribute("data-theme", m);
   root.style.setProperty("--accent",     t.accent);
   root.style.setProperty("--accent2",    t.accent2);
   root.style.setProperty("--accent-rgb", t.accentRgb);
-  root.style.setProperty("--accent-ink", t.accentInk || "#14101F");
+  root.style.setProperty("--accent-ink", accentInk);
+  // En modo oscuro un acento muy oscuro (burdeos) desaparece como texto. En ese
+  // caso el texto usa el color de contraste claro del tema.
+  const accentText = m === "dark" && accentLuminance(t.accent) < 0.12 ? accentInk : t.accent;
+  root.style.setProperty("--accent-text", accentText);
   if (fontBody) {
     root.style.setProperty("--font-body", `'${fontBody}', system-ui, sans-serif`);
     ensureFont(fontBody);
@@ -193,7 +207,7 @@ export default function App() {
         flex: 1, minHeight: 0, color: "var(--text-muted)", fontFamily: "var(--font-body)",
         flexDirection: "column", gap: "12px",
       }}>
-        <span style={{ fontSize: "28px", color: "var(--accent)" }}>✦</span>
+        <span style={{ fontSize: "28px", color: "var(--accent-text)" }}>✦</span>
         <span>Cargando aplicación...</span>
       </div>
     );
@@ -206,7 +220,7 @@ export default function App() {
         flex: 1, minHeight: 0, color: "var(--text-muted)", fontFamily: "var(--font-body)",
         flexDirection: "column", gap: "12px",
       }}>
-        <span style={{ fontSize: "28px", color: "var(--accent)" }}>✦</span>
+        <span style={{ fontSize: "28px", color: "var(--accent-text)" }}>✦</span>
         <span>Cargando aplicación...</span>
       </div>
     }>

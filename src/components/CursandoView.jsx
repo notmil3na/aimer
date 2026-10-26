@@ -559,7 +559,7 @@ export default function CursandoView({
                       <td className={styles.tableCenter} style={{ color: nf ? colorNota(nf) : "var(--text-muted)" }}>
                         {nf ?? "—"}
                       </td>
-                      <td className={styles.tableCenter} style={{ color: "var(--accent)" }}>
+                      <td className={styles.tableCenter} style={{ color: "var(--accent-text)" }}>
                         {pond ?? "—"}
                       </td>
                       <td className={styles.tableCenter}>
@@ -582,7 +582,7 @@ export default function CursandoView({
                     <td className={styles.tableCenter} style={{ color: colorNota(ponderado.valor) }}>
                       {ponderado.valor}
                     </td>
-                    <td className={styles.tableCenter} style={{ color: "var(--accent)", fontWeight: 700 }}>
+                    <td className={styles.tableCenter} style={{ color: "var(--accent-text)", fontWeight: 700 }}>
                       {(Number(ponderado.valor) * ponderado.creditos).toFixed(1)}
                     </td>
                     <td />

@@ -72,7 +72,7 @@
 
 .downloadBtn:hover {
   border-color: var(--accent);
-  color: var(--accent);
+  color: var(--accent-text);
 }
 
 .progressWrap {
@@ -173,7 +173,7 @@
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--accent);
+  color: var(--accent-text);
   border: 1px solid color-mix(in srgb, var(--accent) 38%, var(--border));
   background: color-mix(in srgb, var(--accent) 14%, transparent);
   border-radius: 999px;
@@ -266,7 +266,7 @@
 .semestreNum {
   font-family: var(--font-display);
   font-size: calc(20px * var(--fs, 1));
-  color: var(--accent); font-weight: 400;
+  color: var(--accent-text); font-weight: 400;
   line-height: 1;
 }
 
@@ -876,7 +876,7 @@
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--accent);
   border-radius: var(--radius-sm);
-  color: var(--accent);
+  color: var(--accent-text);
   font-family: var(--font-body);
   font-size: calc(12px * var(--fs, 1));
   font-weight: 600;
@@ -896,7 +896,7 @@
   padding: 3px 9px;
   border: 1px solid var(--accent);
   border-radius: 999px;
-  color: var(--accent);
+  color: var(--accent-text);
   font-family: var(--font-body);
   font-size: calc(11px * var(--fs, 1));
   font-weight: 700;
