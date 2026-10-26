@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo, useCallback, lazy, Suspense } from "react";
-import Sidebar from "../components/Sidebar";
+import Sidebar from "./Sidebar";
 import ErrorBoundary from "../components/ErrorBoundary";
 import NotificationBell from "../components/NotificationBell";
 import SecuritySetupModal from "../components/SecuritySetupModal";
