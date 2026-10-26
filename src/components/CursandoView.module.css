@@ -37,8 +37,6 @@
 }
 .subNavBtn:hover { color: var(--text); }
 .subNavActive { background: var(--surface); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,0.18); }
-.subNavStar { color: var(--accent-text); font-size: 11px; }
-
 .header {
   position: relative;
   z-index: 1;

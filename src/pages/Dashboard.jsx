@@ -12,7 +12,7 @@ import { getPendingSaves, hasPendingSaves, queueSave, clearPendingSave } from ".
 import styles from "./Dashboard.module.css";
 import {
   IconSchedule, IconCalendar, IconClipboard, IconSemester,
-  IconGrades, IconMalla, IconSettings, IconUsers, IconChat,
+  IconMalla, IconSettings, IconUsers, IconChat,
   IconCheck
 } from "../components/Icons";
 
@@ -28,8 +28,7 @@ const VIEW_LOADERS = {
   malla:        () => import("../components/MallaView"),
   cursando:     () => import("../components/CursandoView"),
   horario:      () => import("../components/HorarioView"),
-  notas:        () => import("../components/NotasView"),
-  config:       () => import("../components/SettingsView"),
+  config:        () => import("../components/SettingsView"),
   calendario:   () => import("../components/CalendarioView"),
   asignaciones: () => import("../components/AsignacionesView"),
   colaboracion: () => import("../components/ColaboracionView"),
@@ -39,7 +38,6 @@ const VIEW_LOADERS = {
 const MallaView = lazy(() => loadView(VIEW_LOADERS.malla));
 const CursandoView = lazy(() => loadView(VIEW_LOADERS.cursando));
 const HorarioView = lazy(() => loadView(VIEW_LOADERS.horario));
-const NotasView = lazy(() => loadView(VIEW_LOADERS.notas));
 const SettingsView = lazy(() => loadView(VIEW_LOADERS.config));
 const CalendarioView = lazy(() => loadView(VIEW_LOADERS.calendario));
 const AsignacionesView = lazy(() => loadView(VIEW_LOADERS.asignaciones));
@@ -378,7 +376,6 @@ export default function Dashboard({ user, onLogout, onUpdateUser }) {
     { id: "asignaciones", label: "Asignaciones", icon: IconClipboard },
     { id: "cursando", label: "Semestre", icon: IconSemester },
     { id: "calendario", label: "Calendario", icon: IconCalendar },
-    { id: "notas", label: "Notas", icon: IconGrades },
     { id: "malla", label: "Malla", icon: IconMalla },
     { id: "colaboracion", label: "Amigos", icon: IconUsers },
     { id: "chat", label: "Chats", icon: IconChat },
@@ -506,8 +503,8 @@ export default function Dashboard({ user, onLogout, onUpdateUser }) {
                 onSave={saveCursando}
                 user={user}
                 horarioData={horarioData}
-                notasClaseData={notasClaseData}
-                onSaveNotasClase={saveNotasClase}
+                notas={notas}
+                onSaveNotas={saveNotas}
               />
             )}
             {tab === "malla" && (
@@ -521,9 +518,6 @@ export default function Dashboard({ user, onLogout, onUpdateUser }) {
                 planAlternativo={planAlternativo}
                 etiquetaPlan={esPlan2022 ? "Plan 2022-1" : null}
               />
-            )}
-            {tab === "notas" && (
-              <NotasView malla={malla} notas={notas} onSave={saveNotas} user={user} />
             )}
             {tab === "config" && (
               <SettingsView

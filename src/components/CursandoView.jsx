@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import styles from "./CursandoView.module.css";
-import { IconCheck, IconX, IconUser, IconPlus, IconClose, IconChevronUp, IconChevronDown, IconSemester } from "./Icons";
-import NotasClaseView from "./NotasClaseView";
+import { IconCheck, IconX, IconUser, IconPlus, IconClose, IconChevronUp, IconChevronDown, IconSemester, IconGrades } from "./Icons";
+import NotasView from "./NotasView";
 
 const NOTA_MIN  = 0;
 const NOTA_MAX  = 500;
@@ -388,7 +388,7 @@ function MateriaCard({ materia, data, onChange, colors, borderRadius, horarioCla
 
 export default function CursandoView({
   malla, cursandoData, onSave, user, horarioData,
-  notasClaseData, onSaveNotasClase,
+  notas, onSaveNotas,
 }) {
   const [data, setData]   = useState(cursandoData || {});
   const [saved, setSaved] = useState(false);
@@ -413,12 +413,6 @@ export default function CursandoView({
     const horarioMaterias = fromHorario.map(id => materiaMap[id]);
     return [...manual, ...horarioMaterias];
   }, [malla, horarioClases, materiaMap]);
-
-  const materiasAll = useMemo(() => malla.flatMap(s => s.materias), [malla]);
-  const cursandoIds = useMemo(
-    () => new Set(materiasCursando.map(m => m.id)),
-    [materiasCursando]
-  );
 
   const getHorarioForMateria = (materiaId) => {
     return horarioClases.find(c => c.materiaId === materiaId);
@@ -459,17 +453,12 @@ export default function CursandoView({
           className={`${styles.subNavBtn} ${subView === "notas" ? styles.subNavActive : ""}`}
           onClick={() => setSubView("notas")}
         >
-          <span className={styles.subNavStar}>✦</span> Notas de clase
+          <IconGrades size={13} /> Notas Generales
         </button>
       </div>
 
       {subView === "notas" ? (
-        <NotasClaseView
-          materiasAll={materiasAll}
-          cursandoIds={cursandoIds}
-          notasClaseData={notasClaseData}
-          onSaveNotasClase={onSaveNotasClase}
-        />
+        <NotasView malla={malla} notas={notas} onSave={onSaveNotas} user={user} />
       ) : (
       <>
       <div className={styles.header}>
