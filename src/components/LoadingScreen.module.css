@@ -1,0 +1,123 @@
+.screen {
+  --paper: #fbf8f1;
+  --ink: #1f1a17;
+  --muted: #6b5f55;
+  --wine: #9c2029;
+  --wine-deep: #7d121a;
+  --wine-rgb: 156, 32, 41;
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='g' x='0' y='0' width='100%25' height='100%25' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='2.4 0 0 0 -0.7 2.4 0 0 0 -0.7 2.4 0 0 0 -0.7 0 0 0 0 0.45'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+
+  box-sizing: border-box;
+  display: grid;
+  flex: 1 1 auto;
+  min-height: 0;
+  place-items: center;
+  overflow: hidden;
+  padding: max(24px, env(safe-area-inset-top)) 24px max(24px, env(safe-area-inset-bottom));
+  background-color: #efe3d1;
+  background-image:
+    var(--grain),
+    radial-gradient(38% 46% at 6% 10%, rgba(244, 210, 122, 0.95) 0%, rgba(244, 210, 122, 0) 72%),
+    radial-gradient(36% 46% at 94% 6%, rgba(236, 118, 128, 0.85) 0%, rgba(236, 118, 128, 0) 72%),
+    radial-gradient(circle 380px at 90% 62%, rgba(173, 47, 56, 0) 0%, rgba(173, 47, 56, 0) 55%, rgba(173, 47, 56, 0.34) 78%, rgba(173, 47, 56, 0) 100%),
+    radial-gradient(42% 52% at 80% 100%, rgba(156, 32, 41, 0.8) 0%, rgba(156, 32, 41, 0) 72%),
+    radial-gradient(38% 48% at 2% 96%, rgba(246, 160, 120, 0.95) 0%, rgba(246, 160, 120, 0) 72%);
+  background-size: 200px 200px, auto, auto, auto, auto, auto;
+  background-blend-mode: overlay, normal, normal, normal, normal, normal;
+  color: var(--ink);
+  font-family: var(--font-body, "Overused Grotesk"), system-ui, sans-serif;
+}
+
+.card {
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  width: min(100%, 360px);
+  flex-direction: column;
+  align-items: center;
+  padding: 42px 32px 36px;
+  overflow: hidden;
+  border-radius: 26px;
+  background: var(--paper);
+  box-shadow:
+    10px 12px 0 rgba(var(--wine-rgb), 0.2),
+    20px 24px 0 rgba(var(--wine-rgb), 0.1),
+    0 32px 70px -32px rgba(58, 24, 20, 0.5);
+  text-align: center;
+}
+
+.card::before {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 7px;
+  background: var(--wine);
+  content: "";
+}
+
+.logoBadge {
+  box-sizing: border-box;
+  width: 72px;
+  height: 72px;
+  margin-bottom: 16px;
+  padding: 4px;
+  border-radius: 50%;
+  background: var(--paper);
+  box-shadow: 0 8px 20px -10px rgba(31, 26, 23, 0.6), 0 0 0 1px rgba(156, 32, 41, 0.18);
+}
+
+.face {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+.brand {
+  margin: 0;
+  color: var(--wine-deep);
+  font-family: "Sentient", Georgia, "Times New Roman", serif;
+  font-size: 36px;
+  font-style: italic;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.message {
+  margin: 12px 0 22px;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.progress {
+  display: block;
+  width: 112px;
+  height: 3px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(156, 32, 41, 0.14);
+}
+
+.progress span {
+  display: block;
+  width: 40%;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--wine);
+  animation: progress 1.2s ease-in-out infinite;
+}
+
+@keyframes progress {
+  from { transform: translateX(-110%); }
+  to { transform: translateX(280%); }
+}
+
+@media (max-width: 480px) {
+  .card {
+    padding: 36px 24px 32px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progress span { animation: none; }
+}

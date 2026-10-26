@@ -5,6 +5,7 @@ const UpdatePrompt = lazy(() => import("./components/UpdatePrompt"));
 import { api, saveSession, clearSession, getToken, prewarm } from "./api";
 import { ensureFont } from "./utils/fonts";
 import { getPhoto } from "./utils/photo";
+import LoadingScreen from "./components/LoadingScreen";
 import "./App.css";
 
 export const APP_THEMES = {
@@ -201,29 +202,11 @@ export default function App() {
   };
 
   if (!ready) {
-    return (
-      <div style={{
-        display: "flex", alignItems: "center", justifyContent: "center",
-        flex: 1, minHeight: 0, color: "var(--text-muted)", fontFamily: "var(--font-body)",
-        flexDirection: "column", gap: "12px",
-      }}>
-        <span style={{ fontSize: "28px", color: "var(--accent-text)" }}>✦</span>
-        <span>Cargando aplicación...</span>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   return (
-    <Suspense fallback={
-      <div style={{
-        display: "flex", alignItems: "center", justifyContent: "center",
-        flex: 1, minHeight: 0, color: "var(--text-muted)", fontFamily: "var(--font-body)",
-        flexDirection: "column", gap: "12px",
-      }}>
-        <span style={{ fontSize: "28px", color: "var(--accent-text)" }}>✦</span>
-        <span>Cargando aplicación...</span>
-      </div>
-    }>
+    <Suspense fallback={<LoadingScreen />}>
       {user ? (
         <Dashboard
           user={user}
