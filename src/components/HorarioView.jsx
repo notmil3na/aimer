@@ -1008,7 +1008,8 @@ function HoyWidget({ horarioData, malla }) {
                 <span className={styles.hoyMateriaNombre}>{mat?.nombre || clase.materiaId}</span>
                 <span className={styles.hoyHora}>{toViewHora(clase.horaInicio)} – {toViewHora(clase.horaFin)}</span>
                 <span className={styles.hoySalon}>
-                  <IconLocation size={11} /> {clase.salonLabel || "Sin salón"}
+                  <IconLocation size={11} />
+                  <span className={styles.hoySalonTexto}>{clase.salonLabel || "Sin salón"}</span>
                 </span>
               </div>
             </div>
