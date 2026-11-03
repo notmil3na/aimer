@@ -1,4 +1,4 @@
-import { envReady, json, readBody, verifyPassword, hashPassword, signToken, publicUser, HASH_FALSO, vreq } from "../../lib.js";
+import { envReady, json, readBody, verifyPassword, hashPassword, signToken, setSessionCookie, publicUser, HASH_FALSO, vreq } from "../../lib.js";
 import { jparse } from "../../db.js";
 
 export async function handler(c) {
@@ -6,7 +6,7 @@ export async function handler(c) {
   if (req.method !== "POST") return json(c, 405, { error: "method" });
   if (!envReady(c.env)) return json(c, 500, { error: "Configuración del servidor incompleta" });
 
-  const { username, password } = await readBody(c);
+  const { username, password, remember } = await readBody(c);
   if (!username || !password) return json(c, 400, { error: "Faltan datos" });
 
   const uname = String(username).trim();
@@ -37,8 +37,17 @@ export async function handler(c) {
     dataOut.notasclase = jparse(dataOut.notasclase);
   }
 
+  setSessionCookie(
+    c,
+    await signToken(c, {
+      username: user.username,
+      sessionVersion: Number(user.session_version ?? 0),
+    }),
+    remember !== false
+  );
+
+  // el token ya no viaja en el cuerpo: vive solo en la cookie HttpOnly.
   return json(c, 200, {
-    token: await signToken(c, { username: user.username }),
     user: publicUser(user),
     data: dataOut || null,
   });

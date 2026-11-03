@@ -1,6 +1,7 @@
 ﻿.layout {
   display: flex;
   flex: 1;
+  min-width: 0;
   min-height: 0;
   overflow: hidden;
   gap: 0;
@@ -8,6 +9,7 @@
 
 .main {
   flex: 1;
+  min-width: 0;
   overflow-y: auto;
   background: var(--surface);
   border: 1px solid var(--border);
@@ -25,7 +27,7 @@
   z-index: 999;
   background: color-mix(in srgb, var(--modal-bg) 90%, transparent);
   color: var(--text);
-  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-border) 30%, transparent);
   padding: 10px 14px;
   border-radius: var(--radius-sm);
   font-size: 13px;
@@ -154,7 +156,7 @@
   cursor: pointer;
   transition: border-color 0.15s, color 0.15s;
 }
-.onboardingDismiss:hover { border-color: var(--accent); color: var(--text); }
+.onboardingDismiss:hover { border-color: var(--accent-border); color: var(--text); }
 
 .onboardingProgress {
   width: 100%;
@@ -187,7 +189,7 @@
   border-radius: var(--radius-md);
   transition: border-color 0.2s, background 0.2s;
 }
-.onboardingStep:hover { border-color: color-mix(in srgb, var(--accent) 40%, var(--border)); }
+.onboardingStep:hover { border-color: color-mix(in srgb, var(--accent-border) 40%, var(--border)); }
 
 .onboardingCheck {
   flex-shrink: 0;
@@ -204,10 +206,10 @@
   transition: all 0.2s;
   margin-top: 1px;
 }
-.onboardingCheck:hover { border-color: var(--accent); }
+.onboardingCheck:hover { border-color: var(--accent-border); }
 .onboardingCheckDone {
   background: var(--accent);
-  border-color: var(--accent);
+  border-color: var(--accent-border);
   color: #fff;
 }
 

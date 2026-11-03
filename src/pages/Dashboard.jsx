@@ -3,6 +3,8 @@ import Sidebar from "./Sidebar";
 import ErrorBoundary from "../components/ErrorBoundary";
 import NotificationBell from "../components/NotificationBell";
 import SecuritySetupModal from "../components/SecuritySetupModal";
+import LoadingScreen from "../components/LoadingScreen";
+import useGlobalSiteText from "../hooks/useGlobalSiteText";
 import useReminders from "../hooks/useReminders";
 import useMediaQuery from "../hooks/useMediaQuery";
 import { getMallaByCareer } from "../data/malla.js";
@@ -41,6 +43,7 @@ const SettingsView = lazy(() => loadView(VIEW_LOADERS.config));
 const AsignacionesView = lazy(() => loadView(VIEW_LOADERS.asignaciones));
 const ColaboracionView = lazy(() => loadView(VIEW_LOADERS.colaboracion));
 const ChatView = lazy(() => loadView(VIEW_LOADERS.chat));
+const AdminView = lazy(() => import("../components/AdminView"));
 
 function autoApply(malla, currentSemester) {
   return malla.map((sem) => ({
@@ -91,7 +94,20 @@ async function saveUserData(patch) {
   }
 }
 
-export default function Dashboard({ user, onLogout, onUpdateUser }) {
+function hasCompletedTutorial(username) {
+  try {
+    return Boolean(
+      localStorage.getItem(`malla_onboarding_done_${username}`) ||
+      localStorage.getItem(`malla_tutorial_v2_${username}`)
+    );
+  } catch (_) {
+    return false;
+  }
+}
+
+export default function Dashboard({ user, onLogout, onUpdateUser, appBooting = false }) {
+  const siteTextRootRef = useRef(null);
+  const [adminMode, setAdminMode] = useState(false);
   const [tab, setTab] = useState(() => {
     try {
       const key = `malla_tutorial_v2_${user.username}`;
@@ -99,11 +115,14 @@ export default function Dashboard({ user, onLogout, onUpdateUser }) {
     } catch (_) {}
     return "horario";
   });
+  useGlobalSiteText(`dashboard:${tab}`, siteTextRootRef);
   const isPhone = useMediaQuery("(max-width: 800px)");
   const cachedRef = useRef(null);
   if (cachedRef.current === null) cachedRef.current = getSessionData();
   const cached = cachedRef.current;
   const [loaded, setLoaded] = useState(!!cached);
+  const [showSyncLoading, setShowSyncLoading] = useState(!cached);
+  const finishSyncLoading = useCallback(() => setShowSyncLoading(false), []);
   const [toastMsg, setToastMsg] = useState("");
   const [toastAction, setToastAction] = useState(null);
   const [isOffline, setIsOffline] = useState(typeof navigator !== "undefined" ? !navigator.onLine : false);
@@ -113,12 +132,7 @@ export default function Dashboard({ user, onLogout, onUpdateUser }) {
       : 0
   );
   const toastTimerRef = useRef(null);
-  const [showOnboarding, setShowOnboarding] = useState(() => {
-    try {
-      const key = `malla_onboarding_done_${user.username}`;
-      return !localStorage.getItem(key);
-    } catch (_) { return false; }
-  });
+  const [showOnboarding, setShowOnboarding] = useState(() => !hasCompletedTutorial(user.username));
 
   const [onboardingChecked, setOnboardingChecked] = useState(() => {
     try {
@@ -265,13 +279,6 @@ export default function Dashboard({ user, onLogout, onUpdateUser }) {
   }, [user.username, notify]);
 
   useEffect(() => {
-    const schedule = window.requestIdleCallback || ((cb) => window.setTimeout(cb, 250));
-    schedule(() => {
-      Object.values(VIEW_LOADERS).forEach((loader) => loader().catch(() => {}));
-    });
-  }, []);
-
-  useEffect(() => {
     async function load() {
       const data = await loadUserData();
       // Lo que quedó pendiente de guardar (sin conexión) es más reciente que la
@@ -377,7 +384,8 @@ export default function Dashboard({ user, onLogout, onUpdateUser }) {
     { id: "colaboracion", label: "Amigos", icon: IconUsers },
     { id: "chat", label: "Chats", icon: IconChat },
     { id: "config", label: "Configuración", icon: IconSettings },
-  ], []);
+    ...(adminMode && user.isAdmin ? [{ id: "admin", label: "Administrar", icon: IconSettings }] : []),
+  ], [adminMode, user.isAdmin]);
 
   // En el teléfono Amigos y Chats son una sola vista: Chats es la principal y
   // los amigos se abren desde el icono de la cabecera.
@@ -385,6 +393,10 @@ export default function Dashboard({ user, onLogout, onUpdateUser }) {
     () => (isPhone ? allTabs.filter((t) => t.id !== "colaboracion") : allTabs),
     [allTabs, isPhone]
   );
+  const toggleAdminMode = () => {
+    if (adminMode && tab === "admin") setTab("horario");
+    setAdminMode(!adminMode);
+  };
 
   useEffect(() => {
     if (isPhone && tab === "colaboracion") setTab("chat");
@@ -405,7 +417,11 @@ export default function Dashboard({ user, onLogout, onUpdateUser }) {
         bell={<NotificationBell {...reminders} />}
         hideTopBar={tab === "chat"}
       />
-      <main className={`${styles.main}${tab === "chat" ? ` ${styles.mainChat}` : ""}`}>
+      <main
+        ref={siteTextRootRef}
+        data-site-text-scope={`dashboard:${tab}`}
+        className={`${styles.main}${tab === "chat" ? ` ${styles.mainChat}` : ""}`}
+      >
         {showOnboarding && (
           <div className={styles.onboardingBar} ref={onboardingRef}>
             <div className={styles.onboardingCard}>
@@ -516,6 +532,8 @@ export default function Dashboard({ user, onLogout, onUpdateUser }) {
                 malla={malla}
                 semestre={semestre}
                 onSaveSemestre={saveSemestre}
+                adminMode={adminMode}
+                onToggleAdminMode={toggleAdminMode}
               />
             )}
             {tab === "colaboracion" && (
@@ -543,15 +561,17 @@ export default function Dashboard({ user, onLogout, onUpdateUser }) {
                 onNotify={notify}
               />
             )}
+            {tab === "admin" && adminMode && user.isAdmin && <AdminView />}
           </Suspense>
         </ErrorBoundary>
       </main>
 
-      {!loaded && (
-        <div className={styles.syncing}>
-          <span className={styles.syncingDot} />
-          Sincronizando tu información…
-        </div>
+      {showSyncLoading && !appBooting && (
+        <LoadingScreen
+          ready={loaded}
+          label="Sincronizando tu información"
+          onDone={finishSyncLoading}
+        />
       )}
       {toastMsg && (
         <div className={styles.toast}>

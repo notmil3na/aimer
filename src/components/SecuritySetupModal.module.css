@@ -67,7 +67,7 @@
   font-family: var(--font-body); font-size: 14px;
   outline: none;
 }
-.select:focus, .field input:focus { border-color: var(--accent); }
+.select:focus, .field input:focus { border-color: var(--accent-border); }
 .select option { background: var(--modal-bg); color: var(--modal-text); }
 
 .btn {

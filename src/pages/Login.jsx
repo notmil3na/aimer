@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useId } from "react";
 import { CORTES } from "../utils/cortes";
 import { SEMESTER_CORTE } from "../utils/semesterCountdown";
 import { UNIVERSITIES, autoSemester } from "../utils/academic";
-import { api, prewarm } from "../api";
+import { api } from "../api";
 import styles from "./Login.module.css";
 import { IconCheck, IconWarning } from "../components/Icons";
 import AnimatedFace from "../components/AnimatedFace";
@@ -210,10 +210,23 @@ export default function Login({ onLogin }) {
   const isRegister = tab === "register";
 
   useEffect(() => {
-    prewarm();
-    import("../pages/Dashboard");
-    import("../components/UpdatePrompt");
-    import("../components/HorarioView");
+    // El dashboard se calienta cuando el navegador ya pintó el formulario y
+    // está libre. Pedirlo al montar el login ponía a competir Dashboard,
+    // HorarioView y academic con el LCP de una pantalla que solo es un form.
+    const idle = window.requestIdleCallback
+      ? window.requestIdleCallback.bind(window)
+      : (cb) => setTimeout(cb, 1200);
+    const cancelIdle = window.cancelIdleCallback
+      ? window.cancelIdleCallback.bind(window)
+      : clearTimeout;
+
+    const id = idle(() => {
+      import("../pages/Dashboard");
+      import("../components/HorarioView");
+      import("../components/UpdatePrompt");
+    }, { timeout: 4000 });
+
+    return () => cancelIdle(id);
   }, []);
 
   useEffect(() => {
@@ -260,7 +273,7 @@ export default function Login({ onLogin }) {
       const auth = await api("/auth/login", {
         method: "POST",
         skipAuth: true,
-        body: { username: form.username, password: form.password },
+        body: { username: form.username, password: form.password, remember },
       });
       onLogin(auth, remember);
     } catch (err) {
@@ -373,7 +386,7 @@ export default function Login({ onLogin }) {
 
           <div className={styles.hero}>
             <h1 className={styles.headline}>
-              <span>Sobrevive</span>
+              <span>Sobrevive</span>{" "}
               <span className={styles.headlineIt}>al semestre</span>
             </h1>
             <p className={styles.tagline}>
@@ -388,9 +401,9 @@ export default function Login({ onLogin }) {
             <div className={styles.miniCard}>
               <p className={styles.miniTitle}>
                 {MINI_CARD.line1}
-                <br />
-                <em>{MINI_CARD.line2[0]}</em>
-                {MINI_CARD.icon && <img className={styles.miniIcon} src={MINI_CARD.icon} alt="" />}
+                <br />{" "}
+                <em>{MINI_CARD.line2[0]}</em>{" "}
+                {MINI_CARD.icon && <img className={styles.miniIcon} src={MINI_CARD.icon} alt="" />}{" "}
                 <em>{MINI_CARD.line2[1]}</em>
               </p>
               <div className={styles.miniFoot}>
@@ -444,8 +457,9 @@ export default function Login({ onLogin }) {
                 <div className={styles.field}>
                   <label htmlFor={fid("l-user")}>Usuario</label>
                   <div className={styles.inputWrap}>
-                    <input id={fid("l-user")} value={form.username} onChange={set("username")}
-                      placeholder="tu usuario" autoComplete="username" />
+                    <input id={fid("l-user")} name="username" value={form.username} onChange={set("username")}
+                      placeholder="tu usuario" autoComplete="username" autoCapitalize="none"
+                      autoCorrect="off" spellCheck={false} required />
                     {form.username.trim() && <FieldCheck />}
                   </div>
                 </div>
@@ -453,8 +467,9 @@ export default function Login({ onLogin }) {
                 <div className={styles.field}>
                   <label htmlFor={fid("l-pw")}>Contraseña</label>
                   <div className={styles.pwWrap}>
-                    <input id={fid("l-pw")} type={showPw ? "text" : "password"} value={form.password}
-                      onChange={set("password")} placeholder="tu contraseña" autoComplete="current-password" />
+                    <input id={fid("l-pw")} name="password" type={showPw ? "text" : "password"}
+                      value={form.password} onChange={set("password")}
+                      placeholder="tu contraseña" autoComplete="current-password" required />
                     {form.password.length >= 6 && <FieldCheck />}
                     <button type="button" className={styles.eyeBtn} onClick={() => setShowPw((v) => !v)}
                       aria-label={showPw ? "Ocultar contraseña" : "Mostrar contraseña"} aria-pressed={showPw}>

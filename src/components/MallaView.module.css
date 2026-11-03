@@ -71,7 +71,7 @@
 }
 
 .downloadBtn:hover {
-  border-color: var(--accent);
+  border-color: var(--accent-border);
   color: var(--accent-text);
 }
 
@@ -131,7 +131,7 @@
     linear-gradient(135deg, color-mix(in srgb, var(--accent) 16%, var(--surface)), var(--surface));
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
-  border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-border) 28%, transparent);
   border-radius: var(--radius-lg);
   box-shadow: 0 14px 32px rgba(0, 0, 0, 0.08);
   transition: border-color 0.18s, box-shadow 0.18s;
@@ -141,7 +141,7 @@
 }
 
 .semesterWidget:hover {
-  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+  border-color: color-mix(in srgb, var(--accent-border) 50%, transparent);
   box-shadow: 0 16px 36px color-mix(in srgb, var(--accent) 18%, transparent);
 }
 
@@ -174,7 +174,7 @@
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--accent-text);
-  border: 1px solid color-mix(in srgb, var(--accent) 38%, var(--border));
+  border: 1px solid color-mix(in srgb, var(--accent-border) 38%, var(--border));
   background: color-mix(in srgb, var(--accent) 14%, transparent);
   border-radius: 999px;
   padding: 4px 9px;
@@ -376,9 +376,9 @@
   padding: 6px 10px; min-height: 44px; cursor: pointer;
   transition: all 0.15s;
 }
-.estadoBtn:hover { border-color: var(--accent); color: var(--text); }
+.estadoBtn:hover { border-color: var(--accent-border); color: var(--text); }
 .estadoBtnActive {
-  border-color: var(--accent);
+  border-color: var(--accent-border);
   box-shadow: 0 0 0 2px rgba(var(--accent-rgb), 0.25);
   color: #0e0e14;
 }
@@ -395,7 +395,7 @@
 }
 
 .unlockItem {
-  border-color: color-mix(in srgb, var(--accent) 28%, transparent);
+  border-color: color-mix(in srgb, var(--accent-border) 28%, transparent);
 }
 
 .prereqDot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
@@ -874,7 +874,7 @@
   background: var(--surface);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
-  border: 1px solid var(--accent);
+  border: 1px solid var(--accent-border);
   border-radius: var(--radius-sm);
   color: var(--accent-text);
   font-family: var(--font-body);
@@ -894,7 +894,7 @@
   align-items: center;
   margin-left: 10px;
   padding: 3px 9px;
-  border: 1px solid var(--accent);
+  border: 1px solid var(--accent-border);
   border-radius: 999px;
   color: var(--accent-text);
   font-family: var(--font-body);
@@ -911,7 +911,7 @@
   gap: 14px;
   flex-wrap: wrap;
   background: var(--surface);
-  border: 1px solid var(--accent);
+  border: 1px solid var(--accent-border);
   border-radius: var(--radius-sm);
   padding: 14px 16px;
   margin-bottom: 20px;

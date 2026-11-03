@@ -36,7 +36,7 @@
   display: flex; align-items: center; justify-content: center;
   font-size: 12px; transition: all 0.15s;
 }
-.navBtn:hover { border-color: var(--accent); color: var(--text); }
+.navBtn:hover { border-color: var(--accent-border); color: var(--text); }
 .navTitle { font-family: var(--font-display); font-size: 16px; font-weight: 500; color: var(--text); }
 
 .calGrid {
@@ -100,7 +100,7 @@
   font-family: var(--font-body); font-size: 11px; font-weight: 600;
   padding: 4px 10px; cursor: pointer; transition: all 0.15s;
 }
-.addSmallBtn:hover { border-color: var(--accent); background: rgba(var(--accent-rgb), 0.06); }
+.addSmallBtn:hover { border-color: var(--accent-border); background: rgba(var(--accent-rgb), 0.06); }
 .noEvents { font-size: 12px; color: var(--text-muted); font-style: italic; }
 
 .selectedEvento {
@@ -192,7 +192,7 @@
 .modal .textInput:focus,
 .modal .select:focus,
 .modal .textarea:focus {
-  border-color: var(--accent); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.15);
+  border-color: var(--accent-border); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.15);
 }
 .modal .formField label { color: var(--modal-muted); }
 .modal .btnSecondary {
@@ -206,13 +206,13 @@
   background: color-mix(in srgb, var(--t-color) 12%, var(--modal-bg)) !important;
 }
 .modal .toggleBtn { background: var(--modal-bg2); border-color: var(--modal-border); color: var(--modal-muted); }
-.modal .toggleBtnOn { border-color: var(--accent) !important; color: var(--accent-text) !important; }
+.modal .toggleBtnOn { border-color: var(--accent-border) !important; color: var(--accent-text) !important; }
 .modal .temaRow { background: var(--modal-bg2); border-color: var(--modal-border); }
 .modal .temaRow .textInput { background: transparent; border-color: var(--modal-border); color: var(--modal-text); }
 .modal .removeBtn { color: var(--modal-muted); }
 .modal .removeBtn:hover { color: #e07070; background: rgba(224,112,112,0.08); }
 .modal .addItemBtn { color: var(--modal-muted); border-color: var(--modal-border); }
-.modal .addItemBtn:hover { border-color: var(--accent); color: var(--accent-text); }
+.modal .addItemBtn:hover { border-color: var(--accent-border); color: var(--accent-text); }
 @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
 .modalHeader {
@@ -265,7 +265,7 @@
   min-width: 0; max-width: 100%;
   transition: border-color 0.2s;
 }
-.textInput:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.12); }
+.textInput:focus { border-color: var(--accent-border); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.12); }
 
 .textarea {
   background: var(--surface2); border: 1px solid var(--border);
@@ -275,7 +275,7 @@
   min-width: 0; max-width: 100%;
   transition: border-color 0.2s;
 }
-.textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.12); }
+.textarea:focus { border-color: var(--accent-border); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.12); }
 
 .select {
   background: var(--surface2); border: 1px solid var(--border);
@@ -288,7 +288,7 @@
   background-repeat: no-repeat; background-position: right 12px center;
   padding-right: 32px; cursor: pointer;
 }
-.select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.12); }
+.select:focus { border-color: var(--accent-border); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.12); }
 
 .textInput[aria-invalid="true"], .select[aria-invalid="true"] { border-color: #e07070; }
 .formError { color: #e07070; font-size: 11px; font-weight: 600; }
@@ -306,7 +306,7 @@
 .tipoLabel {
   min-width: 0; overflow-wrap: anywhere; text-align: center; line-height: 1.25;
 }
-.tipoBtn:hover { border-color: var(--t-color, var(--accent)); }
+.tipoBtn:hover { border-color: var(--t-color, var(--accent-border)); }
 .tipoBtnActive {
   border-color: var(--t-color) !important; color: var(--t-color) !important;
   background: color-mix(in srgb, var(--t-color) 10%, var(--surface)) !important;
@@ -318,7 +318,7 @@
   cursor: pointer; font-family: var(--font-body); font-size: 13px;
   color: var(--text-muted); transition: all 0.15s;
 }
-.toggleBtnOn { border-color: var(--accent) !important; color: var(--accent-text) !important; }
+.toggleBtnOn { border-color: var(--accent-border) !important; color: var(--accent-text) !important; }
 
 .notifyRow { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
 .notifyRow .toggleBtn { flex-shrink: 0; }
@@ -335,7 +335,7 @@
   font-family: var(--font-body); font-size: 11px;
   padding: 5px 10px; cursor: pointer; transition: all 0.15s; text-align: center;
 }
-.addItemBtn:hover { border-color: var(--accent); color: var(--accent-text); }
+.addItemBtn:hover { border-color: var(--accent-border); color: var(--accent-text); }
 
 .removeBtn {
   background: transparent; border: 1px solid transparent;

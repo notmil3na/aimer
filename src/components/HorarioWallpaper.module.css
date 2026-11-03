@@ -66,7 +66,7 @@
   cursor: pointer; transition: all 0.15s;
 }
 .formatBtn:hover { border-color: var(--modal-muted); }
-.formatBtnActive { border-color: var(--accent) !important; background: rgba(var(--accent-rgb), 0.12) !important; }
+.formatBtnActive { border-color: var(--accent-border) !important; background: rgba(var(--accent-rgb), 0.12) !important; }
 .formatName { font-size: 13px; font-weight: 700; }
 .formatDim { font-size: 10px; color: var(--modal-muted); }
 
@@ -102,7 +102,7 @@
   border-radius: 8px; padding: 5px 10px; font-size: 11px; font-weight: 600; cursor: pointer;
   transition: all 0.15s;
 }
-.restoreBtn:hover { border-color: var(--accent); color: var(--accent-text); }
+.restoreBtn:hover { border-color: var(--accent-border); color: var(--accent-text); }
 
 .imgUploadBtn {
   display: inline-flex; align-items: center; gap: 5px;
@@ -110,13 +110,13 @@
   border: 1px dashed var(--modal-border); background: transparent;
   color: var(--modal-muted); cursor: pointer; transition: all 0.15s;
 }
-.imgUploadBtn:hover { border-color: var(--accent); color: var(--accent-text); }
+.imgUploadBtn:hover { border-color: var(--accent-border); color: var(--accent-text); }
 .imgPreview {
   display: flex; align-items: center; gap: 8px; margin-top: 6px;
 }
 .imgPreviewThumb {
   width: 44px; height: 44px; border-radius: 8px; object-fit: cover;
-  border: 2px solid var(--accent);
+  border: 2px solid var(--accent-border);
 }
 .imgRemoveBtn {
   width: 22px; height: 22px; border-radius: 50%; border: none;
@@ -139,7 +139,7 @@
 }
 .segBtn:hover { border-color: var(--modal-muted); }
 .segBtnActive {
-  border-color: var(--accent) !important;
+  border-color: var(--accent-border) !important;
   background: rgba(var(--accent-rgb), 0.12) !important;
   color: var(--modal-text);
 }

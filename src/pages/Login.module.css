@@ -55,6 +55,11 @@
   font-family: var(--sans);
 }
 
+:global(html[data-performance="low"]) .wrap,
+:global(html[data-performance="low"]) .panel {
+  background-image: none;
+}
+
 /* ---------- Tarjeta ---------- */
 
 .card {
@@ -328,7 +333,7 @@
   display: inline-block;
   width: 20px;
   height: 20px;
-  margin: 0 4px;
+  margin: 0;
   border-radius: 50%;
   object-fit: cover;
   vertical-align: -3px;

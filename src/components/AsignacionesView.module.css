@@ -44,7 +44,7 @@
   padding: 5px 10px;
   border-radius: 999px;
   background: color-mix(in srgb, var(--accent) 12%, transparent);
-  border: 1px solid color-mix(in srgb, var(--accent) 24%, var(--border));
+  border: 1px solid color-mix(in srgb, var(--accent-border) 24%, var(--border));
   color: var(--accent-text);
   font-size: 11px;
   font-weight: 700;
@@ -133,9 +133,9 @@
   cursor: pointer;
   transition: all 0.15s;
 }
-.filterBtn:hover { border-color: var(--f-color, var(--accent)); color: var(--text); transform: translateY(-1px); }
+.filterBtn:hover { border-color: var(--f-color, var(--accent-border)); color: var(--text); transform: translateY(-1px); }
 .filterBtnActive {
-  border-color: var(--f-color, var(--accent)) !important;
+  border-color: var(--f-color, var(--accent-border)) !important;
   color: var(--f-color, var(--accent)) !important;
   background: color-mix(in srgb, var(--f-color, var(--accent)) 10%, transparent) !important;
 }
@@ -201,14 +201,14 @@
 .card {
   position: relative;
   background: linear-gradient(135deg, color-mix(in srgb, var(--surface) 94%, transparent), color-mix(in srgb, var(--surface2) 90%, transparent));
-  border: 1px solid color-mix(in srgb, var(--card-color, var(--accent)) 28%, transparent);
+  border: 1px solid color-mix(in srgb, var(--card-color, var(--accent-border)) 28%, transparent);
   border-radius: 22px;
   overflow: hidden;
   transition: all 0.2s ease;
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
 }
 .card:hover {
-  border-color: color-mix(in srgb, var(--card-color, var(--accent)) 50%, transparent);
+  border-color: color-mix(in srgb, var(--card-color, var(--accent-border)) 50%, transparent);
   transform: translateY(-2px);
   box-shadow: 0 16px 32px color-mix(in srgb, var(--card-color, var(--accent)) 20%, transparent);
 }
@@ -325,7 +325,7 @@
   text-align: center;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
-.gradeInput:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.12); }
+.gradeInput:focus { border-color: var(--accent-border); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.12); }
 .gradeBadge {
   font-size: 12px;
   font-weight: 700;
@@ -370,7 +370,7 @@
 .cardActions { display: flex; justify-content: flex-end; gap: 8px; padding-top: 4px; }
 .editBtn {
   background: transparent;
-  border: 1px solid color-mix(in srgb, var(--accent) 34%, var(--border));
+  border: 1px solid color-mix(in srgb, var(--accent-border) 34%, var(--border));
   border-radius: 999px;
   color: var(--accent-text);
   font-family: var(--font-body);
@@ -458,7 +458,7 @@
 .modal .textInput:focus,
 .modal .select:focus,
 .modal .textarea:focus {
-  border-color: var(--accent);
+  border-color: var(--accent-border);
   box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.15);
 }
 .modal .formField label { color: var(--modal-muted); }
@@ -476,12 +476,12 @@
   background: color-mix(in srgb, var(--t-color) 12%, var(--modal-bg)) !important;
 }
 .modal .toggleBtn { background: color-mix(in srgb, var(--modal-bg2) 90%, transparent); border-color: var(--modal-border); color: var(--modal-muted); border-radius: 999px; }
-.modal .toggleBtnOn { border-color: var(--accent) !important; color: var(--accent-text) !important; }
+.modal .toggleBtnOn { border-color: var(--accent-border) !important; color: var(--accent-text) !important; }
 .modal .temasList .temaRow { background: color-mix(in srgb, var(--modal-bg2) 90%, transparent); border-color: var(--modal-border); border-radius: 12px; }
 .modal .removeBtn { color: var(--modal-muted); }
 .modal .removeBtn:hover { color: #e07070; background: rgba(224,112,112,0.08); }
 .modal .addItemBtn { color: var(--modal-muted); border-color: var(--modal-border); border-radius: 999px; }
-.modal .addItemBtn:hover { border-color: var(--accent); color: var(--accent-text); }
+.modal .addItemBtn:hover { border-color: var(--accent-border); color: var(--accent-text); }
 @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
 .modalHeader {
@@ -556,7 +556,7 @@
   max-width: 100%;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
-.textInput:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.12); }
+.textInput:focus { border-color: var(--accent-border); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.12); }
 
 .textarea {
   background: color-mix(in srgb, var(--surface2) 94%, transparent);
@@ -573,7 +573,7 @@
   max-width: 100%;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
-.textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.12); }
+.textarea:focus { border-color: var(--accent-border); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.12); }
 
 .select {
   background: color-mix(in srgb, var(--surface2) 94%, transparent);
@@ -595,7 +595,7 @@
   padding-right: 32px;
   cursor: pointer;
 }
-.select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.12); }
+.select:focus { border-color: var(--accent-border); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.12); }
 
 .tipoGrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
 .tipoBtn {
@@ -615,7 +615,7 @@
   transition: all 0.15s;
 }
 .tipoLabel { min-width: 0; overflow-wrap: anywhere; text-align: center; line-height: 1.25; }
-.tipoBtn:hover { border-color: var(--t-color, var(--accent)); }
+.tipoBtn:hover { border-color: var(--t-color, var(--accent-border)); }
 .tipoBtnActive {
   border-color: var(--t-color) !important;
   color: var(--t-color) !important;
@@ -633,7 +633,7 @@
   color: var(--text-muted);
   transition: all 0.15s;
 }
-.toggleBtnOn { border-color: var(--accent) !important; color: var(--accent-text) !important; }
+.toggleBtnOn { border-color: var(--accent-border) !important; color: var(--accent-text) !important; }
 
 .temasList { display: flex; flex-direction: column; gap: 6px; }
 .temaRow { display: flex; gap: 6px; align-items: center; }
@@ -651,7 +651,7 @@
   transition: all 0.15s;
   text-align: center;
 }
-.addItemBtn:hover { border-color: var(--accent); color: var(--accent-text); }
+.addItemBtn:hover { border-color: var(--accent-border); color: var(--accent-text); }
 
 .removeBtn {
   background: transparent;
@@ -697,7 +697,10 @@
   .wrap { padding: 18px 14px; }
   .title { font-size: 22px; }
   .filters { flex-direction: column; align-items: stretch; }
-  .filterBtns { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 2px; }
+  .filterGroup { width: 100%; min-width: 0; flex: 1 1 auto; }
+  .filterLabel { flex: 0 0 auto; }
+  .filterBtns { min-width: 0; flex-wrap: wrap; padding-bottom: 2px; }
+  .filterSelect { flex: 1 1 0; width: 0; min-width: 0; }
   .cardRight { padding: 10px 12px; }
   .modal { max-width: 100%; }
 }
@@ -712,7 +715,7 @@
   .filters { padding: 10px 12px; gap: 10px; flex-direction: column; align-items: stretch; }
   .filterGroup { width: 100%; }
   .filterLabel { font-size: 10px; }
-  .filterBtns { width: 100%; overflow-x: auto; padding-bottom: 2px; }
+  .filterBtns { width: 100%; overflow-x: auto; flex-wrap: nowrap; padding-bottom: 2px; }
   .filterBtn { font-size: 10px; padding: 4px 8px; white-space: nowrap; }
   .filterSelect { width: 100%; }
   .card { border-radius: 18px; }
@@ -750,4 +753,141 @@
   .cardRight { padding: 6px 8px; gap: 6px; }
   .filters { padding: 8px 10px; }
   .tipoGrid { grid-template-columns: 1fr; }
+}
+
+/* Superficies opacas para conservar legibilidad sobre los fondos temáticos. */
+.header,
+.filters,
+.card,
+.emptyState {
+  background: color-mix(in srgb, var(--modal-bg) 94%, var(--accent) 6%);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.cardCompleted { opacity: 1; }
+
+.cardExpanded {
+  background: var(--modal-bg2);
+}
+
+.cardHeader:hover {
+  background: color-mix(in srgb, var(--modal-bg2) 92%, var(--accent) 8%);
+}
+
+.filterBtn {
+  background: var(--modal-bg2);
+  color: var(--modal-text);
+}
+
+.filterBtnActive {
+  background: color-mix(in srgb, var(--modal-bg) 86%, var(--f-color, var(--accent)) 14%) !important;
+}
+
+.filterSelect,
+.gradeInput,
+.temaRow,
+.temaRowDone,
+.temaInput {
+  background-color: var(--modal-bg2);
+  color: var(--modal-text);
+}
+
+.temaRowDone {
+  opacity: 1;
+}
+
+.cardDatePill,
+.cardMetaItem,
+.cardPendiente {
+  background: var(--modal-bg2);
+}
+
+.editBtn,
+.deleteBtn {
+  background: var(--modal-bg2);
+}
+
+.completedToggle {
+  background: color-mix(in srgb, var(--modal-bg) 88%, #6ec88a 12%);
+  color: var(--text);
+}
+
+.modal .textInput,
+.modal .select,
+.modal .textarea,
+.modal .btnSecondary,
+.modal .tipoBtn,
+.modal .toggleBtn,
+.modal .temasList .temaRow,
+.modal .addItemBtn {
+  background-color: var(--modal-bg2);
+}
+
+.cardExpanded {
+  padding: 18px 20px;
+  background: var(--modal-bg2);
+  border-top-color: var(--modal-border);
+}
+
+.gradeRow {
+  align-items: flex-end;
+  padding: 14px;
+  background: var(--modal-bg);
+  border: 1px solid var(--modal-border);
+  border-radius: 14px;
+}
+
+.gradeRow .formField { min-width: 130px; }
+.gradeInput { background: var(--modal-bg2); border-color: var(--modal-border); border-radius: 10px; }
+
+.temasSection {
+  padding: 14px;
+  background: var(--modal-bg);
+  border: 1px solid var(--modal-border);
+  border-radius: 14px;
+}
+
+.temasHeader { margin-bottom: 2px; }
+.temaRow,
+.temaRowDone {
+  background: var(--modal-bg2);
+  border-color: var(--modal-border);
+  border-radius: 10px;
+}
+
+.temaRowDone { opacity: 1; }
+.temaInput { background: transparent; }
+
+.cardActions {
+  padding-top: 12px;
+  border-top: 1px solid var(--modal-border);
+}
+
+.dateInput {
+  min-height: 42px;
+  color-scheme: light dark;
+}
+
+.rangeToggle {
+  align-self: flex-start;
+  padding: 6px 0;
+  border: 0;
+  background: transparent;
+  color: var(--accent-text);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.rangeToggle:hover { text-decoration: underline; }
+
+.modal .dateInput { background: var(--modal-bg2); }
+
+@media (max-width: 480px) {
+  .cardExpanded { padding: 12px 14px; }
+  .gradeRow { align-items: flex-start; padding: 12px; }
+  .temasSection { padding: 12px; }
 }

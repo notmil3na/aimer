@@ -1,10 +1,10 @@
-import { Suspense, lazy, useState, useEffect } from "react";
+import { Suspense, lazy, useState, useEffect, useRef, useCallback } from "react";
 const Login = lazy(() => import("./pages/Login"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const UpdatePrompt = lazy(() => import("./components/UpdatePrompt"));
-import { api, saveSession, clearSession, getToken, prewarm } from "./api";
-import { ensureFont } from "./utils/fonts";
+import { api, saveSession, clearSession, getSession, logout, prewarm } from "./api";
 import { getPhoto } from "./utils/photo";
+import useGlobalSiteText from "./hooks/useGlobalSiteText";
 import LoadingScreen from "./components/LoadingScreen";
 import "./App.css";
 
@@ -34,6 +34,8 @@ export const APP_THEMES = {
     accent: "#FFC94D",
     accent2: "#F2A900",
     accentRgb: "255,201,77",
+    accentText: "#805000",
+    accentBorder: "#805000",
   },
   verde: {
     name: "Verde",
@@ -86,7 +88,7 @@ function accentLuminance(hex) {
 
 export function applyTheme(themeKey, mode, fontBody) {
   const t = APP_THEMES[themeKey] || APP_THEMES.ambar;
-  const m = mode || "dark";
+  const m = mode || "light";
   const root = document.documentElement;
   const accentInk = t.accentInk || "#14101F";
   root.setAttribute("data-theme", m);
@@ -96,11 +98,13 @@ export function applyTheme(themeKey, mode, fontBody) {
   root.style.setProperty("--accent-ink", accentInk);
   // En modo oscuro un acento muy oscuro (burdeos) desaparece como texto. En ese
   // caso el texto usa el color de contraste claro del tema.
-  const accentText = m === "dark" && accentLuminance(t.accent) < 0.12 ? accentInk : t.accent;
+  const accentText = m === "dark"
+    ? (accentLuminance(t.accent) < 0.12 ? accentInk : t.accent)
+    : (t.accentText || t.accent);
   root.style.setProperty("--accent-text", accentText);
+  root.style.setProperty("--accent-border", m === "dark" ? t.accent : (t.accentBorder || t.accent));
   if (fontBody) {
     root.style.setProperty("--font-body", `'${fontBody}', system-ui, sans-serif`);
-    ensureFont(fontBody);
   } else {
     root.style.removeProperty("--font-body");
   }
@@ -141,47 +145,53 @@ export async function saveUser(userData) {
 export default function App() {
   const [user, setUser]   = useState(null);
   const [ready, setReady] = useState(false);
+  const [boot, setBoot] = useState(true);
+  const publicScopeRef = useRef(null);
+  const finishBoot = useCallback(() => setBoot(false), []);
+  useGlobalSiteText(user ? "" : "login", publicScopeRef, false);
 
   useEffect(() => {
     let cancelled = false;
     prewarm();
     (async () => {
+      // las preferencias guardadas permiten pintar el tema al instante; la
+      // sesión real la valida la cookie contra /auth/me.
+      const saved = getSession();
+      if (saved?.user) {
+        applyTheme(saved.user.appTheme || "ambar", saved.user.appMode || "light", saved.user.fontBody);
+        if (!cancelled) setUser(saved.user);
+      }
       try {
-        const saved = localStorage.getItem("malla_session");
-        if (saved) {
-          const s = JSON.parse(saved);
-          if (s?.token && s?.user) {
-            applyTheme(s.user.appTheme || "ambar", s.user.appMode || "light", s.user.fontBody);
-            if (!cancelled) setUser(s.user);
-            api("/auth/me", { soft401: true })
-              .then(({ user: serverUser }) => {
-                if (cancelled) return;
-                setUser((prev) => {
-                  if (!prev) return serverUser;
-                  if (prev.hasPhoto && !serverUser.hasPhoto) {
-                    getPhoto(prev.username).then((p) => {
-                      if (cancelled) return;
-                      if (p) {
-                        api("/users", { method: "POST", body: { photo: p } }).catch(() => {});
-                      }
-                    });
-                    return { ...serverUser, hasPhoto: true };
-                  }
-                  return serverUser;
-                });
-              })
-              .catch(() => { if (!cancelled) { clearSession(); setUser(null); } });
+        const { user: serverUser } = await api("/auth/me", { soft401: true });
+        if (cancelled) return;
+        setUser((prev) => {
+          if (!prev) return serverUser;
+          if (prev.hasPhoto && !serverUser.hasPhoto) {
+            getPhoto(prev.username).then((p) => {
+              if (cancelled) return;
+              if (p) {
+                api("/users", { method: "POST", body: { photo: p } }).catch(() => {});
+              }
+            });
+            return { ...serverUser, hasPhoto: true };
           }
+          return serverUser;
+        });
+      } catch (_) {
+        // sin cookie válida (o caducada) volvemos al login.
+        if (!cancelled) {
+          clearSession();
+          setUser(null);
         }
-      } catch (_) {}
+      }
       if (!cancelled) setReady(true);
     })();
     return () => { cancelled = true; };
   }, []);
 
   const handleLogin = (auth, remember = true) => {
-    if (!auth?.token || !auth?.user) return;
-    saveSession(auth.token, auth.user, auth.data, remember);
+    if (!auth?.user) return;
+    saveSession(auth.user, auth.data, remember);
     setUser(auth.user);
     applyTheme(auth.user.appTheme || "ambar", auth.user.appMode || "light", auth.user.fontBody);
   };
@@ -189,34 +199,42 @@ export default function App() {
   const handleLogout = () => {
     const currentMode  = user?.appMode  || "light";
     const currentTheme = user?.appTheme || "ambar";
-    clearSession();
     setUser(null);
     applyTheme(currentTheme, currentMode);
+    logout();
   };
 
   const handleUpdateUser = async (updated) => {
-    saveSession(getToken(), updated);
+    saveSession(updated);
     setUser(updated);
     applyTheme(updated.appTheme || "ambar", updated.appMode || "light", updated.fontBody);
     await saveUser(updated);
   };
 
-  if (!ready) {
-    return <LoadingScreen />;
-  }
-
   return (
-    <Suspense fallback={<LoadingScreen />}>
-      {user ? (
-        <Dashboard
-          user={user}
-          onLogout={handleLogout}
-          onUpdateUser={handleUpdateUser}
-        />
-      ) : (
-        <Login onLogin={handleLogin} />
+    <>
+      {ready && (
+        <Suspense fallback={<LoadingScreen progress={90} />}>
+          {user ? (
+            <Dashboard
+              user={user}
+              onLogout={handleLogout}
+              onUpdateUser={handleUpdateUser}
+              appBooting={boot}
+            />
+          ) : (
+            <div
+              ref={publicScopeRef}
+              className="loginScope"
+              data-site-text-scope="login"
+            >
+              <Login onLogin={handleLogin} />
+            </div>
+          )}
+          {user && <UpdatePrompt />}
+        </Suspense>
       )}
-      {user && <UpdatePrompt />}
-    </Suspense>
+      {boot && <LoadingScreen ready={ready} onDone={finishBoot} />}
+    </>
   );
 }

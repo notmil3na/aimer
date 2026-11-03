@@ -52,6 +52,26 @@ function calcNotaFinal(cortes) {
   return Number(((sumaPts / sumaPeso) * 500).toFixed(1));
 }
 
+function calcPuntosMateria(cortes) {
+  let obtenidos = 0;
+  let total = 0;
+  let tieneNota = false;
+
+  cortes.forEach(corte => {
+    (corte.items || []).forEach(item => {
+      const nota = parseFloat(item.nota);
+      const notaMax = parseFloat(item.notaMax) || parseFloat(corte.peso);
+      if (!Number.isNaN(nota)) {
+        obtenidos += nota;
+        tieneNota = true;
+      }
+      if (!Number.isNaN(notaMax) && notaMax > 0) total += notaMax;
+    });
+  });
+
+  return tieneNota || total > 0 ? { obtenidos, total } : null;
+}
+
 function colorNota(nota) {
   if (nota === null || nota === undefined || nota === "") return "var(--text-muted)";
   return Number(nota) >= NOTA_PASS ? "#6ec88a" : "#e07070";
@@ -71,14 +91,16 @@ function calcPonderado(materias, cursandoData) {
 function CorteItemRow({ item, idx, onChange, onRemove, max }) {
   return (
     <div className={styles.itemRow}>
-      <span className={styles.itemDot}>{idx + 1}</span>
-      <input
-        type="text"
-        className={styles.itemNameInput}
-        value={item.nombre}
-        placeholder="Nombre"
-        onChange={e => onChange({ ...item, nombre: e.target.value })}
-      />
+      <div className={styles.itemIdentity}>
+        <span className={styles.itemDot}>{idx + 1}</span>
+        <input
+          type="text"
+          className={styles.itemNameInput}
+          value={item.nombre}
+          placeholder="Nombre de la evaluación"
+          onChange={e => onChange({ ...item, nombre: e.target.value })}
+        />
+      </div>
       <div className={styles.inputGroup}>
         <label>Valoración</label>
         <input
@@ -90,7 +112,7 @@ function CorteItemRow({ item, idx, onChange, onRemove, max }) {
         />
       </div>
       <div className={styles.inputGroup}>
-        <label>Nota /{item.notaMax || max}</label>
+        <label>Nota obtenida</label>
         <input
           type="number" min={NOTA_MIN} max={item.notaMax || max} step="0.1"
           className={styles.notaInput}
@@ -105,6 +127,7 @@ function CorteItemRow({ item, idx, onChange, onRemove, max }) {
 }
 
 function CorteRow({ corte, idx, onChange, onRemove, canRemove }) {
+  const [expanded, setExpanded] = useState(false);
   const corteNota = calcCorteNota(corte.items);
   const cortePeso = parseFloat(corte.peso) || 0;
   const cortePct = corteNota !== null && cortePeso > 0 ? (corteNota / cortePeso) * 500 : null;
@@ -125,20 +148,30 @@ function CorteRow({ corte, idx, onChange, onRemove, canRemove }) {
 
   return (
     <div className={styles.corteSection}>
-      <div className={styles.corteHeader}>
+      <div className={`${styles.corteHeader} ${expanded ? styles.corteHeaderExpanded : ""}`}>
         <div className={styles.corteHeaderLeft}>
-          <span className={styles.corteChip}>Corte</span>
-          <input
-            type="text"
-            className={styles.corteNameInput}
-            value={corte.nombre}
-            placeholder={`Corte ${idx + 1}`}
-            onChange={e => onChange({ ...corte, nombre: e.target.value })}
-          />
+          <button
+            type="button"
+            className={styles.corteExpandBtn}
+            aria-expanded={expanded}
+            aria-label={`${expanded ? "Contraer" : "Expandir"} ${corte.nombre || `Corte ${idx + 1}`}`}
+            onClick={() => setExpanded(value => !value)}
+          >
+            {expanded ? <IconChevronUp size={13} /> : <IconChevronDown size={13} />}
+          </button>
+          <span className={styles.corteChip}>
+            <span className={styles.corteNumber}>{String(idx + 1).padStart(2, "0")}</span>
+            <span>Corte {idx + 1}</span>
+          </span>
         </div>
         <div className={styles.corteHeaderRight}>
+          {!expanded && corteNota !== null && (
+            <span className={styles.corteCollapsedScore}>
+              {corteNota}<span>/{cortePeso || "—"}</span>
+            </span>
+          )}
           <div className={styles.inputGroup}>
-            <label>Meta (pts)</label>
+            <label>Valoración total</label>
             <input
               type="number" min={1} max={500}
               className={styles.pesoInput}
@@ -152,34 +185,37 @@ function CorteRow({ corte, idx, onChange, onRemove, canRemove }) {
         </div>
       </div>
 
-      <div className={styles.itemsPanel}>
-        {(corte.items || []).length === 0 && (
-          <p className={styles.itemsEmpty}>Aún no hay evaluaciones. Agrega una para empezar a sumar puntos.</p>
-        )}
-        {(corte.items || []).map((item, i) => (
-          <CorteItemRow
-            key={i} item={item} idx={i}
-            max={cortePeso || 500}
-            onChange={val => updateItem(i, val)}
-            onRemove={() => removeItem(i)}
-          />
-        ))}
-        <button className={styles.addItemBtn} onClick={addItem}><IconPlus size={11} /> Evaluar</button>
-      </div>
+      {expanded && (
+        <div className={styles.corteContent}>
+          <div className={styles.itemsPanel}>
+            {(corte.items || []).length === 0 && (
+              <p className={styles.itemsEmpty}>Aún no hay evaluaciones. Agrega una para empezar a sumar puntos.</p>
+            )}
+            {(corte.items || []).map((item, i) => (
+              <CorteItemRow
+                key={i} item={item} idx={i}
+                max={cortePeso || 500}
+                onChange={val => updateItem(i, val)}
+                onRemove={() => removeItem(i)}
+              />
+            ))}
+            <button className={styles.addItemBtn} onClick={addItem}><IconPlus size={11} /> Evaluar</button>
+          </div>
 
-      {corteNota !== null && (
-        <div className={styles.corteTotal} style={{ borderLeftColor: colorNota(cortePct) }}>
-          <span className={styles.corteTotalLabel}>Nota del corte</span>
-          <span className={styles.corteTotalVal} style={{ color: colorNota(cortePct) }}>
-            {corteNota}
-            <span className={styles.corteTotalMax}> / {cortePeso || "—"} pts</span>
-          </span>
-          <span
-            className={styles.corteTotalStatus}
-            style={{ background: colorNota(cortePct), color: colorNota(cortePct) === "#6ec88a" ? "#0e1526" : "#fff" }}
-          >
-            {metaOk ? "Meta alcanzada" : "Meta no alcanzada"}
-          </span>
+          {corteNota !== null && (
+            <div className={styles.corteTotal} style={{ "--corte-color": colorNota(cortePct) }}>
+              <div className={styles.corteTotalInfo}>
+                <span className={styles.corteTotalLabel}>Puntos obtenidos</span>
+                <span className={styles.corteTotalVal} style={{ color: colorNota(cortePct) }}>
+                  {corteNota}
+                  <span className={styles.corteTotalMax}> / {cortePeso || "—"} pts</span>
+                </span>
+              </div>
+              <span className={`${styles.corteTotalStatus} ${metaOk ? styles.corteStatusOk : styles.corteStatusLow}`}>
+                {metaOk ? "Meta alcanzada" : "Meta no alcanzada"}
+              </span>
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -188,6 +224,7 @@ function CorteRow({ corte, idx, onChange, onRemove, canRemove }) {
 
 function MateriaCard({ materia, data, onChange, colors, borderRadius, horarioClase }) {
   const [expanded, setExpanded] = useState(false);
+  const [profesorExpanded, setProfesorExpanded] = useState(false);
   const rawData = data || {
     profesor: "", grupo: "", salon: "",
     cortes: [],
@@ -199,7 +236,6 @@ function MateriaCard({ materia, data, onChange, colors, borderRadius, horarioCla
   };
 
   const notaFinal = calcNotaFinal(d.cortes);
-  const perdio = notaFinal !== null && Number(notaFinal) < NOTA_PASS;
   const paso   = notaFinal !== null && Number(notaFinal) >= NOTA_PASS;
 
   const updateCorte = (i, val) => {
@@ -208,26 +244,11 @@ function MateriaCard({ materia, data, onChange, colors, borderRadius, horarioCla
     onChange({ ...d, cortes: c });
   };
   const addCorte = () => {
-    if (d.cortes.length >= 5) return;
+    if (d.cortes.length >= 3) return;
     onChange({ ...d, cortes: [...d.cortes, { nombre: `Corte ${d.cortes.length + 1}`, peso: PESOS_DEFAULT[d.cortes.length] ?? 100, items: [] }] });
   };
   const removeCorte = (i) => {
     onChange({ ...d, cortes: d.cortes.filter((_, idx) => idx !== i) });
-  };
-
-  const addRepeticion = () => {
-    onChange({
-      ...d,
-      repeticiones: [...(d.repeticiones || []), { notaAnterior: notaFinal || "", notaNueva: "", periodo: "" }],
-    });
-  };
-  const updateRep = (i, field, val) => {
-    const reps = [...(d.repeticiones || [])];
-    reps[i] = { ...reps[i], [field]: val };
-    onChange({ ...d, repeticiones: reps });
-  };
-  const removeRep = (i) => {
-    onChange({ ...d, repeticiones: (d.repeticiones || []).filter((_, idx) => idx !== i) });
   };
 
   const autoProf = horarioClase?.profesor || "";
@@ -235,12 +256,12 @@ function MateriaCard({ materia, data, onChange, colors, borderRadius, horarioCla
   const autoSalon = horarioClase?.salonLabel || "";
 
   const cardColor = paso ? (colors?.aprobada || "#6ec88a")
-    : perdio ? "#e07070"
+    : notaFinal !== null ? "#e07070"
     : (colors?.cursando || "#c8a96e");
 
   return (
     <div
-      className={`${styles.card} ${perdio ? styles.cardFailed : ""}`}
+      className={styles.card}
       style={{ "--card-color": cardColor, borderRadius: `${borderRadius ?? 12}px` }}
     >
       <button className={styles.cardHeader} onClick={() => setExpanded(v => !v)} aria-expanded={expanded}>
@@ -273,7 +294,16 @@ function MateriaCard({ materia, data, onChange, colors, borderRadius, horarioCla
 
       {expanded && (
         <div className={styles.cardBody}>
-          <div className={styles.infoRow}>
+          <button
+            type="button"
+            className={styles.profesorToggle}
+            aria-expanded={profesorExpanded}
+            onClick={() => setProfesorExpanded(value => !value)}
+          >
+            <span>{profesorExpanded ? "−" : "+"} {d.profesor || d.grupo || d.salon ? "Información del profesor" : "Agregar información del profesor"}</span>
+            {profesorExpanded ? <IconChevronUp size={14} /> : <IconChevronDown size={14} />}
+          </button>
+          {profesorExpanded && <div className={styles.infoRow}>
             <div className={styles.inputGroup}>
               <label>Profesor</label>
               <input type="text" className={styles.textInput}
@@ -292,12 +322,12 @@ function MateriaCard({ materia, data, onChange, colors, borderRadius, horarioCla
                 value={d.salon} placeholder={autoSalon || "Salón"}
                 onChange={e => onChange({ ...d, salon: e.target.value })} />
             </div>
-          </div>
+          </div>}
 
           <div className={styles.cortesSection}>
             <div className={styles.sectionHeader}>
               <span className={styles.sectionLabel}>Cortes y evaluaciones</span>
-              {d.cortes.length < 5 && (
+              {d.cortes.length < 3 && (
                  <button className={styles.addBtn} onClick={addCorte}><IconPlus size={11} /> Corte</button>
               )}
             </div>
@@ -340,46 +370,6 @@ function MateriaCard({ materia, data, onChange, colors, borderRadius, horarioCla
             )}
           </div>
 
-          {perdio && (
-            <div className={styles.repSection}>
-              <div className={styles.sectionHeader}>
-                <span className={styles.sectionLabelRed}>↺ Materia perdida — Repeticiones</span>
-                 <button className={styles.addBtn} onClick={addRepeticion}><IconPlus size={11} /> Repetición</button>
-              </div>
-              {(d.repeticiones || []).length === 0 && (
-                <p className={styles.repEmpty}>Si repetiste esta materia, añade los resultados aquí.</p>
-              )}
-              {(d.repeticiones || []).map((rep, i) => (
-                <div key={i} className={styles.repRow}>
-                  <div className={styles.inputGroup}>
-                    <label>Período</label>
-                    <input type="text" className={styles.textInput} value={rep.periodo}
-                      placeholder="2024-1" onChange={e => updateRep(i, "periodo", e.target.value)} />
-                  </div>
-                  <div className={styles.inputGroup}>
-                    <label>Nota perdida</label>
-                    <input type="number" min={0} max={NOTA_MAX} className={styles.notaInput}
-                      value={rep.notaAnterior} placeholder="—" readOnly style={{ opacity: 0.6 }} />
-                  </div>
-                  <div className={styles.inputGroup}>
-                    <label>Nota nueva /{NOTA_MAX}</label>
-                    <input type="number" min={0} max={NOTA_MAX} step="0.1" className={styles.notaInput}
-                      value={rep.notaNueva} placeholder="—"
-                      onChange={e => updateRep(i, "notaNueva", e.target.value)} />
-                  </div>
-                  {rep.notaNueva !== "" && (
-                    <div className={styles.inputGroup}>
-                      <label>Resultado</label>
-                      <span className={styles.repBadge} style={{ color: colorNota(rep.notaNueva) }}>
-                         {Number(rep.notaNueva) >= NOTA_PASS ? <><IconCheck size={12} /> Aprobó</> : <><IconX size={12} /> Perdió</>}
-                      </span>
-                    </div>
-                  )}
-                   <button className={styles.removeBtn} aria-label="Eliminar repetición" onClick={() => removeRep(i)}><IconClose size={11} /></button>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
       )}
     </div>
@@ -439,6 +429,14 @@ export default function CursandoView({
   const colors       = user?.themeColors || {};
   const borderRadius = user?.borderRadius ?? 12;
   const totalCreditos = materiasCursando.reduce((a, m) => a + m.creditos, 0);
+  const totalPuntosMateria = materiasCursando.reduce((totales, materia) => {
+    const puntos = calcPuntosMateria(data[materia.id]?.cortes || migrateCortes([]));
+    if (puntos) {
+      totales.obtenidos += puntos.obtenidos;
+      totales.total += puntos.total;
+    }
+    return totales;
+  }, { obtenidos: 0, total: 0 });
 
   return (
     <div className={styles.wrap}>
@@ -520,23 +518,24 @@ export default function CursandoView({
 
       {materiasCursando.length > 0 && (
         <div className={styles.resumenTable}>
-          <h3 className={styles.resumenTitle}>Resumen ponderado</h3>
+          <h3 className={styles.resumenTitle}>Resumen de materias</h3>
           <div className={styles.tableWrap}>
             <table className={styles.table}>
               <thead>
                 <tr>
                   <th>Materia</th>
                   <th>Cr</th>
-                  <th>Nota /{NOTA_MAX}</th>
-                  <th>Pond (nota×cr)</th>
+                  <th>Obtenida</th>
+                  <th>Total materia</th>
                   <th>Estado</th>
                 </tr>
               </thead>
               <tbody>
                 {materiasCursando.map(m => {
                   const d = data[m.id];
-                  const nf = calcNotaFinal(d?.cortes || migrateCortes([]));
-                  const pond = nf !== null ? (Number(nf) * m.creditos).toFixed(1) : null;
+                  const cortes = d?.cortes || migrateCortes([]);
+                  const nf = calcNotaFinal(cortes);
+                  const puntos = calcPuntosMateria(cortes);
                   const paso = nf !== null && Number(nf) >= NOTA_PASS;
                   return (
                     <tr key={m.id}>
@@ -545,12 +544,8 @@ export default function CursandoView({
                         <span className={styles.tableNombre}>{m.nombre}</span>
                       </td>
                       <td className={styles.tableCenter}>{m.creditos}</td>
-                      <td className={styles.tableCenter} style={{ color: nf ? colorNota(nf) : "var(--text-muted)" }}>
-                        {nf ?? "—"}
-                      </td>
-                      <td className={styles.tableCenter} style={{ color: "var(--accent-text)" }}>
-                        {pond ?? "—"}
-                      </td>
+                      <td className={styles.tableCenter}>{puntos?.obtenidos.toFixed(1) ?? "—"}</td>
+                      <td className={styles.tableCenter}>{puntos?.total.toFixed(1) ?? "—"}</td>
                       <td className={styles.tableCenter}>
                         {nf !== null
                           ? <span className={styles.tableBadge} style={{ color: paso ? "#6ec88a" : "#e07070", background: paso ? "rgba(110,200,138,0.1)" : "rgba(224,112,112,0.1)" }}>
@@ -563,21 +558,15 @@ export default function CursandoView({
                   );
                 })}
               </tbody>
-              {ponderado && (
-                <tfoot>
-                  <tr className={styles.tableTotal}>
-                    <td>Total</td>
-                    <td className={styles.tableCenter}>{ponderado.creditos}</td>
-                    <td className={styles.tableCenter} style={{ color: colorNota(ponderado.valor) }}>
-                      {ponderado.valor}
-                    </td>
-                    <td className={styles.tableCenter} style={{ color: "var(--accent-text)", fontWeight: 700 }}>
-                      {(Number(ponderado.valor) * ponderado.creditos).toFixed(1)}
-                    </td>
-                    <td />
-                  </tr>
-                </tfoot>
-              )}
+              <tfoot>
+                <tr className={styles.tableTotal}>
+                  <td>Total</td>
+                  <td className={styles.tableCenter}>{totalCreditos}</td>
+                  <td className={styles.tableCenter}>{totalPuntosMateria.obtenidos.toFixed(1)}</td>
+                  <td className={styles.tableCenter}>{totalPuntosMateria.total.toFixed(1)}</td>
+                  <td />
+                </tr>
+              </tfoot>
             </table>
           </div>
         </div>

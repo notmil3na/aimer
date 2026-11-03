@@ -114,14 +114,14 @@
   position: relative;
   z-index: 1;
   background: linear-gradient(135deg, color-mix(in srgb, var(--surface) 94%, transparent), color-mix(in srgb, var(--surface2) 90%, transparent));
-  border: 1px solid color-mix(in srgb, var(--card-color, var(--accent)) 28%, transparent);
+  border: 1px solid color-mix(in srgb, var(--card-color, var(--accent-border)) 28%, transparent);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   overflow: hidden; transition: border-color 0.2s, box-shadow 0.2s;
   border-radius: 22px;
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
 }
-.card:hover { border-color: color-mix(in srgb, var(--card-color, var(--accent)) 50%, transparent); box-shadow: 0 12px 26px color-mix(in srgb, var(--card-color, var(--accent)) 18%, transparent); }
+.card:hover { border-color: color-mix(in srgb, var(--card-color, var(--accent-border)) 50%, transparent); box-shadow: 0 12px 26px color-mix(in srgb, var(--card-color, var(--accent)) 18%, transparent); }
 .cardFailed { border-color: color-mix(in srgb, #e07070 40%, transparent) !important; }
 
 .cardHeader {
@@ -194,7 +194,7 @@
   color: var(--text); font-family: var(--font-body); font-size: 13px; font-weight: 600;
   outline: none; padding: 2px 4px; min-width: 80px; max-width: 160px;
 }
-.corteNameInput:focus { border-bottom-color: var(--accent); box-shadow: 0 1px 0 0 var(--accent); }
+.corteNameInput:focus { border-bottom-color: var(--accent-border); box-shadow: 0 1px 0 0 var(--accent); }
 .corteChip {
   flex-shrink: 0; font-size: 10px; font-weight: 700; text-transform: uppercase;
   letter-spacing: 0.08em; color: var(--accent-text);
@@ -215,11 +215,11 @@
   display: flex; align-items: flex-end; gap: 8px; flex-wrap: wrap;
   padding: 8px 10px;
   background: color-mix(in srgb, var(--surface) 96%, transparent);
-  border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-border) 28%, transparent);
   border-radius: 14px;
   transition: border-color 0.18s, box-shadow 0.18s;
 }
-.itemRow:hover { border-color: color-mix(in srgb, var(--accent) 50%, transparent); box-shadow: 0 8px 20px color-mix(in srgb, var(--accent) 14%, transparent); }
+.itemRow:hover { border-color: color-mix(in srgb, var(--accent-border) 50%, transparent); box-shadow: 0 8px 20px color-mix(in srgb, var(--accent) 14%, transparent); }
 .itemDot {
   width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
@@ -231,7 +231,7 @@
   color: var(--text); font-family: var(--font-body); font-size: 12px; font-weight: 500;
   outline: none; padding: 2px 4px; flex: 1; min-width: 80px;
 }
-.itemNameInput:focus { border-bottom-color: var(--accent); box-shadow: 0 1px 0 0 var(--accent); }
+.itemNameInput:focus { border-bottom-color: var(--accent-border); box-shadow: 0 1px 0 0 var(--accent); }
 
 .addItemBtn {
   background: transparent; border: 1px dashed var(--border);
@@ -241,7 +241,7 @@
   cursor: pointer; transition: all 0.15s;
   text-align: center;
 }
-.addItemBtn:hover { border-color: var(--accent); color: var(--accent-text); background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.addItemBtn:hover { border-color: var(--accent-border); color: var(--accent-text); background: color-mix(in srgb, var(--accent) 10%, transparent); }
 
 .corteTotal {
   display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
@@ -270,14 +270,14 @@
 .notaFinalRow {
   display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
   padding: 12px 14px;
-  background: color-mix(in srgb, var(--surface) 96%, transparent); border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent);
+  background: color-mix(in srgb, var(--surface) 96%, transparent); border: 1px solid color-mix(in srgb, var(--accent-border) 28%, transparent);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border-radius: 16px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
   transition: border-color 0.18s, box-shadow 0.18s;
 }
-.notaFinalRow:hover { border-color: color-mix(in srgb, var(--accent) 50%, transparent); box-shadow: 0 10px 24px color-mix(in srgb, var(--accent) 16%, transparent); }
+.notaFinalRow:hover { border-color: color-mix(in srgb, var(--accent-border) 50%, transparent); box-shadow: 0 10px 24px color-mix(in srgb, var(--accent) 16%, transparent); }
 .notaFinalLabel { font-size: 12px; font-weight: 600; color: var(--text-muted); }
 .notaFinalVal { font-family: var(--font-display); font-size: 22px; font-weight: 400; }
 .notaFinalSub { font-size: 13px; color: var(--text-muted); }
@@ -313,7 +313,7 @@
   padding: 8px 12px; outline: none; min-width: 160px;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
-.textInput:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.12); }
+.textInput:focus { border-color: var(--accent-border); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.12); }
 
 .notaInput {
   background: color-mix(in srgb, var(--surface2) 96%, transparent); border: 1px solid var(--border);
@@ -322,7 +322,7 @@
   padding: 8px 10px; outline: none; width: 90px; text-align: center;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
-.notaInput:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.12); }
+.notaInput:focus { border-color: var(--accent-border); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.12); }
 
 .pesoInput {
   background: color-mix(in srgb, var(--surface2) 96%, transparent); border: 1px solid var(--border);
@@ -330,7 +330,7 @@
   font-family: var(--font-body); font-size: 12px;
   padding: 8px 8px; outline: none; width: 60px; text-align: center;
 }
-.pesoInput:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.12); }
+.pesoInput:focus { border-color: var(--accent-border); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.12); }
 
 .addBtn {
   background: transparent; border: 1px solid var(--border);
@@ -339,7 +339,7 @@
   padding: 5px 10px; min-height: 44px;
   cursor: pointer; transition: all 0.15s;
 }
-.addBtn:hover { background: var(--surface); border-color: var(--accent); }
+.addBtn:hover { background: var(--surface); border-color: var(--accent-border); }
 
 .removeBtn {
   background: transparent; border: 1px solid transparent;
@@ -432,4 +432,484 @@
   .corteHeader { flex-wrap: wrap; }
   .itemRow { flex-wrap: wrap; }
   .notaFinalRow { flex-wrap: wrap; }
+}
+
+/* Solid, layered surfaces make each level of the grade editor easy to scan. */
+.subNav,
+.header,
+.ponderadoBanner,
+.emptyState,
+.card,
+.resumenTable {
+  background: var(--modal-bg);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.subNavActive { background: var(--modal-bg2); }
+.cardCompleted { opacity: 1; }
+.cardHeader:hover { background: var(--modal-bg2); }
+
+.cardBody {
+  padding: 20px;
+  gap: 22px;
+  background: var(--modal-bg);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.infoRow {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  padding: 14px;
+  background: var(--modal-bg2);
+  border: 1px solid var(--modal-border);
+  border-radius: 14px;
+}
+
+.infoRow .inputGroup,
+.repRow .inputGroup { min-width: 0; }
+.infoRow .textInput,
+.repRow .textInput { width: 100%; min-width: 0; }
+
+.cortesSection { gap: 12px; }
+.sectionHeader { gap: 12px; }
+.sectionLabel,
+.sectionLabelRed { font-size: 12px; }
+
+.corteSection {
+  background: var(--modal-bg2);
+  border: 1px solid var(--modal-border);
+  border-radius: 16px;
+  box-shadow: none;
+}
+
+.corteHeader {
+  padding: 14px 16px;
+  background: var(--modal-bg);
+  gap: 16px;
+}
+
+.corteHeaderExpanded { border-bottom: 1px solid var(--modal-border); }
+.corteHeaderLeft { gap: 10px; }
+.corteHeaderRight { align-items: flex-end; gap: 8px; }
+.corteHeaderRight .inputGroup { width: 92px; }
+
+.corteExpandBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  padding: 0;
+  border: 1px solid var(--modal-border);
+  border-radius: 9px;
+  background: var(--modal-bg2);
+  color: var(--modal-text);
+  cursor: pointer;
+}
+
+.corteExpandBtn:hover {
+  border-color: var(--accent-border);
+  color: var(--accent-text);
+}
+
+.corteCollapsedScore {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
+  padding: 5px 9px;
+  border: 1px solid var(--modal-border);
+  border-radius: 8px;
+  background: var(--modal-bg2);
+  color: var(--modal-text);
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.corteCollapsedScore span {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.corteContent {
+  background: var(--modal-bg2);
+  border-radius: 0 0 15px 15px;
+  overflow: hidden;
+}
+
+.corteNameInput {
+  max-width: none;
+  width: 100%;
+  padding: 8px 10px;
+  background: var(--modal-bg2);
+  border: 1px solid var(--modal-border);
+  border-radius: 8px;
+}
+
+.corteChip {
+  color: var(--accent-text);
+  background: color-mix(in srgb, var(--accent) 14%, var(--modal-bg2));
+  padding: 6px 9px;
+  white-space: nowrap;
+}
+
+.itemsPanel {
+  padding: 14px 16px;
+  gap: 9px;
+  background: var(--modal-bg2);
+}
+
+.itemsEmpty {
+  margin: 0;
+  padding: 12px 14px;
+  background: var(--modal-bg);
+  border: 1px dashed var(--modal-border);
+  border-radius: 10px;
+  font-style: normal;
+}
+
+.itemRow {
+  display: grid;
+  grid-template-columns: minmax(160px, 1fr) repeat(2, minmax(100px, 128px)) 40px;
+  align-items: end;
+  gap: 12px;
+  padding: 12px;
+  background: var(--modal-bg);
+  border: 1px solid var(--modal-border);
+  border-radius: 12px;
+}
+
+.itemRow:hover {
+  border-color: color-mix(in srgb, var(--accent-border) 45%, var(--modal-border));
+  box-shadow: 0 3px 10px color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.itemIdentity {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  align-self: stretch;
+}
+
+.itemDot {
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  background: color-mix(in srgb, var(--accent) 12%, var(--modal-bg2));
+}
+
+.itemNameInput {
+  width: 100%;
+  min-width: 0;
+  padding: 9px 10px;
+  background: var(--modal-bg2);
+  border: 1px solid var(--modal-border);
+  border-radius: 8px;
+}
+
+.itemRow .inputGroup { min-width: 0; }
+.itemRow .inputGroup label { white-space: nowrap; }
+
+.corteNameInput,
+.itemNameInput,
+.textInput,
+.notaInput,
+.pesoInput {
+  color: var(--modal-text);
+}
+
+.textInput,
+.notaInput,
+.pesoInput {
+  background: var(--modal-bg);
+  border: 1px solid var(--modal-border);
+  border-radius: 9px;
+}
+
+.notaInput,
+.pesoInput { width: 100%; }
+.notaInput { font-size: 15px; }
+.pesoInput { color: var(--modal-text); }
+.notaInput[readonly] { background: var(--modal-bg2); color: var(--text-muted); }
+
+.removeBtn {
+  width: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  margin: 0;
+  padding: 8px;
+  border: 1px solid var(--modal-border);
+  border-radius: 9px;
+  background: var(--modal-bg2);
+  color: var(--text-muted);
+}
+
+.removeBtn:hover {
+  border-color: color-mix(in srgb, #e07070 40%, var(--modal-border));
+  background: color-mix(in srgb, #e07070 10%, var(--modal-bg));
+}
+
+.addItemBtn {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 38px;
+  margin-top: 2px;
+  padding: 7px 12px;
+  border: 1px solid var(--modal-border);
+  border-radius: 9px;
+  background: var(--modal-bg);
+  color: var(--modal-text);
+}
+
+.addItemBtn:hover {
+  border-color: var(--accent-border);
+  background: color-mix(in srgb, var(--accent) 8%, var(--modal-bg));
+}
+
+.corteTotal {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin: 0 16px 16px;
+  padding: 12px 14px;
+  background: color-mix(in srgb, var(--corte-color) 7%, var(--modal-bg));
+  border: 1px solid color-mix(in srgb, var(--corte-color) 28%, var(--modal-border));
+  border-radius: 10px;
+}
+
+.corteTotalInfo { display: flex; flex-direction: column; gap: 4px; }
+.corteTotalLabel { font-size: 10px; }
+.corteTotalVal { font-size: 21px; }
+.corteTotalStatus {
+  margin: 0;
+  padding: 6px 10px;
+  border: 1px solid color-mix(in srgb, var(--corte-color) 30%, var(--modal-border));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--corte-color) 10%, var(--modal-bg)) !important;
+  color: var(--corte-color) !important;
+  white-space: nowrap;
+}
+
+.corteTotalStatus.corteStatusOk { --corte-color: #6ec88a; }
+.corteTotalStatus.corteStatusLow { --corte-color: #e07070; }
+
+.notaFinalRow,
+.repRow,
+.table th,
+.tableTotal td {
+  background: var(--modal-bg2);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.notaFinalRow {
+  padding: 14px 16px;
+  border-color: var(--modal-border);
+  border-radius: 14px;
+}
+
+.repSection {
+  padding: 16px;
+  background: color-mix(in srgb, #e07070 5%, var(--modal-bg));
+  border-color: color-mix(in srgb, #e07070 24%, var(--modal-border));
+}
+
+.repRow {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) repeat(2, minmax(110px, 140px)) auto 40px;
+  align-items: end;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--modal-border);
+  border-radius: 12px;
+}
+
+.repRow .notaInput { width: 100%; }
+.repRow .removeBtn { align-self: end; }
+
+.addBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 7px 12px;
+  background: var(--modal-bg2);
+  border: 1px solid var(--modal-border);
+  border-radius: 9px;
+  color: var(--modal-text);
+}
+
+.addBtn:hover {
+  background: color-mix(in srgb, var(--accent) 8%, var(--modal-bg2));
+  border-color: var(--accent-border);
+}
+
+.saveBtnDone {
+  background: color-mix(in srgb, #6ec88a 12%, var(--modal-bg));
+  color: #6ec88a;
+}
+
+.card {
+  background: linear-gradient(
+    110deg,
+    color-mix(in srgb, var(--card-color, var(--accent)) 16%, var(--modal-bg2)) 0%,
+    color-mix(in srgb, var(--card-color, var(--accent)) 7%, var(--modal-bg2)) 48%,
+    var(--modal-bg2) 100%
+  );
+  border: 1.5px solid color-mix(in srgb, var(--card-color, var(--accent-border)) 68%, var(--modal-border));
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--card-color, var(--accent)) 16%, transparent),
+    0 8px 22px rgba(0, 0, 0, 0.16),
+    0 8px 22px color-mix(in srgb, var(--card-color, var(--accent)) 12%, transparent);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+[data-theme="light"] .card {
+  background: linear-gradient(
+    110deg,
+    color-mix(in srgb, var(--card-color, var(--accent)) 12%, var(--modal-bg2)) 0%,
+    color-mix(in srgb, var(--card-color, var(--accent)) 5%, var(--modal-bg2)) 48%,
+    var(--modal-bg2) 100%
+  );
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 5px;
+  border-radius: inherit;
+  background: var(--card-color, var(--accent));
+  pointer-events: none;
+}
+
+.cardId {
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--card-color, var(--accent)) 18%, var(--modal-bg));
+}
+
+[data-theme="light"] .card {
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--card-color, var(--accent)) 14%, transparent),
+    0 8px 24px rgba(62, 42, 84, 0.13),
+    0 8px 22px color-mix(in srgb, var(--card-color, var(--accent)) 10%, transparent);
+}
+
+.card:hover {
+  background: linear-gradient(
+    110deg,
+    color-mix(in srgb, var(--card-color, var(--accent)) 22%, var(--modal-bg2)) 0%,
+    color-mix(in srgb, var(--card-color, var(--accent)) 10%, var(--modal-bg2)) 55%,
+    var(--modal-bg2) 100%
+  );
+  border-color: color-mix(in srgb, var(--card-color, var(--accent-border)) 92%, white);
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--card-color, var(--accent)) 22%, transparent),
+    0 12px 28px rgba(0, 0, 0, 0.18),
+    0 12px 28px color-mix(in srgb, var(--card-color, var(--accent)) 18%, transparent);
+  transform: translateY(-2px);
+}
+
+.profesorToggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid color-mix(in srgb, var(--accent-border) 32%, var(--modal-border));
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--accent) 7%, var(--modal-bg2));
+  color: var(--accent-text);
+  font: 600 12px var(--font-body);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.18s, background 0.18s, box-shadow 0.18s;
+}
+
+.profesorToggle:hover {
+  border-color: color-mix(in srgb, var(--accent-border) 62%, var(--modal-border));
+  background: color-mix(in srgb, var(--accent) 11%, var(--modal-bg2));
+  box-shadow: 0 3px 12px color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.corteSection {
+  background: color-mix(in srgb, var(--card-color, var(--accent)) 5%, var(--modal-bg2));
+  border-color: color-mix(in srgb, var(--card-color, var(--accent-border)) 48%, var(--modal-border));
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--card-color, var(--accent)) 10%, transparent),
+    0 5px 16px color-mix(in srgb, var(--card-color, var(--accent)) 10%, transparent);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+.corteSection:hover {
+  background: color-mix(in srgb, var(--card-color, var(--accent)) 8%, var(--modal-bg2));
+  border-color: color-mix(in srgb, var(--card-color, var(--accent-border)) 72%, var(--modal-border));
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--card-color, var(--accent)) 16%, transparent),
+    0 8px 20px color-mix(in srgb, var(--card-color, var(--accent)) 16%, transparent);
+  transform: translateY(-1px);
+}
+
+.corteChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px 6px 6px;
+  border: 1px solid color-mix(in srgb, var(--card-color, var(--accent-border)) 38%, var(--modal-border));
+  border-radius: 9px;
+  color: var(--card-color, var(--accent-text));
+  background: color-mix(in srgb, var(--card-color, var(--accent)) 12%, var(--modal-bg2));
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+.corteNumber {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--card-color, var(--accent)) 22%, var(--modal-bg));
+  color: var(--card-color, var(--accent-text));
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.corteHeaderRight .inputGroup { width: 124px; }
+
+
+@media (max-width: 680px) {
+  .cardBody { padding: 14px; gap: 16px; }
+  .infoRow { grid-template-columns: 1fr; gap: 10px; padding: 12px; }
+  .itemRow { grid-template-columns: minmax(0, 1fr) minmax(88px, 110px) minmax(88px, 110px) 40px; gap: 8px; }
+  .itemIdentity { grid-column: 1 / -1; }
+  .repRow { grid-template-columns: repeat(2, minmax(0, 1fr)) 40px; }
+  .repRow .removeBtn { grid-column: 3; grid-row: 1; }
+}
+
+@media (max-width: 420px) {
+  .corteHeader { align-items: stretch; flex-direction: column; }
+  .corteHeaderLeft { width: 100%; }
+  .corteHeaderRight { align-items: flex-end; }
+  .corteHeaderRight .inputGroup { width: 100%; }
+  .itemRow { grid-template-columns: repeat(2, minmax(0, 1fr)) 40px; }
+  .itemIdentity { grid-column: 1 / -1; }
+  .itemRow .inputGroup { min-width: 0; }
+  .itemRow .removeBtn { grid-column: 3; grid-row: 2; }
+  .corteTotal { align-items: flex-start; flex-direction: column; margin: 0 12px 12px; }
+  .repRow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .repRow .removeBtn { grid-column: 2; grid-row: 3; justify-self: end; }
 }

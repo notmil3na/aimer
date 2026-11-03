@@ -52,6 +52,16 @@ export default function MallaView({ malla: initialMalla, notas, onSave, user, on
 
   const allMaterias = useMemo(() => vistaMalla.flatMap((s) => s.materias), [vistaMalla]);
   const materiaById = useMemo(() => new Map(allMaterias.map(m => [m.id, m])), [allMaterias]);
+  const materiasByPrereq = useMemo(() => {
+    const dependents = new Map();
+    allMaterias.forEach((materia) => {
+      (materia.prereqs || []).forEach((prereqId) => {
+        if (!dependents.has(prereqId)) dependents.set(prereqId, []);
+        dependents.get(prereqId).push(materia);
+      });
+    });
+    return dependents;
+  }, [allMaterias]);
   const obligatorias = useMemo(() => getObligatorias(vistaMalla), [vistaMalla]);
 
   const getColor = useCallback((estado) => {
@@ -91,12 +101,14 @@ export default function MallaView({ malla: initialMalla, notas, onSave, user, on
     setSelected(materia);
 
     const prereqTree = [];
+    const seenPrereqs = new Set();
     const collectPrereqs = (ids) => {
       ids.forEach((id) => {
-        if (!prereqTree.includes(id)) {
+        if (!seenPrereqs.has(id)) {
+          seenPrereqs.add(id);
           prereqTree.push(id);
           const m = materiaById.get(id);
-          if (m) collectPrereqs(m.prereqs);
+          if (m) collectPrereqs(m.prereqs || []);
         }
       });
     };
@@ -104,17 +116,19 @@ export default function MallaView({ malla: initialMalla, notas, onSave, user, on
     setHighlightedPrereqs(prereqTree);
 
     const unlockTree = [];
+    const seenUnlocks = new Set();
     const collectUnlocks = (materiaId) => {
-      allMaterias.forEach((m) => {
-        if (m.prereqs.includes(materiaId) && !unlockTree.includes(m.id)) {
-          unlockTree.push(m.id);
-          collectUnlocks(m.id);
+      (materiasByPrereq.get(materiaId) || []).forEach((dependent) => {
+        if (!seenUnlocks.has(dependent.id)) {
+          seenUnlocks.add(dependent.id);
+          unlockTree.push(dependent.id);
+          collectUnlocks(dependent.id);
         }
       });
     };
     collectUnlocks(materia.id);
     setHighlightedUnlocks(unlockTree);
-  }, [selected, materiaById, allMaterias]);
+  }, [selected, materiaById, materiasByPrereq]);
 
   const applyEstadoChange = useCallback((materiaId, newEstado, { autoApprovePrereqs, extraChanges } = {}) => {
     const updated = malla.map((s) => ({

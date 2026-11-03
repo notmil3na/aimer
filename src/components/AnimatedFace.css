@@ -46,6 +46,25 @@
   50%      { transform: scale(1.015, 0.985); }
 }
 
+/* Rendimiento bajo: fuera los filtros SVG (los blurs de 30/11 y la
+   turbulencia del grano son lo más caro de la carita), los halos difuminados
+   y las animaciones. Queda una carita plana pero nítida. */
+html[data-performance="low"] .afRoot .afGlow,
+html[data-performance="low"] .afRoot .afGrain {
+  display: none;
+}
+
+html[data-performance="low"] .afRoot [filter] {
+  filter: none;
+}
+
+html[data-performance="low"] .afLean,
+html[data-performance="low"] .afBreathe,
+html[data-performance="low"] .afLook,
+html[data-performance="low"] .afEye {
+  animation: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .afLean,
   .afBreathe,

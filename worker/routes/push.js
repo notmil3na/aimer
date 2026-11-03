@@ -219,7 +219,7 @@ export async function handler(c) {
 
   // disparo manual (p. ej. `?test=1`): solo con el secreto en un header.
   // el cron diario ya no pasa por aquí: entra por scheduled() en index.js.
-  // (se quitó la confianza en el header `x-vercel-cron`, que cualquiera podía enviar.)
+  // Solo se acepta el secreto explícito; los headers públicos no autentican el cron.
   if (CRON_SECRET && req.headers["x-cron-secret"] === CRON_SECRET) {
     const r = await runCron(c.env, req.query.test === "1");
     return json(c, r.status, r.body);

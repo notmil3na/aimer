@@ -14,7 +14,7 @@
   cursor: pointer; transition: border-color 0.15s, color 0.15s, background 0.15s;
 }
 .backBtn:hover {
-  border-color: var(--accent);
+  border-color: var(--accent-border);
   color: var(--accent-text);
   background: color-mix(in srgb, var(--accent) 8%, var(--surface));
 }
@@ -48,7 +48,7 @@
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
 }
-.searchRow:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.12); }
+.searchRow:focus-within { border-color: var(--accent-border); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.12); }
 .searchInput {
   flex: 1; background: transparent; border: none; outline: none;
   color: var(--text); font-family: var(--font-body); font-size: 13px;
@@ -120,7 +120,7 @@
   color: var(--text-muted); border-radius: var(--radius-sm);
   width: 32px; height: 32px; cursor: pointer; transition: all 0.15s; flex-shrink: 0;
 }
-.btnIcon:hover { border-color: var(--accent); color: var(--accent-text); }
+.btnIcon:hover { border-color: var(--accent-border); color: var(--accent-text); }
 
 .btnIconDanger {
   display: inline-flex; align-items: center; justify-content: center;
@@ -391,7 +391,7 @@
 }
 .loadingSpinner {
   width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0;
-  border: 2px solid var(--border); border-top-color: var(--accent);
+  border: 2px solid var(--border); border-top-color: var(--accent-border);
   animation: spin 0.8s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }

@@ -44,8 +44,21 @@ function swCacheVersion() {
   }
 }
 
+function stripHtmlComments() {
+  return {
+    name: 'strip-html-comments',
+    apply: 'build',
+    transformIndexHtml: {
+      order: 'post',
+      handler(html) {
+        return html.replace(/<!--[\s\S]*?-->/g, '')
+      },
+    },
+  }
+}
+
 export default defineConfig({
-  plugins: [react(), swCacheVersion()],
+  plugins: [react(), stripHtmlComments(), swCacheVersion()],
   // nada de console/debugger en el bundle que se publica
   esbuild: {
     drop: ['console', 'debugger'],
@@ -53,7 +66,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "https://malla-unimag.vercel.app",
+        target: "https://aimer-project.yaritzamilena4.workers.dev",
         changeOrigin: true,
       },
     },

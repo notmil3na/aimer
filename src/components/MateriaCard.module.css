@@ -35,7 +35,7 @@
 }
 
 .card.unlocked {
-  border-color: var(--accent);
+  border-color: var(--accent-border);
   box-shadow:
     0 0 0 1.5px color-mix(in srgb, var(--accent) 70%, var(--card-color)),
     0 0 18px color-mix(in srgb, var(--accent) 25%, transparent);

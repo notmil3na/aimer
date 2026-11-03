@@ -105,24 +105,40 @@ export function calcCareerTime(user, opts = {}) {
 }
 
 export function estimateGraduation(malla, user) {
-  const obligatorias = getObligatorias(malla);
-  const totalCreditos = obligatorias.reduce((a, m) => a + m.creditos, 0);
-  const aprobadas = obligatorias.filter((m) => m.estado === "aprobada");
-  const cursando = obligatorias.filter((m) => m.estado === "cursando");
-  const faltantes = obligatorias.filter((m) => m.estado === "faltante");
+  const allMaterias = malla.flatMap((sem) =>
+    sem.materias.map((materia) => ({ ...materia, semestrePlan: sem.semestre }))
+  );
+  const obligatorias = allMaterias.filter(
+    (materia) => typeof materia.semestrePlan === "number" && !materia.optativa
+  );
+  const optativasElegidas = allMaterias.filter(
+    (materia) => materia.optativa && (materia.estado === "aprobada" || materia.estado === "cursando")
+  );
+  const evaluables = [...obligatorias, ...optativasElegidas];
+  const aprobadas = evaluables.filter((materia) => materia.estado === "aprobada");
+  const cursando = evaluables.filter((materia) => materia.estado === "cursando");
+  const faltantes = obligatorias.filter(
+    (materia) => materia.estado !== "aprobada" && materia.estado !== "cursando"
+  );
 
-  const creditosAprobados = aprobadas.reduce((a, m) => a + m.creditos, 0);
-  const creditosPendientes = [...cursando, ...faltantes].reduce((a, m) => a + m.creditos, 0);
-
-  const semestresTranscurridos = Math.max(1, (Number(user.semester) || 1) - 1);
-  const ritmoCreditosPorSemestre = creditosAprobados / semestresTranscurridos;
+  const creditos = (materias) => materias.reduce((sum, materia) => sum + (Number(materia.creditos) || 0), 0);
+  const totalCreditos = creditos(evaluables);
+  const creditosAprobados = creditos(aprobadas);
+  const creditosPendientes = creditos([...cursando, ...faltantes]);
+  const creditsPlanObligatorias = creditos(obligatorias);
+  const limiteCreditos = Math.max(
+    ...[...new Set(obligatorias.map((materia) => materia.semestrePlan))]
+      .map((semestre) => creditos(obligatorias.filter((materia) => materia.semestrePlan === semestre))),
+    ...evaluables.map((materia) => Math.ceil(Number(materia.creditos) || 0)),
+    1
+  );
 
   if (creditosPendientes === 0) {
     return {
       totalCreditos,
       creditosAprobados,
       creditosPendientes: 0,
-      ritmoCreditosPorSemestre,
+      ritmoCreditosPorSemestre: 0,
       semestresEstimados: 0,
       mesesEstimados: 0,
       anosEstimados: 0,
@@ -131,22 +147,95 @@ export function estimateGraduation(malla, user) {
     };
   }
 
-  if (ritmoCreditosPorSemestre <= 0) {
+  const completed = new Set(aprobadas.map((materia) => materia.id));
+  let pending = faltantes.slice();
+  let semestresEstimados = 0;
+  let progresoPlanCreditos = creditos(
+    aprobadas.filter((materia) => typeof materia.semestrePlan === "number")
+  );
+  const maxSimulatedSemesters = Math.max(40, pending.length + 1);
+
+  const selectWithinCreditLimit = (candidates, limit) => {
+    const capacity = Math.max(0, Math.floor(limit));
+    const dp = Array.from({ length: capacity + 1 }, () => null);
+    dp[0] = candidates.filter((materia) => (Number(materia.creditos) || 0) <= 0);
+    const ordered = candidates.slice().sort((a, b) =>
+      a.semestrePlan - b.semestrePlan ||
+      (Number(a.creditos) || 0) - (Number(b.creditos) || 0) ||
+      a.id.localeCompare(b.id)
+    );
+
+    ordered.forEach((materia) => {
+      const credits = Math.ceil(Number(materia.creditos) || 0);
+      if (credits <= 0 || credits > capacity) return;
+      for (let used = capacity; used >= credits; used--) {
+        const previous = dp[used - credits];
+        if (previous && !dp[used]) dp[used] = [...previous, materia];
+      }
+    });
+
+    for (let used = capacity; used > 0; used--) {
+      if (dp[used]) return dp[used];
+    }
+    return dp[0] || [];
+  };
+
+  while (pending.length > 0 && semestresEstimados < maxSimulatedSemesters) {
+    const esSemestreActual = semestresEstimados === 0;
+    const currentCredits = esSemestreActual ? creditos(cursando) : 0;
+    const limitAvailable = Math.max(0, limiteCreditos - currentCredits);
+    const eligible = pending.filter((materia) => {
+      const prereqsPassed = (materia.prereqs || []).every((id) => completed.has(id));
+      const percentageReached = !materia.prereqsPct || creditsPlanObligatorias === 0 ||
+        (progresoPlanCreditos / creditsPlanObligatorias) * 100 >= materia.prereqsPct;
+      return prereqsPassed && percentageReached;
+    });
+    let selected = selectWithinCreditLimit(eligible, limitAvailable);
+
+    semestresEstimados++;
+    if (selected.length === 0 && (!esSemestreActual || cursando.length === 0)) {
+      // Si una malla tiene prerrequisitos que ya no pueden satisfacerse, mantener
+      // una estimación útil respetando el límite de créditos evita bloquearla.
+      selected = selectWithinCreditLimit(pending, limitAvailable);
+    }
+
+    selected.forEach((materia) => {
+      completed.add(materia.id);
+      progresoPlanCreditos += Number(materia.creditos) || 0;
+    });
+    if (semestresEstimados === 1) {
+      cursando.forEach((materia) => {
+        completed.add(materia.id);
+        if (typeof materia.semestrePlan === "number") {
+          progresoPlanCreditos += Number(materia.creditos) || 0;
+        }
+      });
+    }
+    pending = pending.filter((materia) => !completed.has(materia.id));
+  }
+
+  if (pending.length > 0) {
+    const semestresAdicionales = Math.ceil(creditos(pending) / limiteCreditos);
+    semestresEstimados += Math.max(1, semestresAdicionales);
+    const mesesEstimados = semestresEstimados * 6;
     return {
       totalCreditos,
       creditosAprobados,
       creditosPendientes,
-      ritmoCreditosPorSemestre: 0,
-      semestresEstimados: null,
-      mesesEstimados: null,
-      anosEstimados: null,
-      mesesRestantes: null,
-      mensaje: "Aún no hay ritmo calculable. Aprueba materias para estimar tu fecha de grado.",
+      ritmoCreditosPorSemestre: creditosPendientes / semestresEstimados,
+      semestresEstimados,
+      mesesEstimados,
+      anosEstimados: Math.floor(mesesEstimados / 12),
+      mesesRestantes: mesesEstimados % 12,
+      mensaje: null,
     };
   }
 
-  const semestresEstimados = Math.ceil(creditosPendientes / ritmoCreditosPorSemestre);
+  if (semestresEstimados === 0 && cursando.length > 0) semestresEstimados = 1;
   const mesesEstimados = semestresEstimados * 6;
+  const ritmoCreditosPorSemestre = semestresEstimados > 0
+    ? creditosPendientes / semestresEstimados
+    : 0;
   return {
     totalCreditos,
     creditosAprobados,

@@ -152,13 +152,80 @@ export async function verifyPath(env, path, token) {
   return diff === 0;
 }
 
+// ---- sesión en cookie HttpOnly ----------------------------------------------
+// El navegador guarda el JWT en una cookie que JavaScript no puede leer, así que
+// un XSS (o una extensión) ya no puede llevarse la sesión. `HttpOnly` la oculta
+// de document.cookie, `Secure` evita que viaje por http y `SameSite=Lax` corta
+// los POST de otros sitios (CSRF). El Bearer se sigue aceptando solo para no
+// romper clientes viejos durante el despliegue.
+
+export const SESSION_COOKIE = "aimer_session";
+const SESSION_MAX_AGE = 60 * 60 * 24 * 30; // 30 días (igual que el JWT)
+
+function readCookie(c, name) {
+  const header = c.req.header("cookie") || "";
+  for (const part of header.split(";")) {
+    const eq = part.indexOf("=");
+    if (eq < 0) continue;
+    if (part.slice(0, eq).trim() !== name) continue;
+    try {
+      return decodeURIComponent(part.slice(eq + 1).trim());
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
+function cookieAttrs(c) {
+  // en producción siempre es https; en `wrangler dev` (http://localhost) no se
+  // marca Secure o el navegador descartaría la cookie.
+  const secure = new URL(c.req.url).protocol === "https:";
+  return `Path=/; HttpOnly; SameSite=Lax${secure ? "; Secure" : ""}`;
+}
+
+export function setSessionCookie(c, token, remember = true) {
+  const maxAge = remember ? `; Max-Age=${SESSION_MAX_AGE}` : "";
+  c.header("Set-Cookie", `${SESSION_COOKIE}=${token}; ${cookieAttrs(c)}${maxAge}`, {
+    append: true,
+  });
+}
+
+export function clearSessionCookie(c) {
+  c.header("Set-Cookie", `${SESSION_COOKIE}=; ${cookieAttrs(c)}; Max-Age=0`, {
+    append: true,
+  });
+}
+
 export function getToken(c) {
   const header = c.req.header("authorization") || "";
-  return header.startsWith("Bearer ") ? header.slice(7) : null;
+  if (header.startsWith("Bearer ")) return header.slice(7);
+  return readCookie(c, SESSION_COOKIE);
 }
 
 export async function requireUser(c) {
-  return verifyToken(c, getToken(c));
+  const payload = await verifyToken(c, getToken(c));
+  if (!payload) return null;
+
+  const user = await c.env.DB
+    .prepare("SELECT session_version FROM users WHERE username = ?")
+    .bind(payload.username)
+    .first();
+  if (!user) return null;
+
+  const tokenVersion = Number(payload.sessionVersion ?? 0);
+  const currentVersion = Number(user.session_version ?? 0);
+  return Number.isSafeInteger(tokenVersion) && tokenVersion === currentVersion ? payload : null;
+}
+
+export async function requireAdmin(c) {
+  const me = await requireUser(c);
+  if (!me) return { error: "unauthenticated" };
+  const user = await c.env.DB
+    .prepare("SELECT is_admin FROM users WHERE username = ?")
+    .bind(me.username)
+    .first();
+  return Number(user?.is_admin) === 1 ? { user: me } : { error: "forbidden" };
 }
 
 export function isColumnMissing(err) {
@@ -190,13 +257,14 @@ export function publicUser(row) {
   const themeColors = unwrapJSON(row.theme_colors);
   return {
     username: row.username,
+    isAdmin: Number(row.is_admin) === 1,
     name: row.name ?? "",
     university: row.university ?? "",
     career: row.career ?? "",
     semester: row.semester ?? 1,
     ingresoCorte: row.ingreso_corte ?? "2023-2",
     hasPhoto: !!row.photo,
-    appMode: row.app_mode ?? "dark",
+    appMode: row.app_mode ?? "light",
     appTheme: row.app_theme ?? "ambar",
     themeColors: themeColors && typeof themeColors === "object" ? themeColors : null,
     borderRadius: row.border_radius ?? 12,

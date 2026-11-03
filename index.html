@@ -2,8 +2,21 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content" />
-    <meta name="description" content="Aimer – Plan de estudios, horarios, notas, asignaciones y colaboración de tu semestre." />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
+    <meta name="description" content="Aimer – Organiza tu semestre con tu plan de estudios, horarios, notas y asignaciones en un solo lugar." />
+    <link rel="canonical" href="https://mallaunimag.com/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="es_CO" />
+    <meta property="og:site_name" content="Aimer" />
+    <meta property="og:title" content="Aimer – Organiza tu semestre" />
+    <meta property="og:description" content="Organiza tu semestre con tu plan de estudios, horarios, notas y asignaciones en un solo lugar." />
+    <meta property="og:url" content="https://mallaunimag.com/" />
+    <meta property="og:image" content="https://mallaunimag.com/icons/icon-512.png" />
+    <meta property="og:image:alt" content="Aimer, tu asistente para organizar el semestre" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Aimer – Organiza tu semestre" />
+    <meta name="twitter:description" content="Organiza tu semestre con tu plan de estudios, horarios, notas y asignaciones en un solo lugar." />
+    <meta name="twitter:image" content="https://mallaunimag.com/icons/icon-512.png" />
     <!-- Sin <meta name="theme-color"> a proposito. En iOS Safari ese meta hace
          que la barra inferior (y la de estado) se pinten como una BANDA OPACA
          del color indicado, que no coincide con el contenido de la app y se ve
@@ -11,7 +24,7 @@
          Safari muestrea el fondo de <html> (--bg-content, igual que el area de
          contenido) y sus barras se funden con la interfaz. No volver a
          agregarlo: ya se quito una vez por este mismo motivo. -->
-    <title>Aimer</title>
+    <title>Aimer – Organiza tu semestre</title>
     <script>
       (function () {
         try {
@@ -19,7 +32,7 @@
             rojo:      ["#E10600", "#A80000", "225,6,0", "#FFF5F4"],
             burdeos:   ["#800020", "#560016", "128,0,32", "#FFF5F4"],
             naranja:   ["#FF7A1A", "#E35E00", "255,122,26"],
-            ambar:     ["#FFC94D", "#F2A900", "255,201,77"],
+            ambar:     ["#FFC94D", "#F2A900", "255,201,77", null, "#805000"],
             verde:     ["#2BD06E", "#0FA84F", "43,208,110"],
             turquesa:  ["#00D1B2", "#00A28A", "0,209,178"],
             azul:      ["#3B82F6", "#1D4ED8", "59,130,246"],
@@ -30,13 +43,15 @@
           var s = JSON.parse(localStorage.getItem("malla_session") || "null");
           var u = (s && s.user) || (s && !s.token ? s : null);
           var r = document.documentElement;
-          var mode = (u && u.appMode) || "dark";
+          var mode = (u && u.appMode) || "light";
           var c = THEMES[(u && u.appTheme)] || THEMES.ambar;
           r.setAttribute("data-theme", mode);
           r.style.setProperty("--accent", c[0]);
           r.style.setProperty("--accent2", c[1]);
           r.style.setProperty("--accent-rgb", c[2]);
           r.style.setProperty("--accent-ink", c[3] || "#14101F");
+          r.style.setProperty("--accent-text", mode === "light" ? (c[4] || c[0]) : c[0]);
+          r.style.setProperty("--accent-border", mode === "light" ? (c[5] || c[4] || c[0]) : c[0]);
           if (u && u.fontBody && u.fontBody !== "DM Sans") r.style.setProperty("--font-body", "'" + u.fontBody + "', system-ui, sans-serif");
         } catch (e) {}
       })();
@@ -50,12 +65,8 @@
         }
       } catch (e) {}
     </script>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="preload" href="/fonts/Sentient-Variable.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/Sentient-VariableItalic.woff2" as="font" type="font/woff2" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
-    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet" /></noscript>
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" type="image/svg+xml" href="/aimer.svg" />

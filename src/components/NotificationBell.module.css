@@ -21,7 +21,7 @@
 .bellBtn:hover,
 .bellBtnOpen {
   color: var(--accent-text);
-  border-color: var(--accent);
+  border-color: var(--accent-border);
   background: rgba(var(--accent-rgb), 0.08);
 }
 

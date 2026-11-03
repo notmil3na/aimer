@@ -1,39 +1,73 @@
 const BASE = "/api";
+const STORAGE_KEY = "malla_session";
 
 function readSession() {
   for (const store of [localStorage, sessionStorage]) {
     try {
-      const raw = store.getItem("malla_session");
-      if (raw) return JSON.parse(raw);
+      const raw = store.getItem(STORAGE_KEY);
+      if (!raw) continue;
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === "object") return parsed;
     } catch {}
   }
   return null;
 }
 
-/* `persist` decide dónde vive la sesión: localStorage (sobrevive al cerrar el
-   navegador) o sessionStorage (solo esta pestaña). Sin `persist` se conserva el
-   almacén que ya tenía la sesión, para no moverla al actualizar el perfil. */
-export function saveSession(token, user, data, persist) {
+/* La sesión (el JWT) vive en una cookie HttpOnly que este código no puede leer.
+   Aquí solo se guardan las preferencias y los datos para pintar la app al
+   instante; nunca el token. */
+function stripLegacyToken() {
+  for (const store of [localStorage, sessionStorage]) {
+    try {
+      const raw = store.getItem(STORAGE_KEY);
+      if (!raw) continue;
+      const parsed = JSON.parse(raw);
+      if (parsed && "token" in parsed) {
+        delete parsed.token;
+        store.setItem(STORAGE_KEY, JSON.stringify(parsed));
+      }
+    } catch {}
+  }
+}
+
+/* Token de una sesión anterior a la cookie: se usa una sola vez para que el
+   servidor emita la cookie y después se borra del almacenamiento. */
+function legacyToken() {
+  const s = readSession();
+  return s && typeof s.token === "string" && s.token ? s.token : null;
+}
+
+/* true cuando la sesión sobrevive al cierre del navegador (localStorage). */
+export function isPersistentSession() {
+  try {
+    return !!localStorage.getItem(STORAGE_KEY);
+  } catch {
+    return true;
+  }
+}
+
+/* `persist` decide dónde viven las preferencias: localStorage (sobrevive al
+   cerrar el navegador) o sessionStorage (solo esta pestaña). Sin `persist` se
+   conserva el almacén que ya tenía la sesión, para no moverla al actualizar el
+   perfil. El token no se guarda: lo pone el servidor en la cookie. */
+export function saveSession(user, data, persist) {
   const prev = readSession();
   const nextData = data !== undefined ? data : (prev && prev.data) || null;
-  const keepLocal = (() => {
-    if (typeof persist === "boolean") return persist;
-    try {
-      return !sessionStorage.getItem("malla_session") || !!localStorage.getItem("malla_session");
-    } catch {
-      return true;
-    }
-  })();
-  const payload = JSON.stringify({ token, user, data: nextData });
+  const keepLocal = typeof persist === "boolean" ? persist : isPersistentSession();
+  const payload = JSON.stringify({ user, data: nextData });
   try {
     if (keepLocal) {
-      localStorage.setItem("malla_session", payload);
-      sessionStorage.removeItem("malla_session");
+      localStorage.setItem(STORAGE_KEY, payload);
+      sessionStorage.removeItem(STORAGE_KEY);
     } else {
-      sessionStorage.setItem("malla_session", payload);
-      localStorage.removeItem("malla_session");
+      sessionStorage.setItem(STORAGE_KEY, payload);
+      localStorage.removeItem(STORAGE_KEY);
     }
   } catch {}
+}
+
+export function getSession() {
+  return readSession();
 }
 
 export function getSessionData() {
@@ -47,33 +81,30 @@ export function updateSessionData(patch) {
     const s = readSession();
     if (!s) return;
     const data = { ...(s.data || {}), ...patch };
-    const payload = JSON.stringify({ ...s, data });
-    const store = localStorage.getItem("malla_session") ? localStorage : sessionStorage;
-    store.setItem("malla_session", payload);
+    const payload = JSON.stringify({ user: s.user, data });
+    const store = localStorage.getItem(STORAGE_KEY) ? localStorage : sessionStorage;
+    store.setItem(STORAGE_KEY, payload);
   } catch (_) {}
 }
 
 export function clearSession() {
   try {
-    localStorage.removeItem("malla_session");
-    sessionStorage.removeItem("malla_session");
+    localStorage.removeItem(STORAGE_KEY);
+    sessionStorage.removeItem(STORAGE_KEY);
   } catch (_) {}
-}
-
-export function getToken() {
-  const s = readSession();
-  return s && s.token ? s.token : null;
 }
 
 const PUBLIC_AUTH_PATHS = new Set(["/auth/login", "/auth/register"]);
 
 export async function api(path, { method = "GET", body, skipAuth = false, soft401 = false } = {}) {
-  const token = skipAuth ? null : getToken();
+  const legacy = skipAuth ? null : legacyToken();
   const res = await fetch(BASE + path, {
     method,
+    credentials: "same-origin", // la cookie HttpOnly viaja sola
     headers: {
       "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      // solo durante la migración: el servidor lo cambia por la cookie.
+      ...(legacy ? { Authorization: `Bearer ${legacy}` } : {}),
     },
     body: body === undefined ? undefined : JSON.stringify(body),
   });
@@ -84,7 +115,7 @@ export async function api(path, { method = "GET", body, skipAuth = false, soft40
   } catch {}
 
   if (res.status === 401) {
-    if (!PUBLIC_AUTH_PATHS.has(path)) {
+    if (!skipAuth && !PUBLIC_AUTH_PATHS.has(path)) {
       clearSession();
       if (!soft401) window.location.reload();
     }
@@ -99,10 +130,22 @@ export async function api(path, { method = "GET", body, skipAuth = false, soft40
     }
     throw err;
   }
+  if (legacy) stripLegacyToken();
   if (data === null) {
     throw new Error("El servidor no devolvió una respuesta válida");
   }
   return data;
+}
+
+/* Cierra la sesión en el servidor (borra la cookie) y en el navegador. */
+export async function logout() {
+  clearSession();
+  try {
+    await fetch(BASE + "/auth/logout", {
+      method: "POST",
+      credentials: "same-origin",
+    });
+  } catch (_) {}
 }
 
 const WARM_PATHS = ["/auth/login", "/auth/me", "/user_data", "/auth/security"];
@@ -112,7 +155,7 @@ export function prewarm() {
   if (document.visibilityState === "hidden") return;
   WARM_PATHS.forEach((path) => {
     try {
-      fetch(BASE + path, { method: "GET", keepalive: true }).catch(() => {});
+      fetch(BASE + path, { method: "GET", keepalive: true, credentials: "same-origin" }).catch(() => {});
     } catch (_) {}
   });
 }

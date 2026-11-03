@@ -52,7 +52,7 @@
   flex-shrink: 0; min-width: 58px; text-align: center;
   font-size: 11px; font-weight: 700; color: var(--text);
   background: color-mix(in srgb, var(--clase-color, var(--accent)) 13%, var(--surface));
-  border: 1px solid color-mix(in srgb, var(--clase-color, var(--accent)) 24%, var(--border));
+  border: 1px solid color-mix(in srgb, var(--clase-color, var(--accent-border)) 24%, var(--border));
   border-radius: 999px; padding: 5px 10px;
 }
 .hoyInfo { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
@@ -98,7 +98,7 @@
   padding: 9px 18px; cursor: pointer; transition: all 0.2s;
   display: inline-flex; align-items: center; gap: 7px; flex-shrink: 0;
 }
-.exportBtn:hover { border-color: var(--accent); color: var(--accent-text); box-shadow: 0 4px 14px rgba(var(--accent-rgb), 0.15); }
+.exportBtn:hover { border-color: var(--accent-border); color: var(--accent-text); box-shadow: 0 4px 14px rgba(var(--accent-rgb), 0.15); }
 
 
 .diasRow {
@@ -117,9 +117,9 @@
   font-family: var(--font-body); font-size: 12px; font-weight: 600;
   padding: 6px 14px; cursor: pointer; transition: all 0.15s;
 }
-.diaBtn:hover { border-color: var(--accent); color: var(--text); }
+.diaBtn:hover { border-color: var(--accent-border); color: var(--text); }
 .diaBtnActive {
-  border-color: var(--accent) !important;
+  border-color: var(--accent-border) !important;
   color: var(--accent-text) !important;
   background: color-mix(in srgb, var(--accent) 14%, var(--surface)) !important;
 }
@@ -153,7 +153,7 @@
   display: inline-flex; align-items: center; gap: 6px;
   padding: 7px 12px;
   background: var(--surface);
-  border: 1px solid var(--accent);
+  border: 1px solid var(--accent-border);
   border-radius: var(--radius-sm);
   box-shadow: 0 8px 24px rgba(0,0,0,0.22);
   font-size: 12px; font-weight: 700; color: var(--accent-text);
@@ -335,7 +335,7 @@
 .modal .textInput:focus,
 .modal .select:focus,
 .modal .textarea:focus {
-  border-color: var(--accent); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.15);
+  border-color: var(--accent-border); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.15);
 }
 .modal .formField label { color: var(--modal-muted); }
 .modal .btnSecondary {
@@ -345,9 +345,9 @@
 .modal .edificioGrid .edificioBtn {
   background: var(--modal-bg2); border-color: var(--modal-border); color: var(--modal-muted);
 }
-.modal .edificioBtn:hover { border-color: var(--accent); color: var(--modal-text); }
+.modal .edificioBtn:hover { border-color: var(--accent-border); color: var(--modal-text); }
 .modal .edificioBtnActive {
-  border-color: var(--accent) !important; color: var(--accent-text) !important;
+  border-color: var(--accent-border) !important; color: var(--accent-text) !important;
   background: color-mix(in srgb, var(--accent) 12%, var(--modal-bg)) !important;
 }
 .modal .removeBtn { color: var(--modal-muted); }
@@ -405,7 +405,7 @@
   transition: border-color 0.2s;
   appearance: none; -webkit-appearance: none;
 }
-.select:focus, .input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.12); }
+.select:focus, .input:focus { border-color: var(--accent-border); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.12); }
 
 
 .edificioGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
@@ -417,8 +417,8 @@
   transition: all 0.15s; text-align: center;
   min-width: 0; word-break: break-word;
 }
-.edificioBtn:hover { border-color: var(--accent); color: var(--text); }
-.edificioBtnActive { border-color: var(--accent) !important; color: var(--accent-text) !important; background: rgba(var(--accent-rgb), 0.16) !important; }
+.edificioBtn:hover { border-color: var(--accent-border); color: var(--text); }
+.edificioBtnActive { border-color: var(--accent-border) !important; color: var(--accent-text) !important; background: rgba(var(--accent-rgb), 0.16) !important; }
 
 
 .ladoRow { display: flex; gap: 8px; }
@@ -428,8 +428,8 @@
   font-family: var(--font-body); font-size: 13px; color: var(--text-muted);
   transition: all 0.15s;
 }
-.ladoBtn:hover { border-color: var(--accent); }
-.ladoBtnActive { border-color: var(--accent) !important; color: var(--accent-text) !important; background: rgba(var(--accent-rgb), 0.16) !important; }
+.ladoBtn:hover { border-color: var(--accent-border); }
+.ladoBtnActive { border-color: var(--accent-border) !important; color: var(--accent-text) !important; background: rgba(var(--accent-rgb), 0.16) !important; }
 
 
 .salonGrid { display: flex; gap: 7px; flex-wrap: wrap; }
@@ -439,8 +439,8 @@
   font-family: var(--font-body); font-size: 12px; color: var(--text-muted);
   transition: all 0.15s;
 }
-.salonBtn:hover { border-color: var(--accent); }
-.salonBtnActive { border-color: var(--accent) !important; color: var(--accent-text) !important; background: rgba(var(--accent-rgb), 0.08) !important; }
+.salonBtn:hover { border-color: var(--accent-border); }
+.salonBtnActive { border-color: var(--accent-border) !important; color: var(--accent-text) !important; background: rgba(var(--accent-rgb), 0.08) !important; }
 
 
 .salonPreview {
@@ -658,9 +658,9 @@
   padding: 6px 14px; cursor: pointer; transition: all 0.15s;
   display: flex; align-items: center; gap: 6px;
 }
-.planOpcionBtn:hover { border-color: var(--accent); color: var(--text); }
+.planOpcionBtn:hover { border-color: var(--accent-border); color: var(--text); }
 .planOpcionBtnActive {
-  border-color: var(--accent) !important; color: var(--accent-text) !important;
+  border-color: var(--accent-border) !important; color: var(--accent-text) !important;
   background: rgba(var(--accent-rgb), 0.08) !important;
 }
 .planOpcionDot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
@@ -671,7 +671,7 @@
   font-family: var(--font-body); font-size: 12px; font-weight: 600;
   padding: 6px 14px; cursor: pointer; transition: all 0.15s;
 }
-.planAddBtn:hover { background: rgba(var(--accent-rgb), 0.08); border-color: var(--accent); }
+.planAddBtn:hover { background: rgba(var(--accent-rgb), 0.08); border-color: var(--accent-border); }
 
 .planGrid {
   display: grid;
@@ -772,7 +772,7 @@
 
 .miniCardDragWrap { transition: opacity 0.15s, transform 0.15s; border-radius: var(--radius-md); }
 .miniCardDragging { opacity: 0.4; }
-.miniCardDragOver { outline: 2px dashed var(--accent); outline-offset: 3px; border-radius: var(--radius-md); }
+.miniCardDragOver { outline: 2px dashed var(--accent-border); outline-offset: 3px; border-radius: var(--radius-md); }
 
 
 .miniCard {
@@ -780,9 +780,9 @@
   border-radius: var(--radius-md); overflow: hidden;
   transition: border-color 0.18s, box-shadow 0.18s; cursor: default;
 }
-.miniCard:hover { border-color: color-mix(in srgb, var(--accent) 40%, var(--border)); box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+.miniCard:hover { border-color: color-mix(in srgb, var(--accent-border) 40%, var(--border)); box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
 .miniCardSelected {
-  border-color: var(--accent) !important;
+  border-color: var(--accent-border) !important;
   box-shadow: 0 0 0 2px rgba(var(--accent-rgb), 0.2), 0 4px 20px rgba(0,0,0,0.12) !important;
 }
 
@@ -809,7 +809,7 @@
   color: var(--text); font-family: var(--font-body); font-size: 13px; font-weight: 600;
   outline: none; width: 130px; padding: 1px 4px;
 }
-.miniCardNameInput:focus { border-bottom-color: var(--accent); }
+.miniCardNameInput:focus { border-bottom-color: var(--accent-border); }
 
 .miniCardBadge {
   font-size: 10px; font-weight: 700; text-transform: uppercase;
@@ -881,7 +881,7 @@
   font-family: var(--font-body); font-size: 11px;
   padding: 5px 12px; cursor: pointer; transition: all 0.15s; width: 100%;
 }
-.planClaseAddBtn:hover { border-color: var(--accent); color: var(--accent-text); }
+.planClaseAddBtn:hover { border-color: var(--accent-border); color: var(--accent-text); }
 
 
 .miniStats {
@@ -933,7 +933,7 @@
 
 .dropPreview {
   position: absolute; left: 3px; right: 3px;
-  border: 2px dashed var(--accent);
+  border: 2px dashed var(--accent-border);
   border-radius: var(--radius-md);
   background: rgba(var(--accent-rgb), 0.24);
   display: flex; align-items: center; justify-content: center;

@@ -43,5 +43,6 @@
   ]
 
   // secretos (no van aquí, se cargan con `npx wrangler secret put NOMBRE`):
-  // SESSION_SECRET, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, CRON_SECRET
+  // SESSION_SECRET, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, CRON_SECRET,
+  // ADMIN_RESET_SECRET y ADMIN_BOOTSTRAP_SECRET (secretos aleatorios de al menos 32 bytes)
 }

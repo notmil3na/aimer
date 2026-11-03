@@ -151,13 +151,45 @@
   margin-bottom: 24px;
 }
 
+.profileAdminButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-left: auto;
+  padding: 10px 13px;
+  border: 1px solid color-mix(in srgb, var(--accent-border) 32%, var(--border));
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--accent) 9%, var(--surface));
+  color: var(--accent-text);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.18s, border-color 0.18s, transform 0.18s;
+}
+.profileAdminButton:hover {
+  background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+  border-color: var(--accent-border);
+  transform: translateY(-1px);
+}
+.profileAdminButtonActive {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+.profileAdminButtonActive:hover {
+  background: var(--accent2);
+  color: var(--accent-ink);
+}
+
 .avatar {
   position: relative; width: 80px; height: 80px; flex-shrink: 0;
 }
 
 .avatarImg {
   width: 80px; height: 80px; border-radius: 50%; object-fit: cover;
-  border: 2px solid var(--accent);
+  border: 2px solid var(--accent-border);
 }
 
 .avatarInitial {
@@ -220,7 +252,7 @@
 .selectInput:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .field input:focus, .selectInput:focus {
-  border-color: var(--accent);
+  border-color: var(--accent-border);
   box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.1);
 }
 
@@ -246,6 +278,34 @@
 }
 .autoSaveSaved { color: #6ec88a; }
 
+.passwordCard {
+  margin-top: 20px;
+  padding: 22px 24px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--surface) 94%, transparent), color-mix(in srgb, var(--surface2) 90%, transparent));
+  border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
+  border-radius: 24px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.06);
+}
+.passwordHint { color: var(--text-muted); font-size: 13px; margin: -6px 0 18px; }
+.passwordForm { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; }
+.passwordGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; width: 100%; }
+.passwordError, .passwordSuccess { font-size: 12px; margin: 0; }
+.passwordError { color: #e05252; }
+.passwordSuccess { color: #6ec88a; }
+.passwordButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid var(--accent-border);
+  border-radius: var(--radius-sm);
+  background: rgba(var(--accent-rgb), 0.12);
+  color: var(--accent-text);
+  font: 600 13px var(--font-body);
+  padding: 10px 16px;
+  cursor: pointer;
+}
+.passwordButton:disabled { opacity: 0.6; cursor: wait; }
 
 .cursandoCol {
   background: linear-gradient(135deg, color-mix(in srgb, var(--surface) 94%, transparent), color-mix(in srgb, var(--surface2) 90%, transparent));
@@ -290,11 +350,11 @@
 
 .cursandoItem {
   display: flex; align-items: center;
-  border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-border) 28%, transparent);
   border-radius: var(--radius-sm);
   transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
 }
-.cursandoItem:hover { background: color-mix(in srgb, var(--surface2) 88%, transparent); border-color: color-mix(in srgb, var(--accent) 50%, transparent); box-shadow: 0 8px 20px color-mix(in srgb, var(--accent) 14%, transparent); }
+.cursandoItem:hover { background: color-mix(in srgb, var(--surface2) 88%, transparent); border-color: color-mix(in srgb, var(--accent-border) 50%, transparent); box-shadow: 0 8px 20px color-mix(in srgb, var(--accent) 14%, transparent); }
 
 .cursandoItemBody {
   flex: 1; padding: 10px 14px;
@@ -329,8 +389,8 @@
   font-family: var(--font-body); padding: 11px 18px;
   transition: border-color 0.2s, color 0.2s, background 0.2s;
 }
-.semDateToggle:hover { border-color: var(--accent); color: var(--accent-text); background: rgba(var(--accent-rgb), 0.06); }
-.semDateToggleOpen { border-color: var(--accent); color: var(--accent-text); }
+.semDateToggle:hover { border-color: var(--accent-border); color: var(--accent-text); background: rgba(var(--accent-rgb), 0.06); }
+.semDateToggleOpen { border-color: var(--accent-border); color: var(--accent-text); }
 .semDateToggle svg { color: var(--accent-text); flex-shrink: 0; }
 
 .semDateMenu {
@@ -364,7 +424,7 @@
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 .semDateRow input:focus {
-  border-color: var(--accent);
+  border-color: var(--accent-border);
   box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.1);
 }
 
@@ -406,9 +466,9 @@
   font-size: 14px; font-weight: 500; color: var(--text-muted);
   transition: border-color 0.18s, color 0.18s, background 0.18s, box-shadow 0.18s;
 }
-.modeBtn:hover { border-color: var(--accent); color: var(--text); }
+.modeBtn:hover { border-color: var(--accent-border); color: var(--text); }
 .modeBtnActive {
-  border-color: var(--accent) !important;
+  border-color: var(--accent-border) !important;
   color: var(--accent-text) !important;
   background: rgba(var(--accent-rgb), 0.06) !important;
   box-shadow: 0 0 0 1px var(--accent);
@@ -459,9 +519,9 @@
   transition: border-color 0.18s, background 0.18s;
   position: relative;
 }
-.fontOptionBtn:hover { border-color: var(--accent); background: var(--surface2); }
+.fontOptionBtn:hover { border-color: var(--accent-border); background: var(--surface2); }
 .fontOptionActive {
-  border-color: var(--accent) !important;
+  border-color: var(--accent-border) !important;
   background: rgba(var(--accent-rgb), 0.06) !important;
   box-shadow: 0 0 0 1px var(--accent);
 }
@@ -488,7 +548,7 @@
   font-family: var(--font-body); font-size: 12px; color: var(--text-muted);
   transition: border-color 0.15s, color 0.15s, background 0.15s; min-width: 90px;
 }
-.presetBtn:hover { border-color: var(--accent); color: var(--text); background: var(--surface2); }
+.presetBtn:hover { border-color: var(--accent-border); color: var(--text); background: var(--surface2); }
 
 .presetSwatches { display: flex; gap: 4px; }
 .swatch { width: 18px; height: 18px; display: block; }
@@ -505,15 +565,15 @@
 
 .borderPreviewRow { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
 .borderBtn { background: var(--surface2); border: 1px solid var(--border); color: var(--text-muted); font-family: var(--font-body); font-size: 11px; padding: 8px 12px; cursor: pointer; transition: border-color 0.15s, color 0.15s; }
-.borderBtn:hover { border-color: var(--accent); color: var(--text); }
-.borderBtnActive { border-color: var(--accent) !important; color: var(--accent-text) !important; }
+.borderBtn:hover { border-color: var(--accent-border); color: var(--text); }
+.borderBtnActive { border-color: var(--accent-border) !important; color: var(--accent-text) !important; }
 .rangeInput { width: 100%; accent-color: var(--accent); }
 
 
 .fontScaleRow { display: flex; gap: 8px; }
 .fontBtn { background: var(--surface2); border: 1px solid var(--border); color: var(--text-muted); font-family: var(--font-body); padding: 8px 16px; cursor: pointer; border-radius: var(--radius-sm); transition: border-color 0.15s, color 0.15s; }
-.fontBtn:hover { border-color: var(--accent); color: var(--text); }
-.fontBtnActive { border-color: var(--accent) !important; color: var(--accent-text) !important; }
+.fontBtn:hover { border-color: var(--accent-border); color: var(--text); }
+.fontBtnActive { border-color: var(--accent-border) !important; color: var(--accent-text) !important; }
 
 
 .preview { display: flex; gap: 10px; flex-wrap: wrap; }
@@ -529,6 +589,8 @@
   .careerGrid { grid-template-columns: 1fr; }
   .card { padding: 18px 14px 16px; border-radius: var(--radius-md); }
   .formGrid { grid-template-columns: 1fr; gap: 12px; margin-bottom: 16px; }
+  .passwordCard { padding: 18px 14px; border-radius: var(--radius-md); }
+  .passwordGrid { grid-template-columns: 1fr; }
   .avatarSection { gap: 12px; margin-bottom: 14px; }
   .avatar, .avatarImg, .avatarInitial { width: 64px; height: 64px; }
   .avatarInitial { font-size: 24px; }
@@ -545,6 +607,10 @@
   .previewCard { width: calc(50% - 6px); min-width: 130px; }
 }
 
+@media (max-width: 1100px) {
+  .twoCol { grid-template-columns: minmax(0, 1fr); }
+}
+
 @media (max-width: 600px) {
   .semDateMenu { grid-template-columns: minmax(0, 1fr); gap: 10px; }
 }
@@ -555,7 +621,8 @@
   .sectionTabs { width: 100%; }
   .sectionTab { flex: 1; justify-content: center; padding: 9px 12px; font-size: 12px; }
   .card { padding: 14px 10px 12px; border-radius: 18px; }
-  .avatarSection { flex-direction: column; align-items: flex-start; }
+  .avatarSection { flex-direction: row; align-items: center; flex-wrap: wrap; }
+  .profileAdminButton { margin-left: 0; }
   .avatar, .avatarImg, .avatarInitial { width: 56px; height: 56px; }
   .avatarInitial { font-size: 20px; }
   .avatarName { font-size: 16px; }

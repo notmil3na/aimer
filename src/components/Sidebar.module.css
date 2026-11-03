@@ -56,7 +56,7 @@
   font-size: 16px; cursor: pointer;
   transition: all 0.2s;
 }
-.modeToggle:hover { border-color: var(--accent); transform: scale(1.05) rotate(-8deg); }
+.modeToggle:hover { border-color: var(--accent-border); transform: scale(1.05) rotate(-8deg); }
 
 .themeIndicator {
   display: flex; align-items: center; gap: 7px;
@@ -100,7 +100,7 @@
 
 .avatarRing {
   position: absolute; inset: -3px; border-radius: 50%;
-  border: 1px solid var(--accent);
+  border: 1px solid var(--accent-border);
   opacity: 0.4;
 }
 .avatarRing::after {

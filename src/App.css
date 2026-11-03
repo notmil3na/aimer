@@ -1,4 +1,5 @@
 @import "./styles/sentient.css";
+@import "./styles/fonts.css";
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -22,7 +23,6 @@ input, textarea, select,
   user-select: text;
   -webkit-touch-callout: default;
 }
-
 
 @font-face {
   font-family: 'Overused Grotesk';
@@ -58,6 +58,7 @@ input, textarea, select,
   --accent:     #c8a96e;
   --accent2:    #8b6f3a;
   --accent-rgb: 200,169,110;
+  --accent-border: var(--accent);
   /* Acento legible como texto sobre el fondo del modo actual. applyTheme lo
      recalcula: con acentos muy oscuros en modo oscuro (p. ej. burdeos) usa un
      tono claro para que "Mi horario", chips y etiquetas se lean. */
@@ -262,6 +263,39 @@ body {
   background-size: 200px 200px;
 }
 
+html[data-performance="low"] {
+  --glass-blur: 0px;
+  --shadow-soft: 0 2px 8px rgba(0,0,0,0.12);
+  --shadow-lg: 0 4px 12px rgba(0,0,0,0.16);
+}
+
+html[data-performance="low"] .bg-mesh {
+  display: none;
+  animation: none;
+  will-change: auto;
+}
+
+html[data-performance="low"] .bg-grain {
+  display: none;
+}
+
+html[data-performance="low"] * {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* En rendimiento bajo no solo se quitan los meshes: también se apagan los
+   bucles de animación decorativos (carita, estrellas, blobs, spinners) para
+   no mantener la GPU despierta. Los estados se siguen viendo estáticos. */
+html[data-performance="low"] *,
+html[data-performance="low"] *::before,
+html[data-performance="low"] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  /* Incluye los filtros SVG (feGaussianBlur/feTurbulence) y los blur de CSS. */
+  filter: none !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .bg-mesh { animation: none; }
 }
@@ -273,6 +307,12 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+}
+
+.loginScope {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 img {
@@ -349,7 +389,7 @@ select option {
 
 
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--accent-border);
   outline-offset: 2px;
   border-radius: 4px;
 }

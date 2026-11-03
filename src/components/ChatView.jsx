@@ -497,7 +497,7 @@ function SharePopover({ open, onClose, myName, shareData, onSendShare, onPickIma
   );
 }
 
-function ThreadView({ user, friend, onBack, onNotify, onToggleInfo, infoOpen, shareData, onSaveAsignaciones, onSaveNotasClase, onMessages }) {
+function ThreadView({ user, friend, onBack, onNotify, onToggleInfo, infoOpen, shareData, onSaveAsignaciones, onSaveNotasClase, onMessages, onThreadRead }) {
   const { malla, notasClaseData, asignacionesData } = shareData;
   const me = user.username;
   const other = friend.username;
@@ -600,8 +600,12 @@ function ThreadView({ user, friend, onBack, onNotify, onToggleInfo, infoOpen, sh
     const key = unread.map((m) => m.id).join(",");
     if (readGuardRef.current === key) return;
     readGuardRef.current = key;
-    markThreadRead(other).then(() => refresh());
-  }, [messages, other, refresh]);
+    markThreadRead(other).then((success) => {
+      if (!success) return;
+      refresh();
+      if (onThreadRead) onThreadRead(other);
+    });
+  }, [messages, other, refresh, onThreadRead]);
 
   const sendText = async () => {
     const texto = input.trim();
@@ -1025,6 +1029,13 @@ export default function ChatView({ user, malla, horarioData, notasClaseData, asi
     loadOverview();
   }, [refreshContacts, loadOverview]);
 
+  const handleThreadRead = useCallback((partner) => {
+    setOverview((prev) => (prev || []).map((conversation) =>
+      conversation.partner === partner ? { ...conversation, unread: 0 } : conversation
+    ));
+    loadOverview();
+  }, [loadOverview]);
+
   const openChatWith = (friend) => {
     if (!friend) return;
     setFriendsOpen(false);
@@ -1236,6 +1247,7 @@ export default function ChatView({ user, malla, horarioData, notasClaseData, asi
               onSaveAsignaciones={onSaveAsignaciones}
               onSaveNotasClase={onSaveNotasClase}
               onMessages={setThreadMessages}
+              onThreadRead={handleThreadRead}
             />
           ) : (
             <div className={styles.threadPlaceholder}>

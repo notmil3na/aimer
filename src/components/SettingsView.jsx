@@ -5,11 +5,12 @@ import { UNIVERSITIES, autoSemester } from "../utils/academic";
 import { calcCareerTime, estimateGraduation } from "../utils/careerProgress.js";
 import { semesterDatesFor, semesterCorteFor } from "../utils/semesterCountdown.js";
 import { getPhoto, compressPhoto, setPhotoCache } from "../utils/photo";
-import { ensureFont, FONT_OPTIONS } from "../utils/fonts";
+import { FONT_OPTIONS } from "../utils/fonts";
+import { api, isPersistentSession } from "../api";
 import styles from "./SettingsView.module.css";
 import {
   IconCamera, IconWarning, IconSemester, IconCalendar, IconCheck, IconChevronDown, IconChevronUp,
-  IconSun, IconMoon, IconPaint, IconUser
+  IconSun, IconMoon, IconPaint, IconUser, IconShield
 } from "./Icons";
 
 const MALLA_PRESETS = [
@@ -56,10 +57,12 @@ const INTERNAL_TABS = [
   { id: "apariencia",  label: "Apariencia",  Icon: IconPaint },
 ];
 
-export default function SettingsView({ user, onUpdate, malla, semestre, onSaveSemestre }) {
+export default function SettingsView({ user, onUpdate, malla, semestre, onSaveSemestre, adminMode = false, onToggleAdminMode }) {
   const [activeSection, setActiveSection] = useState("cuenta");
-
-  useEffect(() => { ensureFont(user.fontBody); }, [user.fontBody]);
+  const [passwordForm, setPasswordForm] = useState({ current: "", next: "", confirm: "" });
+  const [passwordBusy, setPasswordBusy] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordSaved, setPasswordSaved] = useState(false);
 
   const [form, setForm] = useState({
     name:         user.name         || "",
@@ -148,6 +151,38 @@ export default function SettingsView({ user, onUpdate, malla, semestre, onSaveSe
     reader.readAsDataURL(file);
   };
 
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    setPasswordError("");
+    setPasswordSaved(false);
+    if (passwordForm.next.length < 12 || passwordForm.next.length > 256) {
+      setPasswordError("La nueva contraseña debe tener entre 12 y 256 caracteres.");
+      return;
+    }
+    if (passwordForm.next !== passwordForm.confirm) {
+      setPasswordError("La confirmación no coincide con la nueva contraseña.");
+      return;
+    }
+    if (passwordForm.current === passwordForm.next) {
+      setPasswordError("La nueva contraseña debe ser diferente a la actual.");
+      return;
+    }
+
+    setPasswordBusy(true);
+    try {
+      const result = await api("/auth/change-password", {
+        method: "POST",
+        body: { currentPassword: passwordForm.current, newPassword: passwordForm.next, remember: isPersistentSession() },
+      });
+      setPasswordForm({ current: "", next: "", confirm: "" });
+      setPasswordSaved(true);
+    } catch (error) {
+      setPasswordError(error.message || "No se pudo cambiar la contraseña.");
+    } finally {
+      setPasswordBusy(false);
+    }
+  };
+
   const initial = form.name ? form.name[0].toUpperCase() : "?";
   const availableCareers = form.university ? (UNIVERSITIES[form.university] || []) : [];
 
@@ -167,8 +202,13 @@ export default function SettingsView({ user, onUpdate, malla, semestre, onSaveSe
 
   const aparienciaTimer = useRef(null);
   const aparienciaLastRef = useRef(null);
+  const skipInitialAparienciaSave = useRef(true);
 
   useEffect(() => {
+    if (skipInitialAparienciaSave.current) {
+      skipInitialAparienciaSave.current = false;
+      return;
+    }
     window.clearTimeout(aparienciaTimer.current);
     aparienciaTimer.current = window.setTimeout(() => {
       const key = JSON.stringify({ colors, borderRadius, fontScale, appMode, appTheme, fontBody });
@@ -241,7 +281,7 @@ export default function SettingsView({ user, onUpdate, malla, semestre, onSaveSe
                       {graduation.mesesRestantes > 0 ? `${graduation.mesesRestantes} mes${graduation.mesesRestantes !== 1 ? "es" : ""}` : graduation.anosEstimados === 0 ? `${graduation.mesesEstimados} meses` : ""}
                     </span>
                     <span className={styles.careerSub}>
-                      Ritmo: {graduation.ritmoCreditosPorSemestre.toFixed(1)} cr/semestre
+                      Carga promedio proyectada: {graduation.ritmoCreditosPorSemestre.toFixed(1)} cr/semestre
                       · Faltan {graduation.creditosPendientes} cr ({graduation.semestresEstimados} semestre{graduation.semestresEstimados !== 1 ? "s" : ""})
                     </span>
                   </>
@@ -271,6 +311,17 @@ export default function SettingsView({ user, onUpdate, malla, semestre, onSaveSe
                     <p className={styles.avatarCorte}>Corte {corteActual}</p>
                   )}
                 </div>
+                {user.isAdmin && (
+                  <button
+                    type="button"
+                    className={`${styles.profileAdminButton} ${adminMode ? styles.profileAdminButtonActive : ""}`}
+                    onClick={onToggleAdminMode}
+                    aria-pressed={adminMode}
+                  >
+                    <IconShield size={15} />
+                    <span>{adminMode ? "Salir de administración" : "Administrar usuarios"}</span>
+                  </button>
+                )}
               </div>
 
               <div className={styles.divider} />
@@ -389,6 +440,7 @@ export default function SettingsView({ user, onUpdate, malla, semestre, onSaveSe
                     <span>Total créditos</span>
                     <span className={styles.cursandoTotalVal}>{totalCreditosCursando}</span>
                   </div>
+
                 </div>
               )}
 
@@ -421,6 +473,59 @@ export default function SettingsView({ user, onUpdate, malla, semestre, onSaveSe
               )}
             </div>
           </div>
+
+          <section className={styles.passwordCard}>
+            <h3 className={styles.careerTitle}>Cambiar contraseña</h3>
+            <p className={styles.passwordHint}>
+              Escribe tu contraseña actual y elige una nueva de al menos 12 caracteres.
+            </p>
+            <form className={styles.passwordForm} onSubmit={handleChangePassword}>
+              <div className={styles.passwordGrid}>
+                <div className={styles.field}>
+                  <label htmlFor="settings-current-password">Contraseña actual</label>
+                  <input
+                    id="settings-current-password"
+                    type="password"
+                    autoComplete="current-password"
+                    required
+                    value={passwordForm.current}
+                    onChange={(e) => setPasswordForm((form) => ({ ...form, current: e.target.value }))}
+                  />
+                </div>
+                <div className={styles.field}>
+                  <label htmlFor="settings-new-password">Nueva contraseña</label>
+                  <input
+                    id="settings-new-password"
+                    type="password"
+                    autoComplete="new-password"
+                    minLength={12}
+                    maxLength={256}
+                    required
+                    value={passwordForm.next}
+                    onChange={(e) => setPasswordForm((form) => ({ ...form, next: e.target.value }))}
+                  />
+                </div>
+                <div className={styles.field}>
+                  <label htmlFor="settings-confirm-password">Confirmar nueva contraseña</label>
+                  <input
+                    id="settings-confirm-password"
+                    type="password"
+                    autoComplete="new-password"
+                    minLength={12}
+                    maxLength={256}
+                    required
+                    value={passwordForm.confirm}
+                    onChange={(e) => setPasswordForm((form) => ({ ...form, confirm: e.target.value }))}
+                  />
+                </div>
+              </div>
+              {passwordError && <p className={styles.passwordError} role="alert">{passwordError}</p>}
+              {passwordSaved && <p className={styles.passwordSuccess} role="status">Contraseña actualizada. Las demás sesiones se cerraron.</p>}
+              <button className={styles.passwordButton} type="submit" disabled={passwordBusy}>
+                {passwordBusy ? "Actualizando…" : "Actualizar contraseña"}
+              </button>
+            </form>
+          </section>
         </div>
       )}
 
@@ -470,7 +575,7 @@ export default function SettingsView({ user, onUpdate, malla, semestre, onSaveSe
               {FONT_OPTIONS.map(f => (
                 <button key={f.value}
                   className={`${styles.fontOptionBtn} ${fontBody === f.value ? styles.fontOptionActive : ""}`}
-                  onClick={() => { ensureFont(f.value); setFontBody(f.value); }}
+                  onClick={() => setFontBody(f.value)}
                   style={{ fontFamily: `'${f.value}', system-ui, sans-serif` }}>
                   <span className={styles.fontOptionName}>{f.label}</span>
                   <span className={styles.fontOptionSample}>{f.sample}</span>

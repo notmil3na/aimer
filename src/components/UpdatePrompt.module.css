@@ -42,7 +42,7 @@
   height: 78px;
   border-radius: 22px;
   background: linear-gradient(145deg, #2e2c2a, #1a1918);
-  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-border) 45%, transparent);
   color: #ffffff;
   box-shadow:
     0 12px 34px rgba(0, 0, 0, 0.35),

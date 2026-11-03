@@ -4,6 +4,20 @@ import App from './App.jsx'
 import ErrorBoundary from './components/ErrorBoundary.jsx'
 import './App.css'
 
+const deviceMemory = navigator.deviceMemory;
+const hardwareConcurrency = navigator.hardwareConcurrency;
+const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+const slowConnection = !!connection && (
+  connection.saveData === true || /(^|-)2g$/.test(String(connection.effectiveType || ""))
+);
+if (
+  (typeof deviceMemory === "number" && deviceMemory <= 4) ||
+  (typeof hardwareConcurrency === "number" && hardwareConcurrency <= 4) ||
+  slowConnection
+) {
+  document.documentElement.dataset.performance = "low";
+}
+
 document.addEventListener("contextmenu", (e) => {
   const permitido = e.target.closest("input, textarea, select, [contenteditable]:not([contenteditable='false']), .selectable");
   if (!permitido) e.preventDefault();

@@ -644,7 +644,7 @@
   font-size: 17px;
   line-height: 1.6;
   color: var(--text-muted);
-  border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-border) 28%, transparent);
   border-radius: 10px;
   padding: 6px 12px;
   margin: 4px 0;
@@ -697,11 +697,11 @@
   transition: all 0.15s;
 }
 
-.checkbox:hover { border-color: var(--accent); }
+.checkbox:hover { border-color: var(--accent-border); }
 
 .checkboxChecked {
   background: var(--accent);
-  border-color: var(--accent);
+  border-color: var(--accent-border);
   color: var(--accent-ink);
 }
 

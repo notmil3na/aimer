@@ -68,7 +68,10 @@ export async function handler(c) {
 
   const hashed = await hashPassword(String(newPassword));
   try {
-    await db.prepare("UPDATE users SET password = ? WHERE username = ?").bind(hashed, data.username).run();
+    await db
+      .prepare("UPDATE users SET password = ?, session_version = session_version + 1 WHERE username = ?")
+      .bind(hashed, data.username)
+      .run();
   } catch {
     return json(c, 500, { error: "No se pudo restablecer la contraseña" });
   }

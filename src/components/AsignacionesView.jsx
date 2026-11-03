@@ -4,7 +4,6 @@ import {
   IconExamen, IconQuiz, IconTarea, IconProyecto, IconForo, IconLaboratorio, IconInforme, IconTaller, IconClose, IconEdit, IconTrash, IconClipboard, IconCheck, IconChevronUp, IconChevronDown, IconEye, IconArrowLeft
 } from "./Icons";
 import { HORAS_FORM } from "../utils/horarioHelpers";
-import { semesterDatesFor, semesterCorteFor } from "../utils/semesterCountdown";
 import { REMINDER_OPTIONS } from "../utils/reminders";
 import { uuid } from "../utils/notasClase";
 import useBodyScrollLock from "../hooks/useBodyScrollLock";
@@ -15,8 +14,6 @@ const NOTA_PASS_PCT = 0.6;
 
 const MESES_CORTOS = ["","Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
 
-const DIAS = Array.from({ length: 31 }, (_, i) => i + 1);
-
 const HORA_OPTIONS = HORAS_FORM.map((h) => {
   const [time, period] = h.split(" ");
   const [hh, mm] = time.split(":");
@@ -25,11 +22,6 @@ const HORA_OPTIONS = HORAS_FORM.map((h) => {
   if (period.startsWith("a") && h24 === 12) h24 = 0;
   return { value: `${String(h24).padStart(2, "0")}:${mm}`, label: h };
 });
-
-function toISODate(anio, dia, mes) {
-  if (!dia || !mes) return "";
-  return `${anio}-${String(mes).padStart(2, "0")}-${String(dia).padStart(2, "0")}`;
-}
 
 function formatDate(iso) {
   if (!iso) return "";
@@ -163,7 +155,6 @@ function AsignacionCard({ item, allMaterias, onUpdate, onDelete, onEdit, onSyncC
           {mat && <p className={styles.cardMateria}>{mat.id} — {mat.nombre}</p>}
           <div className={styles.cardMeta}>
             {item.valoracion && <span className={styles.cardMetaItem}> vale {item.valoracion} pts</span>}
-            {isExamenQuiz && item.esBinas && <span className={styles.cardMetaItem}>Binas</span>}
             {item.lugar && <span className={styles.cardMetaItem}>▪ {item.lugar}</span>}
             {item.temas?.length > 0 && (
               <span className={styles.cardMetaItem}>☰ {temasDone}/{temasTotal} temas</span>
@@ -185,10 +176,6 @@ function AsignacionCard({ item, allMaterias, onUpdate, onDelete, onEdit, onSyncC
 
       {expanded && (
         <div className={styles.cardExpanded}>
-          {item.descripcion && (
-                <p className={`${styles.cardDesc} selectable`}>{item.descripcion}</p>
-          )}
-
           <div className={styles.gradeRow}>
             <div className={styles.formField}>
               <label>Nota /{item.valoracion || "?"}</label>
@@ -243,16 +230,13 @@ function AsignacionCard({ item, allMaterias, onUpdate, onDelete, onEdit, onSyncC
   );
 }
 
-export default function AsignacionesView({ malla, asignacionesData, onSave, cursandoData, onSaveCursando, calendarioData, onSaveCalendario, semestre }) {
+export default function AsignacionesView({ malla, asignacionesData, onSave, cursandoData, onSaveCursando, calendarioData, onSaveCalendario }) {
   const [filterTipo, setFilterTipo] = useState("todos");
   const [filterMateria, setFilterMateria] = useState("todas");
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState(null);
   const [showCompleted, setShowCompleted] = useState(true);
   const [showCalendar, setShowCalendar] = useState(false);
-
-  const anioSemestre = semesterDatesFor(semestre).start.getFullYear();
-  const corteSemestre = semesterCorteFor(semestre);
 
   const items = asignacionesData?.items || [];
   const allMaterias = malla.flatMap(s => s.materias);
@@ -284,11 +268,11 @@ export default function AsignacionesView({ malla, asignacionesData, onSave, curs
   const completedCount = completedItems.length;
 
   const handleAdd = (newItem) => {
-    const { diaExamen, mesExamen, diaEntrega, mesEntrega, diaFinEx, mesFinEx, diaFinEn, mesFinEn, ...rest } = newItem;
-    const fechaExamen = toISODate(anioSemestre, diaExamen, mesExamen);
-    const fechaEntrega = toISODate(anioSemestre, diaEntrega, mesEntrega);
+    const rest = newItem;
+    const fechaExamen = rest.fechaExamen || "";
+    const fechaEntrega = rest.fechaEntrega || "";
     const isEx = rest.tipo === "examen" || rest.tipo === "quiz";
-    const fechaFin = toISODate(anioSemestre, isEx ? diaFinEx : diaFinEn, isEx ? mesFinEx : mesFinEn);
+    const fechaFin = rest.fechaFin || "";
     const created = { ...rest, id: uuid(), temas: rest.temas || [], completada: false, fechaExamen, fechaEntrega, fechaFin };
     const evts = calendarioData?.eventos || [];
     const fecha = isEx ? fechaExamen : fechaEntrega;
@@ -297,7 +281,7 @@ export default function AsignacionesView({ malla, asignacionesData, onSave, curs
       const calEvent = {
         id: uuid(), tipo: rest.tipo, fecha, hora,
         materiaId: rest.materiaId || "", lugar: rest.lugar || "",
-        descripcion: rest.descripcion || "", fechaFin,
+        fechaFin,
         recordatorio: rest.recordatorio ?? 1, notificar: true,
         assignmentId: created.id,
       };
@@ -318,7 +302,7 @@ export default function AsignacionesView({ malla, asignacionesData, onSave, curs
     if (updated.calendarId) {
       if (fecha) {
         newEvts = evts.map(ev => ev.id === updated.calendarId
-          ? { ...ev, tipo: updated.tipo, fecha, hora, titulo: updated.titulo, materiaId: updated.materiaId, lugar: updated.lugar, descripcion: updated.descripcion, esBinas: updated.esBinas, corteIdx: updated.corteIdx, temas: updated.temas, fechaFin: updated.fechaFin, recordatorio: updated.recordatorio ?? 1, notificar: updated.completada ? false : ev.notificar }
+          ? { ...ev, tipo: updated.tipo, fecha, hora, titulo: updated.titulo, materiaId: updated.materiaId, lugar: updated.lugar, corteIdx: updated.corteIdx, temas: updated.temas, fechaFin: updated.fechaFin, recordatorio: updated.recordatorio ?? 1, notificar: updated.completada ? false : ev.notificar }
           : ev);
       } else {
         newEvts = evts.filter(ev => ev.id !== updated.calendarId);
@@ -328,7 +312,6 @@ export default function AsignacionesView({ malla, asignacionesData, onSave, curs
       const calEvent = {
         id: uuid(), tipo: updated.tipo, fecha, hora,
         materiaId: updated.materiaId || "", lugar: updated.lugar || "",
-        descripcion: updated.descripcion || "", esBinas: updated.esBinas,
         corteIdx: updated.corteIdx, temas: updated.temas, fechaFin: updated.fechaFin,
         recordatorio: updated.recordatorio ?? 1, notificar: true,
         assignmentId: updated.id,
@@ -341,12 +324,14 @@ export default function AsignacionesView({ malla, asignacionesData, onSave, curs
   };
 
   const handleEdit = (newItem, original) => {
-    const { diaExamen, mesExamen, diaEntrega, mesEntrega, diaFinEx, mesFinEx, diaFinEn, mesFinEn, ...rest } = newItem;
-    const fechaExamen = toISODate(anioSemestre, diaExamen, mesExamen);
-    const fechaEntrega = toISODate(anioSemestre, diaEntrega, mesEntrega);
-    const isEx = rest.tipo === "examen" || rest.tipo === "quiz";
-    const fechaFin = toISODate(anioSemestre, isEx ? diaFinEx : diaFinEn, isEx ? mesFinEx : mesFinEn);
-    const updated = { ...original, ...rest, fechaExamen, fechaEntrega, fechaFin, temas: rest.temas || [] };
+    const updated = {
+      ...original,
+      ...newItem,
+      fechaExamen: newItem.fechaExamen || "",
+      fechaEntrega: newItem.fechaEntrega || "",
+      fechaFin: newItem.fechaFin || "",
+      temas: newItem.temas || [],
+    };
     handleUpdate(updated);
     setShowModal(false);
     setEditing(null);
@@ -490,9 +475,8 @@ export default function AsignacionesView({ malla, asignacionesData, onSave, curs
           onClose={() => { setShowModal(false); setEditing(null); }}
           onSave={editing ? (form) => handleEdit(form, editing) : handleAdd}
           materias={cursandoMaterias}
+          selectedMateriaId={filterMateria === "todas" ? "" : filterMateria}
           cortesData={cursandoData}
-          anioSemestre={anioSemestre}
-          corteSemestre={corteSemestre}
           initial={editing}
         />
       )}
@@ -502,28 +486,22 @@ export default function AsignacionesView({ malla, asignacionesData, onSave, curs
   );
 }
 
-function AddModal({ onClose, onSave, materias, cortesData, anioSemestre, corteSemestre, initial }) {
+function AddModal({ onClose, onSave, materias, selectedMateriaId, cortesData, initial }) {
   useBodyScrollLock();
-  const fechaEx = initial?.fechaExamen ? initial.fechaExamen.split("-") : [];
-  const fechaEn = initial?.fechaEntrega ? initial.fechaEntrega.split("-") : [];
-  const fechaFin = initial?.fechaFin ? initial.fechaFin.split("-") : [];
   const hasRangoInitial = !!(initial?.fechaFin);
   const [form, setForm] = useState(initial ? {
     tipo: initial.tipo || "examen", titulo: initial.titulo || "", materiaId: initial.materiaId || "",
-    diaExamen: fechaEx[2] || "", mesExamen: fechaEx[1] || "", horaExamen: initial.horaExamen || "",
-    diaEntrega: fechaEn[2] || "", mesEntrega: fechaEn[1] || "", horaEntrega: initial.horaEntrega || "",
-    diaFinEx: initial.tipo === "examen" || initial.tipo === "quiz" ? (fechaFin[2] || "") : "",
-    mesFinEx: initial.tipo === "examen" || initial.tipo === "quiz" ? (fechaFin[1] || "") : "",
-    diaFinEn: initial.tipo !== "examen" && initial.tipo !== "quiz" ? (fechaFin[2] || "") : "",
-    mesFinEn: initial.tipo !== "examen" && initial.tipo !== "quiz" ? (fechaFin[1] || "") : "",
-    lugar: initial.lugar || "", descripcion: initial.descripcion || "", valoracion: initial.valoracion ?? "", esBinas: !!initial.esBinas,
+    fechaExamen: initial.fechaExamen || "", horaExamen: initial.horaExamen || "",
+    fechaEntrega: initial.fechaEntrega || "", horaEntrega: initial.horaEntrega || "",
+    fechaFin: initial.fechaFin || "",
+    lugar: initial.lugar || "", valoracion: initial.valoracion ?? "",
     corteIdx: initial.corteIdx ?? 0, temas: initial.temas || [], recordatorio: initial.recordatorio ?? 1,
   } : {
-    tipo: "examen", titulo: "", materiaId: "",
-    diaExamen: "", mesExamen: "", horaExamen: "",
-    diaEntrega: "", mesEntrega: "", horaEntrega: "",
-    diaFinEx: "", mesFinEx: "", diaFinEn: "", mesFinEn: "",
-    lugar: "", descripcion: "", valoracion: "", esBinas: false,
+    tipo: "examen", titulo: "", materiaId: selectedMateriaId || "",
+    fechaExamen: "", horaExamen: "",
+    fechaEntrega: "", horaEntrega: "",
+    fechaFin: "",
+    lugar: "", valoracion: "",
     corteIdx: 0, temas: [], recordatorio: 1,
   });
   const [usarRango, setUsarRango] = useState(hasRangoInitial);
@@ -545,8 +523,7 @@ function AddModal({ onClose, onSave, materias, cortesData, anioSemestre, corteSe
   const removeTema = (i) => update("temas", form.temas.filter((_, idx) => idx !== i));
 
   const fechaLabel = isExamenQuiz ? "Fecha de evaluación" : "Fecha de entrega";
-  const diaRango = isExamenQuiz ? "diaFinEx" : "diaFinEn";
-  const mesRango = isExamenQuiz ? "mesFinEx" : "mesFinEn";
+  const fechaField = isExamenQuiz ? "fechaExamen" : "fechaEntrega";
 
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
@@ -586,19 +563,12 @@ function AddModal({ onClose, onSave, materias, cortesData, anioSemestre, corteSe
           <div className={styles.formRow2}>
             <div className={styles.formField}>
               <label>{usarRango ? `${fechaLabel} — Inicio` : fechaLabel}</label>
-              <div className={styles.dateRow}>
-                <select className={styles.select} value={isExamenQuiz ? form.diaExamen : form.diaEntrega}
-                  onChange={e => update(isExamenQuiz ? "diaExamen" : "diaEntrega", e.target.value)}>
-                  <option value="">Día</option>
-                  {DIAS.map(d => <option key={d} value={d}>{d}</option>)}
-                </select>
-                <select className={styles.select} value={isExamenQuiz ? form.mesExamen : form.mesEntrega}
-                  onChange={e => update(isExamenQuiz ? "mesExamen" : "mesEntrega", e.target.value)}>
-                  <option value="">Mes</option>
-                  {MESES_CORTOS.filter(Boolean).map((m, i) => <option key={i + 1} value={i + 1}>{m}</option>)}
-                </select>
-              </div>
-              <span className={styles.formHint}>Año {anioSemestre} · semestre {corteSemestre}</span>
+              <input type="date" className={`${styles.textInput} ${styles.dateInput}`}
+                value={form[fechaField]} onChange={e => {
+                  update(fechaField, e.target.value);
+                  if (form.fechaFin && e.target.value && form.fechaFin < e.target.value) update("fechaFin", "");
+                }} />
+              <span className={styles.formHint}>Selecciona la fecha desde el calendario</span>
             </div>
             <div className={styles.formField}>
               <label>Hora</label>
@@ -613,24 +583,19 @@ function AddModal({ onClose, onSave, materias, cortesData, anioSemestre, corteSe
           {usarRango && (
             <div className={styles.formField}>
               <label>{fechaLabel} — Fin</label>
-              <div className={styles.dateRow}>
-                <select className={styles.select} value={form[diaRango]} onChange={e => update(diaRango, e.target.value)}>
-                  <option value="">Día</option>
-                  {DIAS.map(d => <option key={d} value={d}>{d}</option>)}
-                </select>
-                <select className={styles.select} value={form[mesRango]} onChange={e => update(mesRango, e.target.value)}>
-                  <option value="">Mes</option>
-                  {MESES_CORTOS.filter(Boolean).map((m, i) => <option key={i + 1} value={i + 1}>{m}</option>)}
-                </select>
-              </div>
-              <span className={styles.formHint}>Año {anioSemestre}</span>
+              <input type="date" className={`${styles.textInput} ${styles.dateInput}`}
+                value={form.fechaFin} min={form[fechaField] || undefined}
+                onChange={e => update("fechaFin", e.target.value)} />
             </div>
           )}
 
-          <span className={styles.formHint} role="button" style={{ cursor: "pointer", userSelect: "none" }}
-            onClick={() => setUsarRango(v => !v)}>
+          <button type="button" className={styles.rangeToggle}
+            onClick={() => {
+              setUsarRango(value => !value);
+              if (usarRango) update("fechaFin", "");
+            }}>
             {usarRango ? "Usar fecha única" : "¿Rango de fechas?"}
-          </span>
+          </button>
 
           <div className={styles.formRow2}>
             <div className={styles.formField}>
@@ -638,15 +603,6 @@ function AddModal({ onClose, onSave, materias, cortesData, anioSemestre, corteSe
               <input type="number" min={1} className={styles.textInput}
                 value={form.valoracion} placeholder="100" onChange={e => update("valoracion", e.target.value)} />
             </div>
-            {isExamenQuiz && (
-              <div className={styles.formField}>
-                <label>En binas</label>
-                <button className={`${styles.toggleBtn} ${form.esBinas ? styles.toggleBtnOn : ""}`}
-                  onClick={() => update("esBinas", !form.esBinas)}>
-                  {form.esBinas ? "Sí" : "No"}
-                </button>
-              </div>
-            )}
           </div>
 
           <div className={styles.formField}>
@@ -678,13 +634,6 @@ function AddModal({ onClose, onSave, materias, cortesData, anioSemestre, corteSe
               </div>
             </div>
           )}
-
-          <div className={styles.formField}>
-            <label>Descripción</label>
-            <textarea className={styles.textarea} value={form.descripcion}
-              placeholder="Detalles..." rows={3}
-              onChange={e => update("descripcion", e.target.value)} />
-          </div>
 
           <div className={styles.formField}>
             <label>Lugar (opcional)</label>

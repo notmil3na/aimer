@@ -42,7 +42,7 @@
   padding: 8px 12px;
   color: var(--text-muted);
 }
-.searchRow:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.12); }
+.searchRow:focus-within { border-color: var(--accent-border); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.12); }
 .searchInput {
   flex: 1;
   min-width: 0;
@@ -107,7 +107,7 @@
   -webkit-tap-highlight-color: transparent;
 }
 .friendsBtn:hover {
-  border-color: var(--accent);
+  border-color: var(--accent-border);
   background: color-mix(in srgb, var(--accent) 10%, var(--surface));
 }
 .friendsBtn:active { transform: scale(0.94); }
@@ -145,7 +145,7 @@
   cursor: pointer;
 }
 .chatEmptyBtn:hover {
-  border-color: var(--accent);
+  border-color: var(--accent-border);
   background: color-mix(in srgb, var(--accent) 8%, var(--surface));
 }
 
@@ -361,7 +361,7 @@
   height: 16px;
   border-radius: 50%;
   border: 2px solid var(--border);
-  border-top-color: var(--accent);
+  border-top-color: var(--accent-border);
   animation: chatSpin 0.8s linear infinite;
   display: inline-block;
   flex-shrink: 0;
@@ -395,7 +395,7 @@
   transition: all 0.15s;
   flex-shrink: 0;
 }
-.threadBack:hover { border-color: var(--accent); color: var(--accent-text); }
+.threadBack:hover { border-color: var(--accent-border); color: var(--accent-text); }
 
 .threadHeadInfo { display: flex; flex-direction: column; gap: 1px; min-width: 0; flex: 1; }
 .threadName {
@@ -422,8 +422,8 @@
   transition: all 0.15s;
   flex-shrink: 0;
 }
-.infoToggle:hover { border-color: var(--accent); color: var(--accent-text); }
-.infoToggleOn { border-color: var(--accent); color: var(--accent-text); background: rgba(var(--accent-rgb), 0.12); }
+.infoToggle:hover { border-color: var(--accent-border); color: var(--accent-text); }
+.infoToggleOn { border-color: var(--accent-border); color: var(--accent-text); background: rgba(var(--accent-rgb), 0.12); }
 
 
 .threadBody {
@@ -693,7 +693,7 @@
   line-height: 1.4;
   outline: none;
 }
-.composerInput:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.1); }
+.composerInput:focus { border-color: var(--accent-border); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.1); }
 
 .sendBtn {
   display: flex;
@@ -726,7 +726,7 @@
   transition: all 0.15s;
   flex-shrink: 0;
 }
-.paperclip:hover { border-color: var(--accent); color: var(--accent-text); }
+.paperclip:hover { border-color: var(--accent-border); color: var(--accent-text); }
 .paperclip:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .busyDot {
@@ -734,7 +734,7 @@
   height: 13px;
   border-radius: 50%;
   border: 2px solid var(--border);
-  border-top-color: var(--accent);
+  border-top-color: var(--accent-border);
   animation: chatSpin 0.7s linear infinite;
 }
 
@@ -817,7 +817,7 @@
 }
 .shareTabActive {
   background: rgba(var(--accent-rgb), 0.16);
-  border-color: var(--accent);
+  border-color: var(--accent-border);
   color: var(--text);
 }
 
@@ -861,7 +861,7 @@
 .pickItem:hover { background: var(--surface2); }
 .pickItemSel {
   background: rgba(var(--accent-rgb), 0.14);
-  border-color: var(--accent);
+  border-color: var(--accent-border);
 }
 .pickItemTxt {
   font-size: 12.5px;
@@ -923,7 +923,7 @@
   cursor: pointer;
   transition: all 0.12s;
 }
-.shareFileBtn:hover { border-color: var(--accent); color: var(--accent-text); }
+.shareFileBtn:hover { border-color: var(--accent-border); color: var(--accent-text); }
 .shareFileBtn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 
@@ -979,7 +979,7 @@
   color: var(--text-muted);
   cursor: pointer;
 }
-.infoClose:hover { border-color: var(--accent); color: var(--accent-text); }
+.infoClose:hover { border-color: var(--accent-border); color: var(--accent-text); }
 
 .infoSection {
   display: flex;

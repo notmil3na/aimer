@@ -10,10 +10,9 @@ import "./AnimatedFace.css";
 export default function AnimatedFace({ className }) {
   return (
     <svg
-      className={className}
+      className={["afRoot", className].filter(Boolean).join(" ")}
       viewBox="0 26 512 512"
-      role="img"
-      aria-label="Carita animada que parpadea y mira a los lados"
+      aria-hidden="true"
       focusable="false"
     >
       <defs>
@@ -98,6 +97,7 @@ export default function AnimatedFace({ className }) {
         strokeWidth="84"
         strokeLinejoin="round"
         opacity=".9"
+        className="afGlow"
         filter="url(#afBWide)"
       />
       <use
@@ -107,6 +107,7 @@ export default function AnimatedFace({ className }) {
         strokeWidth="34"
         strokeLinejoin="round"
         opacity=".95"
+        className="afGlow"
         filter="url(#afBMid)"
       />
       <use
@@ -114,6 +115,7 @@ export default function AnimatedFace({ className }) {
         fill="url(#afHalo)"
         opacity=".92"
         transform="translate(-5 -31) scale(1.02 1)"
+        className="afGlow"
         filter="url(#afBHalo)"
       />
       <use
@@ -123,6 +125,7 @@ export default function AnimatedFace({ className }) {
         strokeWidth="10"
         strokeLinejoin="round"
         opacity=".55"
+        className="afGlow"
         filter="url(#afBHalo)"
       />
 
@@ -209,7 +212,7 @@ export default function AnimatedFace({ className }) {
       </g>
 
       {/* grano sutil, como el original */}
-      <rect x="-96" y="-96" width="704" height="704" filter="url(#afGrain)" opacity=".5" />
+      <rect x="-96" y="-96" width="704" height="704" className="afGrain" filter="url(#afGrain)" opacity=".5" />
     </svg>
   );
 }
