@@ -4,7 +4,7 @@ import AvailableFriends from "./AvailableFriends";
 import useFriendAvailability from "../hooks/useFriendAvailability";
 import useMediaQuery from "../hooks/useMediaQuery";
 import {
-  IconSend, IconPaperclip, IconArrowLeft, IconDownload, IconEye,
+  IconSend, IconPaperclip, IconArrowLeft, IconDownload,
   IconClipboard, IconImage, IconUser, IconSparkle, IconCheck, IconClose, IconSearch,
   IconPin, IconEraser, IconTrash, IconUserPlus,
 } from "./Icons";
@@ -320,10 +320,10 @@ function MessageBubble({ msg, mine, sender, onAddAssignment, onAddNote }) {
             <button
               type="button"
               className={styles.fileOpen}
-              onClick={() => openAttachment(att)}
+              onClick={() => downloadAttachment(att)}
               disabled={!att.url}
-              title={att.url ? `Ver ${att.file_name || "archivo"}` : "Archivo no disponible"}
-              aria-label={att.url ? `Ver ${att.file_name || "archivo"}` : "Archivo no disponible"}
+              title={att.url ? `Descargar ${att.file_name || "archivo"}` : "Archivo no disponible"}
+              aria-label={att.url ? `Descargar ${att.file_name || "archivo"}` : "Archivo no disponible"}
             >
               <span className={styles.fileIcon}><IconPaperclip size={15} /></span>
               <span className={styles.fileInfo}>
@@ -333,19 +333,8 @@ function MessageBubble({ msg, mine, sender, onAddAssignment, onAddNote }) {
                   {att.file_size ? ` · ${(att.file_size / 1024).toFixed(0)} KB` : ""}
                 </span>
               </span>
-              <IconEye size={14} className={styles.fileViewIcon} />
+              <IconDownload size={14} className={styles.fileActionIcon} />
             </button>
-            {att.url && (
-              <button
-                type="button"
-                className={styles.fileDlBtn}
-                onClick={() => downloadAttachment(att)}
-                title={`Descargar ${att.file_name || "archivo"}`}
-                aria-label={`Descargar ${att.file_name || "archivo"}`}
-              >
-                <IconDownload size={15} />
-              </button>
-            )}
           </div>
         )}
 

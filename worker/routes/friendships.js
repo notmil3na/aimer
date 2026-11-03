@@ -599,10 +599,16 @@ export async function handler(c) {
 
     if (action === "request") {
       try {
+        const target = await db
+          .prepare("SELECT username FROM users WHERE username = ?")
+          .bind(other)
+          .first();
+        if (!target) return json(c, 404, { error: "No se encontró el usuario" });
+
         await db
           .prepare(
             "INSERT INTO friendships (user_username, friend_username, status, requested_by, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?) " +
-              "ON CONFLICT(user_username, friend_username) DO UPDATE SET status = excluded.status, requested_by = excluded.requested_by, updated_at = excluded.updated_at"
+              "ON CONFLICT(user_username, friend_username) DO NOTHING"
           )
           .bind(a, b, "pendiente", username, nowISO(), nowISO())
           .run();
@@ -614,10 +620,16 @@ export async function handler(c) {
 
     if (action === "accept") {
       try {
-        await db
-          .prepare("UPDATE friendships SET status = ?, updated_at = ? WHERE user_username = ? AND friend_username = ?")
-          .bind("aceptado", nowISO(), a, b)
+        const result = await db
+          .prepare(
+            "UPDATE friendships SET status = ?, updated_at = ? " +
+              "WHERE user_username = ? AND friend_username = ? AND status = ? AND requested_by = ?"
+          )
+          .bind("aceptado", nowISO(), a, b, "pendiente", other)
           .run();
+        if (!result.meta?.changes) {
+          return json(c, 409, { error: "No hay una solicitud pendiente para aceptar" });
+        }
         return json(c, 200, { ok: true });
       } catch (e) {
         return json(c, 500, { error: "No se pudo aceptar la solicitud" });
