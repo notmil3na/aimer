@@ -175,11 +175,9 @@ async function handleChatList(db, me) {
   if (convIds.length === 0) return { data: [] };
   const ph = convIds.map(() => "?").join(",");
 
-  const clearedByConv = {};
   const hiddenByConv = {};
   const pinnedByConv = {};
   for (const c of myConvs) {
-    if (c.cleared_at) clearedByConv[c.conversation_id] = new Date(c.cleared_at).getTime();
     if (c.hidden_at) hiddenByConv[c.conversation_id] = new Date(c.hidden_at).getTime();
     pinnedByConv[c.conversation_id] = !!c.pinned_at;
   }
@@ -203,22 +201,50 @@ async function handleChatList(db, me) {
     partnerUsernames.push(m.username);
   });
 
-  const msgRows = await db
-    .prepare(`SELECT id, conversation_id, sender, message_type, content, read, created_at FROM messages WHERE conversation_id IN (${ph}) ORDER BY created_at DESC`)
-    .bind(...convIds)
-    .all();
-
   const lastByConv = {};
   const unreadByConv = {};
   const visibleAfterHidden = new Set();
+  const msgRows = await db
+    .prepare(`WITH my_conversations AS (
+      SELECT conversation_id, cleared_at, hidden_at
+      FROM conversation_members
+      WHERE username = ? AND conversation_id IN (${ph})
+    ),
+    message_stats AS (
+      SELECT cm.conversation_id, cm.cleared_at,
+        MAX(m.created_at) AS last_created_at,
+        MAX(CASE WHEN cm.hidden_at IS NOT NULL AND m.created_at > cm.hidden_at THEN 1 ELSE 0 END) AS visible_after_hidden
+      FROM my_conversations cm
+      LEFT JOIN messages m ON m.conversation_id = cm.conversation_id
+        AND (cm.cleared_at IS NULL OR m.created_at > cm.cleared_at)
+      GROUP BY cm.conversation_id, cm.cleared_at
+    ),
+    unread_stats AS (
+      SELECT cm.conversation_id, COUNT(*) AS unread_count
+      FROM my_conversations cm
+      JOIN messages m ON m.conversation_id = cm.conversation_id
+      WHERE m.read = 0 AND m.sender != ?
+        AND (cm.cleared_at IS NULL OR m.created_at > cm.cleared_at)
+      GROUP BY cm.conversation_id
+    )
+    SELECT m.id, stats.conversation_id, m.sender, m.message_type, m.content, m.read, m.created_at,
+      COALESCE(unread_stats.unread_count, 0) AS unread_count, stats.visible_after_hidden
+    FROM message_stats stats
+    LEFT JOIN unread_stats ON unread_stats.conversation_id = stats.conversation_id
+    LEFT JOIN messages m ON m.id = (
+      SELECT latest.id FROM messages latest
+      WHERE latest.conversation_id = stats.conversation_id
+        AND latest.created_at = stats.last_created_at
+      ORDER BY latest.id
+      LIMIT 1
+    )`)
+    .bind(me, ...convIds, me)
+    .all();
+
   for (const m of msgRows.results || []) {
-    const createdMs = new Date(m.created_at).getTime();
-    const clearedMs = clearedByConv[m.conversation_id];
-    if (clearedMs && createdMs <= clearedMs) continue;
-    const hiddenMs = hiddenByConv[m.conversation_id];
-    if (hiddenMs && createdMs > hiddenMs) visibleAfterHidden.add(m.conversation_id);
-    if (lastByConv[m.conversation_id] === undefined) lastByConv[m.conversation_id] = m;
-    if (m.sender !== me && !m.read) unreadByConv[m.conversation_id] = (unreadByConv[m.conversation_id] || 0) + 1;
+    if (m.id) lastByConv[m.conversation_id] = m;
+    unreadByConv[m.conversation_id] = m.unread_count || 0;
+    if (m.visible_after_hidden) visibleAfterHidden.add(m.conversation_id);
   }
 
   const info = await usersInfo(db, partnerUsernames);
