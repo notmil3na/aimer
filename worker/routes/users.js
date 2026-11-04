@@ -1,5 +1,6 @@
-import { envReady, json, readBody, requireUser, toUserRow, vreq } from "../lib.js";
+import { envReady, json, readBody, requireUser, toUserRow, vreq, getClientIP, normalizePhoto } from "../lib.js";
 import { jstringify, all, unwrapJSON } from "../db.js";
+import { checkAndIncrement } from "../rate-limit.js";
 
 const USERNAME_RE = /^[a-zA-Z0-9._-]{2,20}$/;
 
@@ -13,6 +14,9 @@ function limpio(rows) {
   return (rows || []).map(({ photo, ...rest }) => ({ ...rest, hasPhoto: !!photo }));
 }
 
+// 20 comprobaciones por IP en 1 min → bloqueo 5 min.
+const CHECK_IP_LIMIT = { maxAttempts: 20, windowSec: 60, lockoutSec: 300 };
+
 export async function handler(c) {
   const req = vreq(c);
   if (!envReady(c.env)) return json(c, 500, { error: "Configuración del servidor incompleta" });
@@ -24,6 +28,18 @@ export async function handler(c) {
     const check = url.searchParams.get("check");
     if (check) {
       if (!USERNAME_RE.test(check)) return json(c, 200, { available: false });
+
+      // Rate limiting: evitar enumeración masiva de usuarios
+      const ip = getClientIP(c);
+      try {
+        const ipCheck = await checkAndIncrement(db, `check-ip:${ip}`, CHECK_IP_LIMIT);
+        if (!ipCheck.allowed) {
+          return json(c, 429, { error: "Demasiados intentos", retryAfter: ipCheck.retryAfter });
+        }
+      } catch (e) {
+        console.error("rate-limit check failed (users?check)", e);
+      }
+
       const row = await db.prepare("SELECT username FROM users WHERE username = ?").bind(check).first();
       return json(c, 200, { available: !row });
     }
@@ -68,6 +84,13 @@ export async function handler(c) {
     const me = await requireUser(c);
     if (!me) return json(c, 401, { error: "Sesión inválida" });
     const body = await readBody(c);
+    if (body.photo !== undefined && body.photo !== null && body.photo !== "") {
+      if (!normalizePhoto(body.photo)) {
+        return json(c, 400, {
+          error: "La foto debe ser una imagen PNG, JPEG, WebP o GIF de menos de 200 KB",
+        });
+      }
+    }
     const patch = toUserRow(body);
     if (Object.keys(patch).length === 0) return json(c, 400, { error: "Sin cambios" });
     if (patch.theme_colors !== undefined && patch.theme_colors !== null) {

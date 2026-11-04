@@ -1,4 +1,4 @@
-import { envReady, json, requireUser, vreq } from "../lib.js";
+import { envReady, json, MAX_PHOTO_READ_CHARS, normalizePhoto, requireUser, vreq } from "../lib.js";
 
 export async function handler(c) {
   const req = vreq(c);
@@ -11,5 +11,7 @@ export async function handler(c) {
   if (!username) return json(c, 400, { error: "Falta el usuario" });
 
   const data = await c.env.DB.prepare("SELECT photo FROM users WHERE username = ?").bind(username).first();
-  return json(c, 200, { photo: (data && data.photo) || null });
+  // Normalizar también al leer: las fotos guardadas antes de esta validación
+  // no deben llegar al cliente si no son una data URL de imagen válida.
+  return json(c, 200, { photo: normalizePhoto(data && data.photo, MAX_PHOTO_READ_CHARS) });
 }

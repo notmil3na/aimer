@@ -2,8 +2,8 @@
 // son rutas públicas pero protegidas por un enlace firmado (ver signPath en lib.js),
 // porque las etiquetas <img>/fetch del navegador no envían el Authorization.
 import { json, verifyPath } from "../lib.js";
+import { MAX_FILE_BYTES, MAX_USER_STORAGE_BYTES, usedStorageBytes } from "../chat-storage.js";
 
-const MAX_FILE_BYTES = 8 * 1024 * 1024;
 const INLINE_IMAGE_TYPES = new Set(["image/png", "image/jpeg", "image/webp", "image/gif"]);
 
 function detectContentType(bytes) {
@@ -78,13 +78,39 @@ export async function uploadHandler(c) {
   if (!path.startsWith("chat/")) return json(c, 400, { error: "Ruta inválida" });
   if (!(await verifyPath(c.env, path, token))) return json(c, 403, { error: "Enlace inválido o vencido" });
 
+  // La ruta debe corresponder a una subida registrada al pedir el enlace. Así
+  // el token no sirve para escribir objetos arbitrarios y una subida ya
+  // enviada no puede reemplazar el adjunto de un mensaje existente.
+  const upload = await c.env.DB
+    .prepare("SELECT username, consumed_at, declared_size, actual_size FROM chat_uploads WHERE path = ?")
+    .bind(path)
+    .first();
+  if (!upload) return json(c, 403, { error: "Subida no autorizada" });
+  if (upload.consumed_at) return json(c, 409, { error: "El adjunto ya fue enviado" });
+
+  // Content-Length solo se usa como rechazo rápido. El cuerpo se lee acotado
+  // igualmente, de modo que un envío chunked sin longitud no puede colarse.
   const cl = Number(c.req.header("content-length") || 0);
-  if (cl > MAX_FILE_BYTES) return json(c, 413, { error: "El archivo supera el límite de 8 MB" });
+  if (Number.isFinite(cl) && cl > MAX_FILE_BYTES) {
+    return json(c, 413, { error: "El archivo supera el límite de 8 MB" });
+  }
 
   const bytes = await readBoundedBody(c.req.raw.body, MAX_FILE_BYTES);
   if (!bytes) return json(c, 413, { error: "El archivo supera el límite de 8 MB" });
+  if (bytes.byteLength === 0) return json(c, 400, { error: "El archivo está vacío" });
+
+  const used = await usedStorageBytes(c.env.DB, upload.username);
+  const previous = Number(upload.actual_size ?? upload.declared_size) || 0;
+  if (used - previous + bytes.byteLength > MAX_USER_STORAGE_BYTES) {
+    return json(c, 413, { error: "Has alcanzado el límite de almacenamiento de adjuntos" });
+  }
+
   const type = detectContentType(bytes);
   await c.env.R2_BUCKET.put(path, bytes, { httpMetadata: { contentType: type } });
+  await c.env.DB
+    .prepare("UPDATE chat_uploads SET actual_size = ? WHERE path = ? AND consumed_at IS NULL")
+    .bind(bytes.byteLength, path)
+    .run();
   return json(c, 200, { ok: true });
 }
 

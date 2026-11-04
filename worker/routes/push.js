@@ -1,11 +1,13 @@
 import { sendNotification } from "web-push-neo";
 import { envReady, json, readBody, requireUser, vreq } from "../lib.js";
-import { jparse, jstringify } from "../db.js";
+import { jparse, jstringify, uuid, nowISO } from "../db.js";
 
 const MAX_SENT_KEYS = 200;
+const MAX_SUBS_PER_USER = 5; // Tope máximo de suscripciones push por usuario
 const BOGOTA_OFFSET_MS = 5 * 60 * 60 * 1000;
 const DAY_MS = 86400000;
 const DEFAULT_REMINDER = 1;
+const MAX_SUBREQUESTS = 45; // Límite seguro para Cloudflare Workers (50 máx)
 
 const TIPO_LABEL = {
   examen: "Examen", quiz: "Quiz", tarea: "Tarea",
@@ -14,9 +16,54 @@ const TIPO_LABEL = {
   fin_semestre: "Fin de semestre",
 };
 
+/**
+ * Valida que el endpoint de notificación pertenezca a la lista blanca de proveedores
+ * legítimos de Web Push para evitar SSRF, abuso saliente y llamadas a hosts no autorizados.
+ */
+export function isValidPushEndpoint(endpoint) {
+  if (!endpoint || typeof endpoint !== "string" || endpoint.length > 1000) return false;
+  let url;
+  try {
+    url = new URL(endpoint);
+  } catch {
+    return false;
+  }
+
+  // Requiere estrictamente protocolo HTTPS y sin credenciales en la URL
+  if (url.protocol !== "https:" || url.username || url.password) return false;
+
+  const h = url.hostname.toLowerCase();
+
+  // Lista blanca de proveedores oficiales de Web Push
+  const ALLOWED_EXACT = new Set([
+    "fcm.googleapis.com",
+    "push.services.mozilla.com",
+    "push.apple.com",
+    "notify.windows.com",
+  ]);
+  if (ALLOWED_EXACT.has(h)) return true;
+
+  const ALLOWED_SUFFIXES = [
+    ".push.services.mozilla.com",
+    ".push.apple.com",
+    ".notify.windows.com",
+  ];
+  return ALLOWED_SUFFIXES.some((s) => h.endsWith(s));
+}
+
+export function isValidSubscription(sub) {
+  if (!sub || typeof sub !== "object") return false;
+  if (!isValidPushEndpoint(sub.endpoint)) return false;
+  if (!sub.keys || typeof sub.keys !== "object") return false;
+  const { p256dh, auth } = sub.keys;
+  if (typeof p256dh !== "string" || p256dh.length < 20 || p256dh.length > 250) return false;
+  if (typeof auth !== "string" || auth.length < 10 || auth.length > 100) return false;
+  return true;
+}
+
 function normalizePush(raw) {
   return {
-    subs: Array.isArray(raw?.subs) ? raw.subs : [],
+    subs: Array.isArray(raw?.subs) ? raw.subs.filter(isValidSubscription).slice(-MAX_SUBS_PER_USER) : [],
     sentKeys: Array.isArray(raw?.sentKeys) ? raw.sentKeys : [],
   };
 }
@@ -65,7 +112,7 @@ function dueFrom(item, fecha, now) {
 function computeDue(row, now) {
   const out = [];
   const seen = new Set();
-  const syncedIds = new Set((row?.calendario?.eventos || []).map(ev => ev.assignmentId).filter(Boolean));
+  const syncedIds = new Set((row?.calendario?.eventos || []).map((ev) => ev.assignmentId).filter(Boolean));
   for (const it of row?.asignaciones?.items || []) {
     if (it.completada || it.calendarId || syncedIds.has(it.id)) continue;
     const fecha =
@@ -91,6 +138,9 @@ function vapidFor(env) {
 
 // envía un push y nunca lanza: devuelve { ok } o { ok:false, code }
 function trySend(env, sub, payload, ttl) {
+  if (!isValidSubscription(sub)) {
+    return Promise.resolve({ ok: false, code: 400 });
+  }
   return sendNotification(sub, payload, { TTL: ttl, vapidDetails: vapidFor(env) }).then(
     () => ({ ok: true }),
     (err) => ({ ok: false, code: err && err.statusCode })
@@ -98,6 +148,64 @@ function trySend(env, sub, payload, ttl) {
 }
 
 const ignore = () => {};
+
+// Helpers para consultar y actualizar la tabla dedicada `push_subscriptions`
+async function getSubsForUser(db, username, fallbackSubs = []) {
+  try {
+    const r = await db
+      .prepare("SELECT subscription FROM push_subscriptions WHERE username = ?")
+      .bind(username)
+      .all();
+    if (r?.results && r.results.length > 0) {
+      const dbSubs = r.results
+        .map((row) => jparse(row.subscription))
+        .filter(isValidSubscription);
+      const map = new Map();
+      for (const s of fallbackSubs) if (isValidSubscription(s)) map.set(s.endpoint, s);
+      for (const s of dbSubs) if (isValidSubscription(s)) map.set(s.endpoint, s);
+      return Array.from(map.values()).slice(-MAX_SUBS_PER_USER);
+    }
+  } catch (_) {}
+  return fallbackSubs.filter(isValidSubscription).slice(-MAX_SUBS_PER_USER);
+}
+
+async function saveSubscriptionToTable(db, username, sub) {
+  if (!isValidSubscription(sub)) return;
+  const now = nowISO();
+  const id = uuid();
+  try {
+    await db
+      .prepare(
+        `INSERT INTO push_subscriptions (id, username, endpoint, subscription, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?)
+         ON CONFLICT (endpoint) DO UPDATE SET
+           username = excluded.username,
+           subscription = excluded.subscription,
+           updated_at = excluded.updated_at`
+      )
+      .bind(id, username, sub.endpoint, jstringify(sub), now, now)
+      .run();
+
+    // Mantener tope de 5 suscripciones por usuario en la tabla
+    const allUserSubs = await db
+      .prepare("SELECT id FROM push_subscriptions WHERE username = ? ORDER BY created_at ASC")
+      .bind(username)
+      .all();
+    if (allUserSubs?.results && allUserSubs.results.length > MAX_SUBS_PER_USER) {
+      const excess = allUserSubs.results.slice(0, allUserSubs.results.length - MAX_SUBS_PER_USER);
+      for (const row of excess) {
+        await db.prepare("DELETE FROM push_subscriptions WHERE id = ?").bind(row.id).run();
+      }
+    }
+  } catch (_) {}
+}
+
+async function removeSubscriptionFromTable(db, endpoint) {
+  if (!endpoint) return;
+  try {
+    await db.prepare("DELETE FROM push_subscriptions WHERE endpoint = ?").bind(endpoint).run();
+  } catch (_) {}
+}
 
 // lógica del cron. la usan tanto scheduled() (index.js) como la ruta manual.
 // devuelve { status, body } en vez de responder, para poder llamarla sin http.
@@ -109,20 +217,48 @@ export async function runCron(env, isTest = false) {
   const now = new Date(Date.now() - BOGOTA_OFFSET_MS);
   const db = env.DB;
 
-  const rRows = await db
-    .prepare("SELECT username, asignaciones, calendario, ajustes FROM user_data")
-    .all();
+  // Filtrar en SQL solo los usuarios con suscripciones push activas.
+  // Evita leer, deserializar y procesar toda la tabla user_data innecesariamente.
+  let rRows;
+  try {
+    rRows = await db
+      .prepare(
+        `SELECT u.username, u.asignaciones, u.calendario, u.ajustes
+         FROM user_data u
+         WHERE (
+           EXISTS (SELECT 1 FROM push_subscriptions ps WHERE ps.username = u.username)
+           OR (u.ajustes IS NOT NULL AND u.ajustes LIKE '%"endpoint"%')
+         )`
+      )
+      .all();
+  } catch (_) {
+    rRows = await db
+      .prepare(
+        `SELECT username, asignaciones, calendario, ajustes
+         FROM user_data
+         WHERE ajustes IS NOT NULL AND ajustes LIKE '%"endpoint"%'`
+      )
+      .all();
+  }
+
   if (rRows.error) return { status: 500, body: { error: "No se pudieron leer los datos" } };
   const rows = rRows.results || [];
 
   let sent = 0;
   let removedSubs = 0;
   let processed = 0;
+  let subrequestCount = 0;
 
   for (const row of rows || []) {
+    if (subrequestCount >= MAX_SUBREQUESTS) {
+      console.warn("Límite de subrequests alcanzado en este ciclo del cron");
+      break;
+    }
+
     const ajustes = row.ajustes && typeof row.ajustes === "object" ? row.ajustes : jparse(row.ajustes) || {};
     const push = normalizePush(ajustes.push);
-    if (push.subs.length === 0) continue;
+    const activeSubs = await getSubsForUser(db, row.username, push.subs);
+    if (activeSubs.length === 0) continue;
 
     if (isTest) {
       const payload = JSON.stringify({
@@ -131,17 +267,20 @@ export async function runCron(env, isTest = false) {
         tag: "aimer-test-" + Date.now(),
         url: "/",
       });
-      const results = await Promise.all(push.subs.map((sub) => trySend(env, sub, payload, 60)));
+      subrequestCount += activeSubs.length;
+      const results = await Promise.all(activeSubs.map((sub) => trySend(env, sub, payload, 60)));
       const liveSubs = [];
-      push.subs.forEach((sub, i) => {
+      for (let i = 0; i < activeSubs.length; i++) {
+        const sub = activeSubs[i];
         const r = results[i];
         if (r && !r.ok && (r.code === 404 || r.code === 410)) {
           removedSubs++;
+          await removeSubscriptionFromTable(db, sub.endpoint);
         } else {
           liveSubs.push(sub);
         }
-      });
-      if (liveSubs.length !== push.subs.length) {
+      }
+      if (liveSubs.length !== activeSubs.length) {
         ajustes.push = { subs: liveSubs, sentKeys: push.sentKeys };
         await db
           .prepare("UPDATE user_data SET ajustes = ? WHERE username = ?")
@@ -168,36 +307,60 @@ export async function runCron(env, isTest = false) {
     const fresh = due.filter((n) => !sentKeys.has(n.key));
     if (fresh.length === 0) continue;
 
-    const payload = JSON.stringify({
-      title: "Aimer · Recordatorio",
-      body: `${fresh[0].titulo} · ${fresh[0].fecha}${fresh[0].atrasado ? " (con retraso)" : ""}`,
-      tag: `aimer-${fresh[0].key}`,
-      url: "/",
-    });
+    // Notificar cada ítem pendiente (hasta 3 por día para no saturar).
+    // Si hay más, los restantes se notificarán en el siguiente ciclo sin perderse.
+    const toNotify = fresh.slice(0, 3);
+    let liveSubs = [...activeSubs];
+    let userSentCount = 0;
 
-    const results = await Promise.all(push.subs.map((sub) => trySend(env, sub, payload, 86400)));
+    for (const item of toNotify) {
+      if (liveSubs.length === 0) break;
+      if (subrequestCount + liveSubs.length > MAX_SUBREQUESTS) break;
 
-    const liveSubs = [];
-    push.subs.forEach((sub, i) => {
-      const r = results[i];
-      if (r && !r.ok && (r.code === 404 || r.code === 410)) {
-        removedSubs++;
-      } else {
-        liveSubs.push(sub);
+      const payload = JSON.stringify({
+        title: "Aimer · Recordatorio",
+        body: `${item.titulo} · ${item.fecha}${item.atrasado ? " (con retraso)" : ""}`,
+        tag: `aimer-${item.key}`,
+        url: "/",
+      });
+
+      subrequestCount += liveSubs.length;
+      const results = await Promise.all(liveSubs.map((sub) => trySend(env, sub, payload, 86400)));
+
+      // Limpiar suscripciones inactivas o desinstaladas (HTTP 404 / 410)
+      const nextLiveSubs = [];
+      for (let i = 0; i < liveSubs.length; i++) {
+        const sub = liveSubs[i];
+        const r = results[i];
+        if (r && !r.ok && (r.code === 404 || r.code === 410)) {
+          removedSubs++;
+          await removeSubscriptionFromTable(db, sub.endpoint);
+        } else {
+          nextLiveSubs.push(sub);
+        }
       }
-    });
+      liveSubs = nextLiveSubs;
 
-    fresh.forEach((n) => sentKeys.add(n.key));
-    ajustes.push = { subs: liveSubs, sentKeys: Array.from(sentKeys).slice(-MAX_SENT_KEYS) };
+      // SOLO marcar este ítem como enviado si al menos un dispositivo recibió la notificación con éxito
+      const anyOk = results.some((r) => r.ok);
+      if (anyOk) {
+        sentKeys.add(item.key);
+        userSentCount++;
+        sent++;
+      }
+    }
 
-    try {
-      await db
-        .prepare("UPDATE user_data SET ajustes = ? WHERE username = ?")
-        .bind(jstringify(ajustes), row.username)
-        .run();
-      sent += fresh.length;
-      processed++;
-    } catch {}
+    // Actualizar ajustes solo si se enviaron recordatorios o se eliminaron suscripciones caídas
+    if (userSentCount > 0 || liveSubs.length !== activeSubs.length) {
+      ajustes.push = { subs: liveSubs, sentKeys: Array.from(sentKeys).slice(-MAX_SENT_KEYS) };
+      try {
+        await db
+          .prepare("UPDATE user_data SET ajustes = ? WHERE username = ?")
+          .bind(jstringify(ajustes), row.username)
+          .run();
+        if (userSentCount > 0) processed++;
+      } catch {}
+    }
   }
 
   return {
@@ -218,8 +381,6 @@ export async function handler(c) {
   const CRON_SECRET = c.env.CRON_SECRET || "";
 
   // disparo manual (p. ej. `?test=1`): solo con el secreto en un header.
-  // el cron diario ya no pasa por aquí: entra por scheduled() en index.js.
-  // Solo se acepta el secreto explícito; los headers públicos no autentican el cron.
   if (CRON_SECRET && req.headers["x-cron-secret"] === CRON_SECRET) {
     const r = await runCron(c.env, req.query.test === "1");
     return json(c, r.status, r.body);
@@ -233,12 +394,12 @@ export async function handler(c) {
       return json(c, 200, { publicKey: VAPID_PUBLIC });
     }
     const data = await db.prepare("SELECT ajustes FROM user_data WHERE username = ?").bind(me.username).first();
-    if (!data) return json(c, 500, { error: "No se pudo cargar el estado de push" });
-    const ajustes = jparse(data.ajustes) || {};
+    const ajustes = jparse(data?.ajustes) || {};
     const push = normalizePush(ajustes.push);
+    const activeSubs = await getSubsForUser(db, me.username, push.subs);
     return json(c, 200, {
       publicKey: VAPID_PUBLIC || null,
-      subscribed: push.subs.length > 0,
+      subscribed: activeSubs.length > 0,
       sentKeys: push.sentKeys,
     });
   }
@@ -251,25 +412,33 @@ export async function handler(c) {
     if (!action) return json(c, 400, { error: "Faltan datos" });
 
     const data = await db.prepare("SELECT ajustes FROM user_data WHERE username = ?").bind(me.username).first();
-    if (!data) return json(c, 500, { error: "No se pudo guardar el estado de push" });
-
-    const ajustes = jparse(data.ajustes) || {};
+    const ajustes = jparse(data?.ajustes) || {};
     const push = normalizePush(ajustes.push);
     let { subs, sentKeys } = push;
 
     if (action === "subscribe") {
       const { subscription } = body;
-      if (!subscription || !subscription.endpoint || !subscription.keys) {
-        return json(c, 400, { error: "Suscripción inválida" });
+      if (!isValidSubscription(subscription)) {
+        return json(c, 400, {
+          error: "Suscripción inválida o servicio push no permitido. Solo se aceptan proveedores oficiales (Google, Apple, Mozilla, Windows).",
+        });
       }
-      subs = subs.filter((s) => s.endpoint !== subscription.endpoint);
+      await saveSubscriptionToTable(db, me.username, subscription);
+      subs = subs.filter((s) => s.endpoint !== subscription.endpoint && isValidSubscription(s));
+      if (subs.length >= MAX_SUBS_PER_USER) {
+        subs = subs.slice(-(MAX_SUBS_PER_USER - 1));
+      }
       subs.push(subscription);
     } else if (action === "unsubscribe") {
       const { endpoint } = body;
       if (!endpoint) return json(c, 400, { error: "Faltan datos" });
+      await removeSubscriptionFromTable(db, endpoint);
       subs = subs.filter((s) => s.endpoint !== endpoint);
     } else if (action === "test") {
-      if (subs.length === 0) return json(c, 400, { error: "Sin suscripción activa. Toca 'Activar push' o dale permiso a las notificaciones." });
+      const activeSubs = await getSubsForUser(db, me.username, subs);
+      if (activeSubs.length === 0) {
+        return json(c, 400, { error: "Sin suscripción activa. Toca 'Activar push' o dale permiso a las notificaciones." });
+      }
       if (!VAPID_PUBLIC || !VAPID_PRIVATE) {
         return json(c, 503, { error: "Push no configurado" });
       }
@@ -279,16 +448,20 @@ export async function handler(c) {
         tag: "aimer-test-" + Date.now(),
         url: "/",
       });
-      const results = await Promise.all(subs.map((s) => trySend(c.env, s, payload, 60)));
+      const results = await Promise.all(activeSubs.map((s) => trySend(c.env, s, payload, 60)));
       const liveSubs = [];
       let okCount = 0;
-      subs.forEach((s, i) => {
+      for (let i = 0; i < activeSubs.length; i++) {
+        const s = activeSubs[i];
         const r = results[i];
-        if (!r.ok && (r.code === 404 || r.code === 410)) return;
+        if (!r.ok && (r.code === 404 || r.code === 410)) {
+          await removeSubscriptionFromTable(db, s.endpoint);
+          continue;
+        }
         liveSubs.push(s);
         if (r.ok) okCount++;
-      });
-      if (liveSubs.length !== subs.length) {
+      }
+      if (liveSubs.length !== activeSubs.length) {
         ajustes.push = { subs: liveSubs, sentKeys };
         await db
           .prepare("UPDATE user_data SET ajustes = ? WHERE username = ?")
@@ -313,7 +486,7 @@ export async function handler(c) {
       return json(c, 400, { error: "Acción inválida" });
     }
 
-    ajustes.push = { subs, sentKeys };
+    ajustes.push = { subs: subs.slice(-MAX_SUBS_PER_USER), sentKeys };
     try {
       await db
         .prepare("UPDATE user_data SET ajustes = ? WHERE username = ?")

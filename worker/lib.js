@@ -84,15 +84,28 @@ function b64uDecode(str) {
 }
 
 function hmacKey(secret, usage) {
-  return crypto.subtle.importKey("raw", te.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, [usage]);
+  const raw = typeof secret === "string" ? te.encode(secret) : secret;
+  return crypto.subtle.importKey("raw", raw, { name: "HMAC", hash: "SHA-256" }, false, [usage]);
 }
 
-export async function signToken(c, payload, expiresInSec = 60 * 60 * 24 * 30) {
+// 7 días si el usuario marcó "recordarme"; 12 horas para una sesión de
+// navegador. Antes eran 30 días fijos.
+export const SESSION_REMEMBER_TTL = 60 * 60 * 24 * 7;
+export const SESSION_BROWSER_TTL = 60 * 60 * 12;
+
+export async function signToken(c, payload, expiresInSec = SESSION_REMEMBER_TTL) {
   const secret = c.env.SESSION_SECRET;
   if (!secret) throw new Error("SESSION_SECRET no configurado");
   const header = b64u(te.encode(JSON.stringify({ alg: "HS256", typ: "JWT" })));
   const now = Math.floor(Date.now() / 1000);
-  const body = b64u(te.encode(JSON.stringify({ ...payload, iat: now, exp: now + expiresInSec })));
+  // `jti` único: dos logins en el mismo segundo no comparten token, así que
+  // cerrar una sesión no revoca las demás por accidente.
+  const body = b64u(te.encode(JSON.stringify({
+    ...payload,
+    jti: crypto.randomUUID(),
+    iat: now,
+    exp: now + expiresInSec,
+  })));
   const data = `${header}.${body}`;
   const sig = new Uint8Array(await crypto.subtle.sign("HMAC", await hmacKey(secret, "sign"), te.encode(data)));
   return `${data}.${b64u(sig)}`;
@@ -115,7 +128,14 @@ export async function verifyToken(c, token) {
   if (!ok) return null;
   try {
     const payload = JSON.parse(td.decode(b64uDecode(b)));
-    if (!payload || !payload.username || payload.exp * 1000 < Date.now()) return null;
+    if (
+      !payload ||
+      !payload.username ||
+      !Number.isFinite(payload.exp) ||
+      payload.exp * 1000 <= Date.now()
+    ) {
+      return null;
+    }
     return payload;
   } catch {
     return null;
@@ -132,20 +152,42 @@ function toHex(bytes) {
   return s;
 }
 
+// Clave separada para los enlaces de R2. Si no se configura
+// `R2_SIGNING_SECRET`, se deriva una subclave con separación de dominio desde
+// SESSION_SECRET: nunca se usa la misma clave para JWT y para rutas de R2.
+async function r2SigningSecret(env) {
+  if (env.R2_SIGNING_SECRET) return env.R2_SIGNING_SECRET;
+  if (!env.SESSION_SECRET) throw new Error("R2_SIGNING_SECRET no configurado");
+  const derived = await crypto.subtle.sign(
+    "HMAC",
+    await hmacKey(env.SESSION_SECRET, "sign"),
+    te.encode("aimer:r2-path-signing:v1")
+  );
+  return new Uint8Array(derived);
+}
+
 export async function signPath(env, path, ttlSec = 6 * 60 * 60) {
-  if (!env.SESSION_SECRET) throw new Error("SESSION_SECRET no configurado");
+  const secret = await r2SigningSecret(env);
   const exp = Math.floor(Date.now() / 1000) + ttlSec;
   const msg = `${path}:${exp}`;
-  const sig = new Uint8Array(await crypto.subtle.sign("HMAC", await hmacKey(env.SESSION_SECRET, "sign"), te.encode(msg)));
+  const sig = new Uint8Array(await crypto.subtle.sign("HMAC", await hmacKey(secret, "sign"), te.encode(msg)));
   return `${exp}.${toHex(sig)}`;
 }
 
 export async function verifyPath(env, path, token) {
-  if (!path || !token || !env.SESSION_SECRET) return false;
+  if (!path || !token) return false;
+  let secret;
+  try {
+    secret = await r2SigningSecret(env);
+  } catch {
+    return false;
+  }
   const [expStr, sig] = String(token).split(".");
   const exp = Number(expStr);
   if (!Number.isFinite(exp) || exp * 1000 < Date.now()) return false;
-  const expected = toHex(new Uint8Array(await crypto.subtle.sign("HMAC", await hmacKey(env.SESSION_SECRET, "sign"), te.encode(`${path}:${exp}`))));
+  const expected = toHex(
+    new Uint8Array(await crypto.subtle.sign("HMAC", await hmacKey(secret, "sign"), te.encode(`${path}:${exp}`)))
+  );
   if (sig.length !== expected.length) return false;
   let diff = 0;
   for (let i = 0; i < sig.length; i++) diff |= sig.charCodeAt(i) ^ expected.charCodeAt(i);
@@ -160,7 +202,6 @@ export async function verifyPath(env, path, token) {
 // romper clientes viejos durante el despliegue.
 
 export const SESSION_COOKIE = "aimer_session";
-const SESSION_MAX_AGE = 60 * 60 * 24 * 30; // 30 días (igual que el JWT)
 
 function readCookie(c, name) {
   const header = c.req.header("cookie") || "";
@@ -185,7 +226,7 @@ function cookieAttrs(c) {
 }
 
 export function setSessionCookie(c, token, remember = true) {
-  const maxAge = remember ? `; Max-Age=${SESSION_MAX_AGE}` : "";
+  const maxAge = remember ? `; Max-Age=${SESSION_REMEMBER_TTL}` : "";
   c.header("Set-Cookie", `${SESSION_COOKIE}=${token}; ${cookieAttrs(c)}${maxAge}`, {
     append: true,
   });
@@ -198,14 +239,35 @@ export function clearSessionCookie(c) {
 }
 
 export function getToken(c) {
+  // La cookie HttpOnly manda; el Bearer solo se acepta para migrar clientes
+  // viejos que todavía tengan el token en localStorage.
+  const cookie = readCookie(c, SESSION_COOKIE);
+  if (cookie) return cookie;
   const header = c.req.header("authorization") || "";
   if (header.startsWith("Bearer ")) return header.slice(7);
-  return readCookie(c, SESSION_COOKIE);
+  return null;
 }
 
-export async function requireUser(c) {
-  const payload = await verifyToken(c, getToken(c));
+async function tokenFingerprint(token) {
+  const digest = new Uint8Array(await crypto.subtle.digest("SHA-256", te.encode(String(token))));
+  return toHex(digest);
+}
+
+export async function validateSession(c, token) {
+  const payload = await verifyToken(c, token);
   if (!payload) return null;
+
+  // Los tokens antiguos se emitieron con 30 días. Además de su `exp`,
+  // aplicamos una edad máxima de 7 días para no arrastrar sesiones largas.
+  const now = Math.floor(Date.now() / 1000);
+  if (!Number.isFinite(payload.iat) || payload.iat + SESSION_REMEMBER_TTL < now) return null;
+
+  const fingerprint = await tokenFingerprint(token);
+  const revoked = await c.env.DB
+    .prepare("SELECT 1 AS revoked FROM revoked_sessions WHERE token_hash = ? LIMIT 1")
+    .bind(fingerprint)
+    .first();
+  if (revoked) return null;
 
   const user = await c.env.DB
     .prepare("SELECT session_version FROM users WHERE username = ?")
@@ -216,6 +278,27 @@ export async function requireUser(c) {
   const tokenVersion = Number(payload.sessionVersion ?? 0);
   const currentVersion = Number(user.session_version ?? 0);
   return Number.isSafeInteger(tokenVersion) && tokenVersion === currentVersion ? payload : null;
+}
+
+export async function requireUser(c) {
+  return validateSession(c, getToken(c));
+}
+
+export async function revokeToken(c, token, payload) {
+  if (!token || !payload || !Number.isFinite(payload.exp)) return;
+  const now = new Date();
+  const expiresAt = new Date(payload.exp * 1000).toISOString();
+  await c.env.DB
+    .prepare(
+      "INSERT INTO revoked_sessions (token_hash, expires_at, created_at) VALUES (?, ?, ?) ON CONFLICT(token_hash) DO NOTHING"
+    )
+    .bind(await tokenFingerprint(token), expiresAt, now.toISOString())
+    .run();
+  // Limpieza oportunista de revocaciones ya vencidas.
+  await c.env.DB
+    .prepare("DELETE FROM revoked_sessions WHERE expires_at < ?")
+    .bind(now.toISOString())
+    .run();
 }
 
 export async function requireAdmin(c) {
@@ -274,6 +357,29 @@ export function publicUser(row) {
   };
 }
 
+// ---- IP del cliente (para rate limiting) ------------------------------------
+export function getClientIP(c) {
+  return c.req.header("cf-connecting-ip") || c.req.header("x-real-ip") || "unknown";
+}
+
+// La foto de perfil se guarda como data URL en la propia fila del usuario.
+// Solo aceptamos imágenes raster comunes y un tamaño acotado: sin esto,
+// cualquier usuario podía guardar un texto arbitrario o megabytes de base64
+// en `users.photo` y hacer fallar la fila de D1 (límite ~2 MB).
+export const MAX_PHOTO_CHARS = 200_000;
+// Al leer aceptamos fotos antiguas más grandes para que el cliente pueda
+// comprimirlas y volver a guardarlas (ver healPhoto en src/utils/photo.js).
+export const MAX_PHOTO_READ_CHARS = 1_500_000;
+const PHOTO_DATA_URL_RE = /^data:image\/(?:png|jpe?g|webp|gif);base64,[A-Za-z0-9+/]+={0,2}$/i;
+
+export function normalizePhoto(value, maxChars = MAX_PHOTO_CHARS) {
+  if (value === null || value === undefined || value === "") return null;
+  if (typeof value !== "string") return null;
+  const photo = value.trim();
+  if (!photo || photo.length > maxChars) return null;
+  return PHOTO_DATA_URL_RE.test(photo) ? photo : null;
+}
+
 export function toUserRow(obj) {
   const row = {};
   if (obj.name !== undefined) row.name = String(obj.name);
@@ -281,7 +387,7 @@ export function toUserRow(obj) {
   if (obj.career !== undefined) row.career = String(obj.career);
   if (obj.semester !== undefined) row.semester = Number(obj.semester) || 1;
   if (obj.ingresoCorte !== undefined) row.ingreso_corte = String(obj.ingresoCorte);
-  if (obj.photo !== undefined) row.photo = obj.photo || null;
+  if (obj.photo !== undefined) row.photo = normalizePhoto(obj.photo);
   if (obj.appMode !== undefined) row.app_mode = String(obj.appMode);
   if (obj.appTheme !== undefined) row.app_theme = String(obj.appTheme);
   if (obj.themeColors !== undefined) row.theme_colors = obj.themeColors || null;

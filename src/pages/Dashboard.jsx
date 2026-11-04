@@ -10,7 +10,8 @@ import useMediaQuery from "../hooks/useMediaQuery";
 import { getMallaByCareer } from "../data/malla.js";
 import { MALLA_SISTEMAS_2022, aplicaPlan2022, claveEstado, traducirDatosGuardados } from "../data/malla2022.js";
 import { api, getSessionData, updateSessionData } from "../api";
-import { getPendingSaves, hasPendingSaves, queueSave, clearPendingSave } from "../utils/offlineQueue.js";
+import { getPendingSaves, hasPendingSaves, queueSave, clearPendingSave, getPendingEntries } from "../utils/offlineQueue.js";
+import { mergeUserData, mergeColumnData } from "../utils/dataMerge.js";
 import styles from "./Dashboard.module.css";
 import {
   IconSchedule, IconClipboard, IconSemester,
@@ -85,12 +86,21 @@ async function loadUserData() {
   }
 }
 
-async function saveUserData(patch) {
+async function saveUserData(patch, baseVersion) {
   try {
-    await api("/user_data", { method: "POST", body: { patch } });
-    return { ok: true };
+    const res = await api("/user_data", {
+      method: "POST",
+      body: { patch, baseVersion: baseVersion ?? undefined },
+    });
+    return { ok: true, version: res.version, updatedAt: res.updated_at };
   } catch (error) {
-    return { ok: false, error };
+    return {
+      ok: false,
+      error,
+      status: error.status,
+      serverData: error.serverData,
+      serverVersion: error.serverVersion,
+    };
   }
 }
 
@@ -120,6 +130,7 @@ export default function Dashboard({ user, onLogout, onUpdateUser, appBooting = f
   const cachedRef = useRef(null);
   if (cachedRef.current === null) cachedRef.current = getSessionData();
   const cached = cachedRef.current;
+  const dataVersionRef = useRef(cached?.version || 1);
   const [loaded, setLoaded] = useState(!!cached);
   const [showSyncLoading, setShowSyncLoading] = useState(!cached);
   const finishSyncLoading = useCallback(() => setShowSyncLoading(false), []);
@@ -127,8 +138,8 @@ export default function Dashboard({ user, onLogout, onUpdateUser, appBooting = f
   const [toastAction, setToastAction] = useState(null);
   const [isOffline, setIsOffline] = useState(typeof navigator !== "undefined" ? !navigator.onLine : false);
   const [pendingCount, setPendingCount] = useState(() =>
-    typeof localStorage !== "undefined" && hasPendingSaves()
-      ? Object.keys(getPendingSaves()).length
+    typeof localStorage !== "undefined" && hasPendingSaves(user.username)
+      ? Object.keys(getPendingSaves(user.username)).length
       : 0
   );
   const toastTimerRef = useRef(null);
@@ -217,8 +228,12 @@ export default function Dashboard({ user, onLogout, onUpdateUser, appBooting = f
   useEffect(() => {
     // Sin malla guardada, el semestre actual es el que define el punto de
     // partida; en cuanto el usuario guarda algo, esto ya no se aplica.
-    if (!hayMallaGuardada) setMalla(autoApply(baseMalla, user.semester || 1));
-  }, [hayMallaGuardada, baseMalla, user.semester]);
+    // Solo auto-aplicar si ya cargaron los datos (loaded) y efectivamente no hay malla guardada,
+    // para evitar pisar la malla del servidor antes de que termine load() en un nuevo dispositivo.
+    if (loaded && !hayMallaGuardada) {
+      setMalla(autoApply(baseMalla, user.semester || 1));
+    }
+  }, [loaded, hayMallaGuardada, baseMalla, user.semester]);
 
   const [notas, setNotas] = useState(guardado?.notas ?? {});
   const [cursandoData, setCursandoData] = useState(guardado?.cursando ?? {});
@@ -232,36 +247,89 @@ export default function Dashboard({ user, onLogout, onUpdateUser, appBooting = f
     applyLocal(data);
     if (column === "malla") setHayMallaGuardada(true);
     updateSessionData({ [column]: data });
+
     if (!navigator.onLine) {
-      queueSave(column, data);
-      setPendingCount(Object.keys(getPendingSaves()).length);
+      queueSave(column, data, dataVersionRef.current, user.username);
+      setPendingCount(Object.keys(getPendingSaves(user.username)).length);
       notify("Sin conexión: tus cambios quedaron guardados y se sincronizarán al volver.");
       return;
     }
-    const res = await saveUserData({ [column]: data });
-    if (!res.ok) {
-      queueSave(column, data);
-      setPendingCount(Object.keys(getPendingSaves()).length);
-      notify("Sin conexión: tus cambios quedaron guardados y se sincronizarán al volver.");
-    } else {
+
+    const res = await saveUserData({ [column]: data }, dataVersionRef.current);
+    if (res.ok) {
+      if (res.version) dataVersionRef.current = res.version;
+      updateSessionData({ version: dataVersionRef.current, updated_at: res.updatedAt });
       notify("Cambios guardados");
+      return;
     }
+
+    // Si hubo conflicto de concurrencia (409) porque otro dispositivo guardó:
+    if (res.status === 409 && res.serverData) {
+      const serverVal = res.serverData[column];
+      const merged = mergeColumnData(column, serverVal, data);
+      applyLocal(merged);
+      if (res.serverVersion) dataVersionRef.current = res.serverVersion;
+      updateSessionData({ [column]: merged, version: dataVersionRef.current });
+
+      // Reintentar guardar los datos fusionados con la versión más reciente del servidor
+      const retryRes = await saveUserData({ [column]: merged }, res.serverVersion);
+      if (retryRes.ok) {
+        if (retryRes.version) dataVersionRef.current = retryRes.version;
+        updateSessionData({ version: dataVersionRef.current, updated_at: retryRes.updatedAt });
+        notify("Tus cambios se combinaron con los de tu otro dispositivo.");
+      } else {
+        queueSave(column, merged, dataVersionRef.current, user.username);
+        setPendingCount(Object.keys(getPendingSaves(user.username)).length);
+        notify("Hubo un conflicto y los cambios se guardaron para reintentar.");
+      }
+      return;
+    }
+
+    // Otro error de red o servidor: guardar en cola offline
+    queueSave(column, data, dataVersionRef.current, user.username);
+    setPendingCount(Object.keys(getPendingSaves(user.username)).length);
+    notify("Sin conexión: tus cambios quedaron guardados y se sincronizarán al volver.");
   }, [user.username, notify]);
 
   useEffect(() => {
     const flush = async () => {
-      const pending = getPendingSaves();
-      const cols = Object.keys(pending);
+      const pendingEntries = getPendingEntries(user.username);
+      const cols = Object.keys(pendingEntries);
       if (cols.length === 0) return;
       let okCount = 0;
+
       for (const col of cols) {
-        const res = await saveUserData({ [col]: pending[col] });
+        const meta = pendingEntries[col];
+        const patchData = meta && typeof meta === "object" && "data" in meta ? meta.data : meta;
+        const baseVer = (meta && meta.baseVersion) || dataVersionRef.current;
+
+        const res = await saveUserData({ [col]: patchData }, baseVer);
         if (res.ok) {
-          clearPendingSave(col);
+          if (res.version) dataVersionRef.current = res.version;
+          clearPendingSave(col, user.username);
           okCount++;
+        } else if (res.status === 409 && res.serverData) {
+          // Si otro dispositivo modificó mientras estábamos offline: fusionar por ítems/clave
+          const merged = mergeColumnData(col, res.serverData[col], patchData);
+          const retryRes = await saveUserData({ [col]: merged }, res.serverVersion);
+          if (retryRes.ok) {
+            if (retryRes.version) dataVersionRef.current = retryRes.version;
+            clearPendingSave(col, user.username);
+            okCount++;
+            // Actualizar vista local
+            if (col === "horario") setHorarioData(merged);
+            else if (col === "asignaciones") setAsignacionesData(merged);
+            else if (col === "calendario") setCalendarioData(merged);
+            else if (col === "cursando") setCursandoData(merged);
+            else if (col === "notas") setNotas(merged);
+            else if (col === "notasclase") setNotasClaseData(merged);
+            else if (col === "plan") setPlanData(merged);
+            else if (col === "malla") setMalla(mergeMallaWithBase(baseMalla, merged, esPlan2022));
+            updateSessionData({ [col]: merged, version: dataVersionRef.current });
+          }
         }
       }
-      setPendingCount(Object.keys(getPendingSaves()).length);
+      setPendingCount(Object.keys(getPendingSaves(user.username)).length);
       if (okCount > 0) notify(`${okCount} cambio(s) sincronizado(s) con la nube`);
     };
 
@@ -270,22 +338,24 @@ export default function Dashboard({ user, onLogout, onUpdateUser, appBooting = f
 
     window.addEventListener("online", onOnline);
     window.addEventListener("offline", onOffline);
-    if (navigator.onLine && hasPendingSaves()) flush();
+    if (navigator.onLine && hasPendingSaves(user.username)) flush();
 
     return () => {
       window.removeEventListener("online", onOnline);
       window.removeEventListener("offline", onOffline);
     };
-  }, [user.username, notify]);
+  }, [user.username, notify, baseMalla, esPlan2022]);
 
   useEffect(() => {
     async function load() {
       const data = await loadUserData();
-      // Lo que quedó pendiente de guardar (sin conexión) es más reciente que la
-      // copia del servidor, así que manda.
-      const pendientes = getPendingSaves();
+      if (data?.version) {
+        dataVersionRef.current = data.version;
+      }
+      // Reconciliar con lo que quedó pendiente sin pisar columnas completas del servidor
+      const pendientes = getPendingSaves(user.username);
       const combinado = (data || Object.keys(pendientes).length)
-        ? { ...(data || {}), ...pendientes }
+        ? mergeUserData(data, pendientes)
         : null;
       const guardadoApi = combinado ? (esPlan2022 ? traducirDatosGuardados(combinado) : combinado) : null;
       if (guardadoApi) {
@@ -298,6 +368,7 @@ export default function Dashboard({ user, onLogout, onUpdateUser, appBooting = f
           ...(guardadoApi.calendario && { calendario: guardadoApi.calendario }),
           ...(guardadoApi.asignaciones && { asignaciones: guardadoApi.asignaciones }),
           ...(guardadoApi.notasclase && { notasclase: guardadoApi.notasclase }),
+          version: dataVersionRef.current,
         });
         if (guardadoApi.malla) {
           setHayMallaGuardada(true);

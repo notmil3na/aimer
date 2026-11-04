@@ -1,14 +1,25 @@
 import { envReady, json, readBody, requireUser, signPath, vreq } from "../lib.js";
 import { uuid, nowISO, jstringify, all } from "../db.js";
+import {
+  MAX_FILE_BYTES,
+  MAX_USER_STORAGE_BYTES,
+  MAX_PENDING_UPLOADS,
+  usedStorageBytes,
+  pendingUploadCount,
+  cleanupStaleUploads,
+} from "../chat-storage.js";
 
 function canonicalPair(a, b) {
   return a < b ? [a, b] : [b, a];
 }
 
-const MAX_FILE_BYTES = 8 * 1024 * 1024;
 const MAX_TEXT = 8000;
 const MAX_JSON = 32000;
 const MESSAGE_TYPES = ["text", "image", "file", "assignment", "note"];
+// Acepta UUIDs y también los ids cortos que generaba el cliente anterior
+// (`Date.now().toString(36) + random`). Lo importante no es el formato sino
+// que sea seguro como segmento de ruta y que no exista ya en `messages`.
+const MESSAGE_ID_RE = /^[A-Za-z0-9_-]{6,64}$/;
 
 function newChannelToken() {
   try {
@@ -24,6 +35,13 @@ function newChannelToken() {
 
 function newMessageId() {
   return uuid();
+}
+
+// El id del mensaje lo propone el cliente para enlazar la subida con el
+// mensaje. Solo aceptamos un charset seguro como segmento de ruta; reutilizar
+// el id de un mensaje ajeno se bloquea después consultando `messages`.
+function cleanMessageId(value) {
+  return typeof value === "string" && MESSAGE_ID_RE.test(value) ? value : null;
 }
 
 function sanitizeFileName(name) {
@@ -44,7 +62,7 @@ function msgParams(data) {
       : "",
     attachments: Array.isArray(data.attachments) ? data.attachments : [],
     academicItems: Array.isArray(data.academic_items) ? data.academic_items : [],
-    messageId: data.message_id || newMessageId(),
+    messageId: cleanMessageId(data.message_id),
   };
 }
 
@@ -410,15 +428,44 @@ async function actionChatSend(db, env, me, other, body) {
   }
   const conversationId = conv.conversationId;
 
-  const cleanAttachments = p.attachments
-    .filter((a) => a && typeof a.storage_path === "string" && a.storage_path.startsWith(`chat/${conversationId}/`))
-    .slice(0, 3)
-    .map((a) => ({
-      storage_path: String(a.storage_path).slice(0, 500),
+  const id = p.messageId || newMessageId();
+
+  // El id del mensaje lo propone el cliente. Reutilizar uno existente permitiría
+  // que la ruta de subida apunte al adjunto de otro mensaje de la conversación.
+  const usedId = await db.prepare("SELECT id FROM messages WHERE id = ?").bind(id).first();
+  if (usedId) return { error: "Identificador de mensaje ya usado", status: 409 };
+
+  // Solo se aceptan adjuntos registrados por este usuario para este mensaje y
+  // que todavía no se hayan enviado. El tamaño y la ruta salen del registro del
+  // servidor, no de lo que diga el cliente.
+  const cleanAttachments = [];
+  const seenPaths = new Set();
+  for (const a of p.attachments.slice(0, 3)) {
+    if (!a || typeof a.storage_path !== "string") continue;
+    const path = a.storage_path.slice(0, 500);
+    if (!path.startsWith(`chat/${conversationId}/`) || seenPaths.has(path)) continue;
+    seenPaths.add(path);
+
+    const upload = await db
+      .prepare(
+        "SELECT path, actual_size FROM chat_uploads WHERE path = ? AND username = ? AND conversation_id = ? AND message_id = ? AND consumed_at IS NULL"
+      )
+      .bind(path, me, conversationId, id)
+      .first();
+    if (!upload || upload.actual_size === null) {
+      return { error: "El adjunto no está disponible", status: 400 };
+    }
+
+    cleanAttachments.push({
+      storage_path: upload.path,
       file_name: sanitizeFileName(a.file_name || ""),
       mime_type: String(a.mime_type || "application/octet-stream").slice(0, 120),
-      file_size: Number(a.file_size) || 0,
-    }));
+      file_size: Number(upload.actual_size) || 0,
+    });
+  }
+  if ((p.type === "image" || p.type === "file") && cleanAttachments.length === 0) {
+    return { error: "El mensaje necesita un archivo adjunto válido" };
+  }
 
   const cleanAcademic = p.academicItems.slice(0, 5).map((a) => ({
     item_type: a.item_type === "note" ? "note" : "assignment",
@@ -428,30 +475,61 @@ async function actionChatSend(db, env, me, other, body) {
     item_payload: a.item_payload && typeof a.item_payload === "object" ? a.item_payload : {},
   }));
 
-  const id = p.messageId || newMessageId();
   const now = nowISO();
 
-  await db
-    .prepare("INSERT INTO messages (id, conversation_id, sender, message_type, content, read, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)")
-    .bind(id, conversationId, me, p.type, p.content, 0, now)
-    .run();
-
+  // Reclamar los adjuntos antes de crear el mensaje. Así dos envíos
+  // simultáneos no pueden compartir la misma subida y, si la escritura falla,
+  // la reclamación se revierte para que el usuario pueda reintentar.
+  const claimed = [];
   for (const a of cleanAttachments) {
-    await db
-      .prepare("INSERT INTO message_attachments (id, message_id, storage_path, file_name, mime_type, file_size, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)")
-      .bind(uuid(), id, a.storage_path, a.file_name, a.mime_type, a.file_size, now)
+    const res = await db
+      .prepare("UPDATE chat_uploads SET consumed_at = ? WHERE path = ? AND consumed_at IS NULL")
+      .bind(now, a.storage_path)
       .run();
-  }
-  for (const a of cleanAcademic) {
-    await db
-      .prepare("INSERT INTO message_academic_items (id, message_id, item_type, subject_id, assignment_id, note_id, item_payload, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
-      .bind(uuid(), id, a.item_type, a.subject_id, a.assignment_id, a.note_id, jstringify(a.item_payload), now)
-      .run();
+    if (!res.meta?.changes) {
+      for (const path of claimed) {
+        await db.prepare("UPDATE chat_uploads SET consumed_at = NULL WHERE path = ?").bind(path).run();
+      }
+      return { error: "El adjunto ya fue usado", status: 409 };
+    }
+    claimed.push(a.storage_path);
   }
 
-  await db.prepare("UPDATE conversations SET updated_at = ? WHERE id = ?").bind(now, conversationId).run();
-  await db.prepare("UPDATE conversation_members SET last_read_at = ? WHERE conversation_id = ? AND username = ?").bind(now, conversationId, me).run();
-  await db.prepare("UPDATE conversation_members SET hidden_at = NULL WHERE conversation_id = ? AND username = ?").bind(conversationId, me).run();
+  const statements = [
+    db
+      .prepare("INSERT INTO messages (id, conversation_id, sender, message_type, content, read, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)")
+      .bind(id, conversationId, me, p.type, p.content, 0, now),
+    ...cleanAttachments.map((a) =>
+      db
+        .prepare("INSERT INTO message_attachments (id, message_id, storage_path, file_name, mime_type, file_size, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)")
+        .bind(uuid(), id, a.storage_path, a.file_name, a.mime_type, a.file_size, now)
+    ),
+    ...cleanAcademic.map((a) =>
+      db
+        .prepare("INSERT INTO message_academic_items (id, message_id, item_type, subject_id, assignment_id, note_id, item_payload, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
+        .bind(uuid(), id, a.item_type, a.subject_id, a.assignment_id, a.note_id, jstringify(a.item_payload), now)
+    ),
+    db.prepare("UPDATE conversations SET updated_at = ? WHERE id = ?").bind(now, conversationId),
+    db
+      .prepare("UPDATE conversation_members SET last_read_at = ? WHERE conversation_id = ? AND username = ?")
+      .bind(now, conversationId, me),
+    db
+      .prepare("UPDATE conversation_members SET hidden_at = NULL WHERE conversation_id = ? AND username = ?")
+      .bind(conversationId, me),
+  ];
+
+  try {
+    await db.batch(statements);
+  } catch (err) {
+    for (const path of claimed) {
+      await db.prepare("UPDATE chat_uploads SET consumed_at = NULL WHERE path = ?").bind(path).run();
+    }
+    const msg = String(err?.message || "").toLowerCase();
+    if (msg.includes("unique") || msg.includes("constraint")) {
+      return { error: "Identificador de mensaje ya usado", status: 409 };
+    }
+    return { error: "No se pudo enviar el mensaje" };
+  }
 
   const token = await channelTokenOf(db, conversationId);
   return {
@@ -523,18 +601,90 @@ async function actionChatUploadURL(db, env, me, other, body) {
   const friend = await sonAmigos(db, me, other);
   if (!friend.ok) return { error: "Solo puedes chatear con tus amigos", status: 403 };
 
-  const fileSize = Number(body.file_size) || 0;
-  if (fileSize > MAX_FILE_BYTES) return { error: "El archivo supera el límite de 8 MB" };
+  const declaredSize = Number(body.file_size);
+  if (!Number.isFinite(declaredSize) || declaredSize < 0) {
+    return { error: "Tamaño de archivo inválido" };
+  }
+  if (declaredSize > MAX_FILE_BYTES) {
+    return { error: "El archivo supera el límite de 8 MB", status: 413 };
+  }
   if (!env.R2_BUCKET) return { error: "El almacenamiento de adjuntos no está configurado" };
+
+  // Liberar enlaces vencidos antes de calcular la cuota.
+  try {
+    await cleanupStaleUploads(db, env.R2_BUCKET, me);
+  } catch (e) {
+    console.error("no se pudieron limpiar subidas vencidas", e);
+  }
+
+  const messageId = cleanMessageId(body.message_id);
+  if (!messageId) return { error: "Identificador de mensaje inválido" };
+
+  // Un id ya usado por cualquier mensaje no se puede volver a firmar: de lo
+  // contrario se podría sobrescribir el adjunto de ese mensaje.
+  const usedMessage = await db.prepare("SELECT id FROM messages WHERE id = ?").bind(messageId).first();
+  if (usedMessage) return { error: "Identificador de mensaje no válido", status: 409 };
 
   const conv = await ensureConversation(db, me, other);
   if (!conv.conversation_id) return { error: "No se pudo preparar la subida" };
   const conversationId = conv.conversation_id;
 
-  const messageId = String(body.message_id || newMessageId()).slice(0, 64) || newMessageId();
   const fileName = sanitizeFileName(body.file_name || "archivo");
   const mime = String(body.mime_type || "application/octet-stream").slice(0, 120);
   const storagePath = `chat/${conversationId}/${messageId}/${fileName}`;
+
+  const existing = await db
+    .prepare(
+      "SELECT path, username, consumed_at, declared_size, actual_size FROM chat_uploads WHERE message_id = ? LIMIT 1"
+    )
+    .bind(messageId)
+    .first();
+
+  if (existing) {
+    // Reintento del mismo usuario: se reutiliza la subida pendiente. Cualquier
+    // otra combinación (otro dueño, otro archivo o ya enviada) se rechaza.
+    if (existing.username !== me || existing.consumed_at || existing.path !== storagePath) {
+      return { error: "Identificador de mensaje no válido", status: 409 };
+    }
+    const used = await usedStorageBytes(db, me);
+    const previous = Number(existing.actual_size ?? existing.declared_size) || 0;
+    if (used - previous + declaredSize > MAX_USER_STORAGE_BYTES) {
+      return { error: "Has alcanzado el límite de almacenamiento de adjuntos", status: 413 };
+    }
+    await db
+      .prepare("UPDATE chat_uploads SET declared_size = ? WHERE path = ?")
+      .bind(declaredSize, storagePath)
+      .run();
+  } else {
+    const used = await usedStorageBytes(db, me);
+    if (used + declaredSize > MAX_USER_STORAGE_BYTES) {
+      return { error: "Has alcanzado el límite de almacenamiento de adjuntos", status: 413 };
+    }
+    if ((await pendingUploadCount(db, me)) >= MAX_PENDING_UPLOADS) {
+      return {
+        error: "Tienes demasiadas subidas pendientes. Envía o descarta las anteriores.",
+        status: 429,
+      };
+    }
+    try {
+      await db
+        .prepare(
+          "INSERT INTO chat_uploads (path, username, conversation_id, message_id, declared_size, actual_size, created_at, consumed_at) VALUES (?, ?, ?, ?, ?, NULL, ?, NULL)"
+        )
+        .bind(storagePath, me, conversationId, messageId, declaredSize, nowISO())
+        .run();
+    } catch (insertErr) {
+      // Carrera: otra petición registró el mismo message_id. Solo se reutiliza
+      // si es del mismo usuario, sigue pendiente y apunta al mismo archivo.
+      const again = await db
+        .prepare("SELECT path, username, consumed_at FROM chat_uploads WHERE message_id = ?")
+        .bind(messageId)
+        .first();
+      if (!again || again.username !== me || again.consumed_at || again.path !== storagePath) {
+        return { error: "Identificador de mensaje no válido", status: 409 };
+      }
+    }
+  }
 
   const token = await signPath(env, storagePath, 6 * 60 * 60);
   const channel_token = await channelTokenOf(db, conversationId);

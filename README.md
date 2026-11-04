@@ -59,3 +59,21 @@ Remove-Variable secret, body
 ```
 
 Después de confirmar la respuesta `{ "ok": true }`, elimina el secreto de aprovisionamiento (`npx wrangler secret delete ADMIN_BOOTSTRAP_SECRET`). El rol queda guardado en la base de datos. Al iniciar sesión con esa cuenta, el botón de escudo permite entrar o salir del modo administrador; desde allí se pueden gestionar perfiles, restablecer contraseñas y eliminar cuentas. En cualquier sección, con el modo activo, haz clic en un texto para cambiarlo globalmente. Los cambios se guardan en D1 y se aplican como texto plano para evitar interpretar contenido como HTML.
+
+Sesiones y enlaces de adjuntos
+------------------------------
+
+La sesión vive en una cookie `HttpOnly` y los JWT nuevos duran 7 días (12 horas si no se marca "recordarme"). Al cerrar sesión se revoca el token en D1, así que ya no sirve aunque alguien lo hubiera copiado. Los cambios de contraseña y los restablecimientos administrativos invalidan las demás sesiones mediante `session_version`.
+
+Los enlaces firmados de R2 usan una clave distinta de la del JWT. Configura un secreto independiente antes de desplegar (si no existe, se deriva una subclave desde `SESSION_SECRET`, pero lo recomendable es separarlo):
+
+```powershell
+npx wrangler secret put R2_SIGNING_SECRET
+```
+
+Aplica también la migración de sesiones revocadas:
+
+```powershell
+npx wrangler d1 migrations apply aimer --remote
+npx wrangler deploy
+```

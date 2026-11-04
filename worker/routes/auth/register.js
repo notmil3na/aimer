@@ -1,12 +1,33 @@
-import { envReady, json, readBody, hashPassword, toUserRow, vreq } from "../../lib.js";
+import { envReady, json, readBody, hashPassword, toUserRow, vreq, getClientIP } from "../../lib.js";
 import { jstringify } from "../../db.js";
+import { checkAndIncrement } from "../../rate-limit.js";
 
 const USERNAME_RE = /^[a-zA-Z0-9._-]{2,20}$/;
+
+// 5 registros por IP en 1 hora → bloqueo 1 hora.
+const REGISTER_IP_LIMIT = { maxAttempts: 5, windowSec: 3600, lockoutSec: 3600 };
 
 export async function handler(c) {
   const req = vreq(c);
   if (req.method !== "POST") return json(c, 405, { error: "method" });
   if (!envReady(c.env)) return json(c, 500, { error: "Configuración del servidor incompleta" });
+
+  const ip = getClientIP(c);
+  const db = c.env.DB;
+
+  // --- Rate limiting por IP ---
+  try {
+    const ipCheck = await checkAndIncrement(db, `register-ip:${ip}`, REGISTER_IP_LIMIT);
+    if (!ipCheck.allowed) {
+      const retry = ipCheck.retryAfter;
+      return json(c, 429, {
+        error: `Demasiados registros desde esta dirección. Intenta de nuevo en ${Math.ceil(retry / 60)} minuto(s).`,
+        retryAfter: retry,
+      });
+    }
+  } catch (e) {
+    console.error("rate-limit check failed (register)", e);
+  }
 
   const body = await readBody(c);
   const username = String(body.username || "").trim();
@@ -21,7 +42,6 @@ export async function handler(c) {
   if (!body.name) return json(c, 400, { error: "El nombre es obligatorio" });
   if (!String(body.career || "").trim()) return json(c, 400, { error: "La carrera es obligatoria" });
 
-  const db = c.env.DB;
   const existing = await db.prepare("SELECT username FROM users WHERE username = ?").bind(username).first();
   if (existing) return json(c, 409, { error: "Ese usuario ya existe" });
 
@@ -47,7 +67,8 @@ export async function handler(c) {
   const securityAnswer = String(body.securityAnswer || "").trim();
   if (securityQuestion && securityAnswer) {
     row.security_question = securityQuestion;
-    row.security_answer = await hashPassword(securityAnswer);
+    // Normalizar la respuesta: trim + lowercase antes de hashear.
+    row.security_answer = await hashPassword(securityAnswer.toLowerCase());
   }
 
   const themeColorsStr = jstringify(row.theme_colors);

@@ -23,6 +23,17 @@ import { uuid } from "../utils/notasClase";
 
 const FriendsView = lazy(() => import("./ColaboracionView"));
 
+// id del mensaje que enlaza la subida con el mensaje; crypto.randomUUID evita
+// que dos clientes puedan proponer el mismo id por casualidad.
+function newMessageId() {
+  try {
+    if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+      return crypto.randomUUID();
+    }
+  } catch (_) {}
+  return uuid();
+}
+
 const POLL_MIN_MS = 4000;    // conversación abierta y visible: sondeo rápido
 const POLL_MAX_MS = 30000;   // sin novedades el intervalo se alarga hasta aquí
 const POLL_LIST_MS = 60000;  // lista de chats: red de seguridad a un minuto
@@ -633,7 +644,7 @@ function ThreadView({ user, friend, onBack, onNotify, onToggleInfo, infoOpen, sh
       mime = "image/jpeg";
     }
 
-    const message_id = uuid();
+    const message_id = newMessageId();
     const up = await getChatUploadUrl(other, { message_id, file_name: name, mime_type: mime, file_size: blob.size });
     if (up.needsMigration) { setNeedsMig(true); setSending(false); return; }
     if (!up.ok || !up.data) { setError(up.error || "No se pudo preparar la subida"); setSending(false); return; }

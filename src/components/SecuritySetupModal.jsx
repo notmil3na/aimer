@@ -15,6 +15,7 @@ export default function SecuritySetupModal() {
   const [mode, setMode] = useState("hidden");
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
   const [msg, setMsg] = useState("");
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
@@ -49,12 +50,14 @@ export default function SecuritySetupModal() {
     if (!question) return setErr("Selecciona una pregunta");
     if (!answer.trim()) return setErr("Escribe la respuesta");
     if (answer.trim().length < 3) return setErr("La respuesta debe tener al menos 3 caracteres");
+    if (!currentPassword) return setErr("Escribe tu contraseña actual para confirmar");
     setBusy(true);
     try {
       await api("/auth/security", {
         method: "POST",
-        body: { question, answer: answer.trim() },
+        body: { question, answer: answer.trim(), currentPassword },
       });
+      setCurrentPassword("");
       localStorage.setItem(SET_FLAG, "1");
       setMsg("¡Pregunta guardada! Ya no volverá a aparecer este aviso.");
       setBusy(false);
@@ -117,6 +120,16 @@ export default function SecuritySetupModal() {
                 value={answer}
                 onChange={e => setAnswer(e.target.value)}
                 placeholder="La respuesta que solo tú conoces"
+                onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); handleSave(); } }}
+              />
+            </div>
+            <div className={styles.field}>
+              <label>Contraseña actual</label>
+              <input
+                type="password"
+                value={currentPassword}
+                onChange={e => setCurrentPassword(e.target.value)}
+                placeholder="Para confirmar el cambio"
                 onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); handleSave(); } }}
               />
             </div>

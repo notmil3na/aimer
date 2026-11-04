@@ -24,14 +24,7 @@ const MINI_CARD = {
   dots: [DEFAULT_THEME_COLORS.cursando, DEFAULT_THEME_COLORS.aprobada, DEFAULT_THEME_COLORS.faltante],
 };
 
-// Preguntas de seguridad para la recuperación de cuenta (paso 2 del registro).
-const SECURITY_QUESTIONS = [
-  "¿Cómo se llamaba tu primera mascota?",
-  "¿En qué ciudad nació tu mamá?",
-  "¿Cuál era el nombre de tu colegio?",
-  "¿Cuál es tu comida favorita de la infancia?",
-  "¿Cómo se llamaba tu mejor amigo de la infancia?",
-];
+import { SECURITY_QUESTIONS } from "../utils/securityQuestions";
 
 function EyeIcon({ off }) {
   return (

@@ -98,16 +98,22 @@ const PUBLIC_AUTH_PATHS = new Set(["/auth/login", "/auth/register"]);
 
 export async function api(path, { method = "GET", body, skipAuth = false, soft401 = false } = {}) {
   const legacy = skipAuth ? null : legacyToken();
-  const res = await fetch(BASE + path, {
-    method,
-    credentials: "same-origin", // la cookie HttpOnly viaja sola
-    headers: {
-      "Content-Type": "application/json",
-      // solo durante la migración: el servidor lo cambia por la cookie.
-      ...(legacy ? { Authorization: `Bearer ${legacy}` } : {}),
-    },
-    body: body === undefined ? undefined : JSON.stringify(body),
-  });
+  let res;
+  try {
+    res = await fetch(BASE + path, {
+      method,
+      credentials: "same-origin", // la cookie HttpOnly viaja sola
+      headers: {
+        "Content-Type": "application/json",
+        // solo durante la migración: el servidor lo cambia por la cookie.
+        ...(legacy ? { Authorization: `Bearer ${legacy}` } : {}),
+      },
+      body: body === undefined ? undefined : JSON.stringify(body),
+    });
+  } catch (netErr) {
+    netErr.status = 0;
+    throw netErr;
+  }
 
   let data = null;
   try {
@@ -119,7 +125,15 @@ export async function api(path, { method = "GET", body, skipAuth = false, soft40
       clearSession();
       if (!soft401) window.location.reload();
     }
-    throw new Error((data && data.error) || "Sesión expirada");
+    const err = new Error((data && data.error) || "Sesión expirada");
+    err.status = res.status;
+    if (data) {
+      err.code = data.code;
+      err.needsMigration = data.needsMigration;
+      err.notConfigured = data.notConfigured;
+      err.retryAfter = data.retryAfter;
+    }
+    throw err;
   }
   if (!res.ok) {
     const err = new Error((data && data.error) || "Error de red");
@@ -127,23 +141,31 @@ export async function api(path, { method = "GET", body, skipAuth = false, soft40
       err.code = data.code;
       err.needsMigration = data.needsMigration;
       err.notConfigured = data.notConfigured;
+      err.retryAfter = data.retryAfter;
     }
+    err.status = res.status;
     throw err;
   }
   if (legacy) stripLegacyToken();
   if (data === null) {
-    throw new Error("El servidor no devolvió una respuesta válida");
+    const err = new Error("El servidor no devolvió una respuesta válida");
+    err.status = res.status;
+    throw err;
   }
   return data;
 }
 
 /* Cierra la sesión en el servidor (borra la cookie) y en el navegador. */
 export async function logout() {
+  // Leer el token viejo antes de borrar el almacenamiento: así el servidor
+  // también puede revocarlo si venimos de una sesión en localStorage.
+  const legacy = legacyToken();
   clearSession();
   try {
     await fetch(BASE + "/auth/logout", {
       method: "POST",
       credentials: "same-origin",
+      headers: legacy ? { Authorization: `Bearer ${legacy}` } : undefined,
     });
   } catch (_) {}
 }

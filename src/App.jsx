@@ -177,9 +177,12 @@ export default function App() {
           }
           return serverUser;
         });
-      } catch (_) {
+      } catch (err) {
         // sin cookie válida (o caducada) volvemos al login.
-        if (!cancelled) {
+        // Solo limpiamos si el servidor confirma que la sesión expiró (401).
+        // En caso de fallo de red (offline) o 500 transitorio, conservamos la sesión
+        // y los datos en caché para permitir el funcionamiento offline.
+        if (!cancelled && err?.status === 401) {
           clearSession();
           setUser(null);
         }

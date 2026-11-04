@@ -3,8 +3,9 @@
 // - todo lo que empiece con /api/ pasa por aquí (run_worker_first)
 // - el recordatorio diario entra por scheduled() en vez de un cron http
 import { Hono } from "hono";
+import { bodyLimit } from "hono/body-limit";
 
-import { setSessionCookie, verifyToken } from "./lib.js";
+import { setSessionCookie, validateSession } from "./lib.js";
 
 import { handler as login } from "./routes/auth/login.js";
 import { handler as register } from "./routes/auth/register.js";
@@ -27,6 +28,23 @@ import { handler as push, runCron } from "./routes/push.js";
 
 const app = new Hono();
 
+// Límites de cuerpo para las rutas que reciben JSON. `/api/chat-upload` queda
+// fuera a propósito: su cuerpo se lee en streaming y acotado en chat-files.js
+// (hasta 8 MB), sin confiar en Content-Length.
+const tooLarge = (c) => {
+  c.header("Cache-Control", "no-store");
+  return c.json({ error: "El cuerpo de la petición es demasiado grande" }, 413);
+};
+const jsonBodyLimit = (maxSize) => bodyLimit({ maxSize, onError: tooLarge });
+
+app.use("/api/auth/*", jsonBodyLimit(64 * 1024));
+app.use("/api/admin/*", jsonBodyLimit(64 * 1024));
+app.use("/api/site-content", jsonBodyLimit(64 * 1024));
+app.use("/api/push", jsonBodyLimit(64 * 1024));
+app.use("/api/users", jsonBodyLimit(320 * 1024)); // incluye la foto de perfil
+app.use("/api/friendships", jsonBodyLimit(128 * 1024));
+app.use("/api/user_data", jsonBodyLimit(1536 * 1024)); // cerca del límite de fila de D1
+
 // CSRF extra para la cookie SameSite=Lax: un POST/PUT/DELETE disparado desde
 // otro sitio trae `Sec-Fetch-Site: cross-site`; los navegadores que no mandan
 // la cabecera quedan cubiertos por SameSite.
@@ -45,7 +63,9 @@ app.use("/api/*", async (c, next) => {
   const auth = c.req.header("authorization") || "";
   if (auth.startsWith("Bearer ")) {
     const token = auth.slice(7);
-    if (await verifyToken(c, token)) setSessionCookie(c, token);
+    // Validar también revocación y session_version: un token viejo ya no debe
+    // convertirse de nuevo en cookie.
+    if (await validateSession(c, token)) setSessionCookie(c, token);
   }
 
   await next();

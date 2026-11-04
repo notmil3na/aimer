@@ -1,4 +1,5 @@
-import { envReady, json, readBody, verifyPassword, hashPassword, isColumnMissing, HASH_FALSO, vreq } from "../../lib.js";
+import { envReady, json, readBody, verifyPassword, hashPassword, isColumnMissing, HASH_FALSO, vreq, getClientIP } from "../../lib.js";
+import { checkAndIncrement, resetLimit } from "../../rate-limit.js";
 
 // mismas preguntas que src/utils/securityQuestions.js (si cambia la lista hay
 // que cambiarla en los dos sitios).
@@ -23,6 +24,12 @@ function preguntaFalsa(username) {
 }
 
 const NO_COINCIDE = "La respuesta no coincide. Si tu cuenta no tiene pregunta de seguridad, pide ayuda al administrador.";
+
+// --- Rate limiting ---
+// 5 intentos por usuario en una ventana de 15 min → bloqueo de 15 min.
+// 20 intentos por IP en una ventana de 15 min → bloqueo de 30 min.
+const FORGOT_USER_LIMIT = { maxAttempts: 5, windowSec: 900, lockoutSec: 900 };
+const FORGOT_IP_LIMIT   = { maxAttempts: 20, windowSec: 900, lockoutSec: 1800 };
 
 export async function handler(c) {
   const req = vreq(c);
@@ -59,12 +66,49 @@ export async function handler(c) {
     return json(c, 200, { question: tienePregunta ? data.security_question : preguntaFalsa(uname) });
   }
 
-  // paso 2: verificar la respuesta. se verifica siempre (contra un hash de
-  // relleno si la cuenta no existe) para igualar el tiempo de respuesta.
-  const ok = await verifyPassword(String(answer), tienePregunta ? data.security_answer : HASH_FALSO);
+  // --- Rate limiting: verificar antes de procesar la respuesta ---
+  const ip = getClientIP(c);
+  const userKey = `forgot:${uname}`;
+  const ipKey = `forgot-ip:${ip}`;
+
+  try {
+    const [userCheck, ipCheck] = await Promise.all([
+      checkAndIncrement(db, userKey, FORGOT_USER_LIMIT),
+      checkAndIncrement(db, ipKey, FORGOT_IP_LIMIT),
+    ]);
+
+    if (!userCheck.allowed) {
+      const retry = userCheck.retryAfter;
+      return json(c, 429, {
+        error: `Demasiados intentos. Intenta de nuevo en ${Math.ceil(retry / 60)} minuto(s).`,
+        retryAfter: retry,
+      });
+    }
+    if (!ipCheck.allowed) {
+      const retry = ipCheck.retryAfter;
+      return json(c, 429, {
+        error: `Demasiados intentos desde esta dirección. Intenta de nuevo en ${Math.ceil(retry / 60)} minuto(s).`,
+        retryAfter: retry,
+      });
+    }
+  } catch (e) {
+    // Si la tabla rate_limits no existe aún, se deja pasar (no bloquear por
+    // migración faltante), pero se loguea.
+    console.error("rate-limit check failed (forgot-password)", e);
+  }
+
+  // paso 2: verificar la respuesta. se normaliza con .trim().toLowerCase() para
+  // que "Santa Marta" == "santa marta " == "SANTA MARTA".
+  const normalizedAnswer = String(answer).trim().toLowerCase();
+  const ok = await verifyPassword(normalizedAnswer, tienePregunta ? data.security_answer : HASH_FALSO);
   if (!tienePregunta || !ok) {
     return json(c, 400, { error: NO_COINCIDE });
   }
+
+  // Respuesta correcta → reiniciar contadores
+  try {
+    await Promise.all([resetLimit(db, userKey), resetLimit(db, ipKey)]);
+  } catch { /* no crítico */ }
 
   const hashed = await hashPassword(String(newPassword));
   try {
