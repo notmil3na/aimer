@@ -120,6 +120,7 @@ export default function Dashboard({ user, onLogout, onUpdateUser, appBooting = f
   const siteTextRootRef = useRef(null);
   const [adminMode, setAdminMode] = useState(false);
   const [tab, setTab] = useState(() => {
+    if (demoMode) return "horario";
     try {
       const key = `malla_tutorial_v2_${user.username}`;
       if (!localStorage.getItem(key)) return "config";
@@ -144,7 +145,7 @@ export default function Dashboard({ user, onLogout, onUpdateUser, appBooting = f
       : 0
   );
   const toastTimerRef = useRef(null);
-  const [showOnboarding, setShowOnboarding] = useState(() => !hasCompletedTutorial(user.username));
+  const [showOnboarding, setShowOnboarding] = useState(() => !demoMode && !hasCompletedTutorial(user.username));
 
   const [onboardingChecked, setOnboardingChecked] = useState(() => {
     try {
