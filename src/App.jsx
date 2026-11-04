@@ -1,9 +1,9 @@
 import { Suspense, lazy, useState, useEffect, useRef, useCallback } from "react";
 const Login = lazy(() => import("./pages/Login"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
-const Demo = lazy(() => import("./pages/Demo"));
 const UpdatePrompt = lazy(() => import("./components/UpdatePrompt"));
-import { api, saveSession, clearSession, getSession, logout } from "./api";
+import { api, saveSession, clearSession, getSession, isDemoMode, logout } from "./api";
+import { DEMO_USER } from "./demoData.js";
 import { getPhoto } from "./utils/photo";
 import useGlobalSiteText from "./hooks/useGlobalSiteText";
 import LoadingScreen from "./components/LoadingScreen";
@@ -144,8 +144,8 @@ export async function saveUser(userData) {
 }
 
 export default function App() {
-  const isDemo = window.location.pathname.replace(/\/+$/, "") === "/demo";
-  const [user, setUser]   = useState(null);
+  const isDemo = isDemoMode();
+  const [user, setUser]   = useState(isDemo ? DEMO_USER : null);
   const [ready, setReady] = useState(isDemo);
   const [boot, setBoot] = useState(!isDemo);
   const publicScopeRef = useRef(null);
@@ -153,7 +153,10 @@ export default function App() {
   useGlobalSiteText(isDemo || user ? "" : "login", publicScopeRef, false);
 
   useEffect(() => {
-    if (isDemo) return undefined;
+    if (isDemo) {
+      applyTheme(DEMO_USER.appTheme, DEMO_USER.appMode);
+      return undefined;
+    }
     let cancelled = false;
     (async () => {
       // las preferencias guardadas permiten pintar el tema al instante; la
@@ -202,6 +205,7 @@ export default function App() {
   };
 
   const handleLogout = () => {
+    if (isDemo) return;
     const currentMode  = user?.appMode  || "light";
     const currentTheme = user?.appTheme || "ambar";
     setUser(null);
@@ -210,6 +214,11 @@ export default function App() {
   };
 
   const handleUpdateUser = async (updated) => {
+    if (isDemo) {
+      setUser(updated);
+      applyTheme(updated.appTheme || "ambar", updated.appMode || "light", updated.fontBody);
+      return;
+    }
     saveSession(updated);
     setUser(updated);
     applyTheme(updated.appTheme || "ambar", updated.appMode || "light", updated.fontBody);
@@ -220,14 +229,13 @@ export default function App() {
     <>
       {ready && (
         <Suspense fallback={<LoadingScreen progress={90} />}>
-          {isDemo ? (
-            <Demo />
-          ) : user ? (
+          {user ? (
             <Dashboard
               user={user}
               onLogout={handleLogout}
               onUpdateUser={handleUpdateUser}
               appBooting={boot}
+              demoMode={isDemo}
             />
           ) : (
             <div
@@ -238,7 +246,7 @@ export default function App() {
               <Login onLogin={handleLogin} />
             </div>
           )}
-          {user && <UpdatePrompt />}
+          {user && !isDemo && <UpdatePrompt />}
         </Suspense>
       )}
       {boot && <LoadingScreen ready={ready} onDone={finishBoot} />}

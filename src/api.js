@@ -1,5 +1,92 @@
+import { DEMO_FRIENDS, DEMO_USER, DEMO_USER_DATA, cloneDemoData } from "./demoData.js";
+
 const BASE = "/api";
 const STORAGE_KEY = "malla_session";
+let demoData = cloneDemoData(DEMO_USER_DATA);
+const demoRelationships = Object.fromEntries(
+  DEMO_FRIENDS.map((friend) => [friend.username, { status: "aceptado", requestedBy: DEMO_USER.username }])
+);
+const demoMessages = Object.fromEntries(
+  DEMO_FRIENDS.slice(0, 2).map((friend, index) => [friend.username, [
+    { id: `demo-message-${index}-1`, sender: friend.username, content: index === 0 ? "¿Ya empezaste el taller de estructuras?" : "¡Nos vemos en clase!", message_type: "text", created_at: new Date(Date.now() - (index + 1) * 3600000).toISOString(), read: index > 0 },
+    { id: `demo-message-${index}-2`, sender: DEMO_USER.username, content: index === 0 ? "Sí, voy por los árboles AVL. ¿Tú?" : "¡Listo!", message_type: "text", created_at: new Date(Date.now() - index * 1800000).toISOString(), read: true },
+  ]])
+);
+
+export function isDemoMode() {
+  return window.location.pathname.replace(/\/+$/, "") === "/demo";
+}
+
+function demoResponse(path, method, body) {
+  const url = new URL(path, window.location.origin);
+  const route = url.pathname.replace(/^\/api/, "");
+  const query = url.searchParams;
+
+  if (route === "/user_data" && method === "GET") return { data: cloneDemoData(demoData) };
+  if (route === "/user_data" && method === "POST") {
+    demoData = { ...demoData, ...(body?.patch || {}) };
+    demoData.version += 1;
+    return { ok: true, version: demoData.version, updated_at: new Date().toISOString() };
+  }
+  if (route.startsWith("/user_data/") && method === "GET") return { data: cloneDemoData(demoData) };
+  if (route === "/auth/me") return { user: DEMO_USER };
+  if (route === "/auth/security" && method === "GET") return { question: "¿Cuál fue tu primer colegio?" };
+  if (route === "/site-content") return { items: [] };
+  if (route === "/push" && method === "GET") return { publicKey: "", sentKeys: [], subscribed: false };
+  if (route === "/push") return { ok: true, sentKeys: [], subscribed: false };
+  if (route === "/photo/camila-demo" || route.startsWith("/photo/")) return { photo: null };
+  if (route === "/users" && method === "GET") {
+    const search = (query.get("q") || "").trim().toLowerCase();
+    return { data: DEMO_FRIENDS.filter((friend) => !search || `${friend.name} ${friend.username}`.toLowerCase().includes(search)) };
+  }
+  if (route === "/users" && method === "POST") return { ok: true, hasPhoto: false };
+  if (route === "/friendships" && method === "GET") {
+    if (query.get("view") === "chat") {
+      if (query.has("other")) {
+        const other = query.get("other");
+        return { data: { conversation_id: `demo-${other}`, messages: cloneDemoData(demoMessages[other] || []) } };
+      }
+      return {
+        data: DEMO_FRIENDS.slice(0, 2).map((friend) => {
+          const messages = demoMessages[friend.username] || [];
+          const last = messages[messages.length - 1] || null;
+          return { partner: friend.username, last, unread: messages.filter((message) => message.sender === friend.username && !message.read).length, pinned: false };
+        }),
+      };
+    }
+    return { data: cloneDemoData(demoRelationships) };
+  }
+  if (route === "/friendships" && method === "POST") {
+    if (body?.action === "chatSend" && demoMessages[body.other]) {
+      const message = {
+        id: `demo-message-${Date.now()}`,
+        sender: DEMO_USER.username,
+        content: body.content || "",
+        message_type: body.message_type || "text",
+        payload: body.payload || null,
+        created_at: new Date().toISOString(),
+        read: true,
+      };
+      demoMessages[body.other].push(message);
+      return { ok: true, data: message };
+    }
+    if (body?.action === "chatOpen") {
+      demoMessages[body.other] ||= [];
+      return { ok: true, data: { conversation_id: `demo-${body.other}`, messages: cloneDemoData(demoMessages[body.other]) } };
+    }
+    if (body?.action === "chatUploadURL") return { ok: false, error: "Los adjuntos no están disponibles en la demo." };
+    return { ok: true, data: null };
+  }
+  if (route === "/auth/security" && method === "POST") return { ok: true };
+  if (route === "/auth/change-password" || route === "/auth/delete-account") {
+    throw Object.assign(new Error("Esta acción no está disponible en la cuenta de demostración."), { status: 403 });
+  }
+  if (route.startsWith("/admin/")) {
+    throw Object.assign(new Error("La administración no está disponible en la demo."), { status: 403 });
+  }
+
+  throw Object.assign(new Error(`La ruta ${route} no está disponible en la demo.`), { status: 501 });
+}
 
 function readSession() {
   for (const store of [localStorage, sessionStorage]) {
@@ -92,6 +179,8 @@ export function clearSession() {
 const PUBLIC_AUTH_PATHS = new Set(["/auth/login", "/auth/register"]);
 
 export async function api(path, { method = "GET", body, skipAuth = false, soft401 = false } = {}) {
+  if (isDemoMode()) return demoResponse(path, method.toUpperCase(), body);
+
   let res;
   try {
     res = await fetch(BASE + path, {

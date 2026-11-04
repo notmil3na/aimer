@@ -20,7 +20,7 @@ function saveSet(key, set) {
   } catch {}
 }
 
-export default function useReminders({ items, eventos }) {
+export default function useReminders({ items, eventos }, enabled = true) {
   const [permission, setPermission] = useState(
     typeof Notification !== "undefined" ? Notification.permission : "unsupported"
   );
@@ -34,6 +34,7 @@ export default function useReminders({ items, eventos }) {
   const lastKeyRef = useRef("");
 
   const activatePush = useCallback(async () => {
+    if (!enabled) return false;
     setPushError(null);
     setPushFeedback(null);
     const r = await enablePush();
@@ -41,24 +42,27 @@ export default function useReminders({ items, eventos }) {
     setSubscribed(r.ok);
     if (!r.ok) setPushError(r.error);
     return r.ok;
-  }, []);
+  }, [enabled]);
 
   const requestPermission = useCallback(async () => {
+    if (!enabled) return;
     if (typeof Notification === "undefined") return;
     const p = await Notification.requestPermission();
     setPermission(p);
     if (p === "granted") await activatePush();
-  }, [activatePush]);
+  }, [activatePush, enabled]);
 
   const disablePushCb = useCallback(async () => {
+    if (!enabled) return;
     await disablePush();
     setPushEnabled(false);
     setSubscribed(false);
     setPushError(null);
     setPushFeedback(null);
-  }, []);
+  }, [enabled]);
 
   useEffect(() => {
+    if (!enabled) return undefined;
     let mounted = true;
     (async () => {
       const state = await fetchPushState();
@@ -85,9 +89,13 @@ export default function useReminders({ items, eventos }) {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [enabled]);
 
   useEffect(() => {
+    if (!enabled) {
+      setDue([]);
+      return undefined;
+    }
     const scan = () => {
       const now = new Date();
       const found = computeDueNotifications({ items, eventos }, now);
@@ -117,7 +125,7 @@ export default function useReminders({ items, eventos }) {
     scan();
     const id = setInterval(scan, 60000);
     return () => clearInterval(id);
-  }, [items, eventos, permission]);
+  }, [items, eventos, permission, enabled]);
 
   const dismiss = useCallback((key) => {
     dismissedRef.current.add(key);
@@ -126,6 +134,7 @@ export default function useReminders({ items, eventos }) {
   }, []);
 
   const sendTest = useCallback(async () => {
+    if (!enabled) return;
     if (permission !== "granted" || typeof Notification === "undefined") return;
     if (subscribed) {
       setPushError(null);
@@ -149,7 +158,7 @@ export default function useReminders({ items, eventos }) {
     if (isIOS() && !isStandalone()) {
       setPushError("En iPhone/iPad añade la app a la pantalla de inicio (Compartir → Añadir a pantalla de inicio) para recibir notificaciones.");
     }
-  }, [permission, subscribed]);
+  }, [permission, subscribed, enabled]);
 
   return { due, permission, requestPermission, dismiss, sendTest, pushEnabled, subscribed, pushError, pushFeedback, activatePush, disablePush: disablePushCb };
 }

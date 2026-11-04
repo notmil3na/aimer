@@ -11,7 +11,7 @@ ALTER TABLE users ADD COLUMN security_answer TEXT;`;
 const SET_FLAG = "malla_security_set";
 const DISMISSED_FLAG = "malla_security_dismissed";
 
-export default function SecuritySetupModal() {
+export default function SecuritySetupModal({ disabled = false }) {
   const [mode, setMode] = useState("hidden");
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
@@ -23,6 +23,7 @@ export default function SecuritySetupModal() {
   useBodyScrollLock(mode !== "hidden");
 
   useEffect(() => {
+    if (disabled) return undefined;
     let alive = true;
     if (localStorage.getItem(SET_FLAG) === "1") return;
     api("/auth/security")
@@ -38,7 +39,7 @@ export default function SecuritySetupModal() {
       })
       .catch(() => {});
     return () => { alive = false; };
-  }, []);
+  }, [disabled]);
 
   const dismiss = () => {
     sessionStorage.setItem(DISMISSED_FLAG, "1");
@@ -87,7 +88,7 @@ export default function SecuritySetupModal() {
     }
   };
 
-  if (mode === "hidden") return null;
+  if (disabled || mode === "hidden") return null;
 
   return (
     <div className={styles.overlay}>

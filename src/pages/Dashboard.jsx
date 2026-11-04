@@ -10,6 +10,7 @@ import useMediaQuery from "../hooks/useMediaQuery";
 import { getMallaByCareer } from "../data/malla.js";
 import { MALLA_SISTEMAS_2022, aplicaPlan2022, claveEstado, traducirDatosGuardados } from "../data/malla2022.js";
 import { api, getSessionData, updateSessionData } from "../api";
+import { DEMO_USER_DATA, cloneDemoData } from "../demoData.js";
 import { getPendingSaves, hasPendingSaves, queueSave, clearPendingSave, getPendingEntries } from "../utils/offlineQueue.js";
 import { mergeUserData, mergeColumnData } from "../utils/dataMerge.js";
 import styles from "./Dashboard.module.css";
@@ -115,7 +116,7 @@ function hasCompletedTutorial(username) {
   }
 }
 
-export default function Dashboard({ user, onLogout, onUpdateUser, appBooting = false }) {
+export default function Dashboard({ user, onLogout, onUpdateUser, appBooting = false, demoMode = false }) {
   const siteTextRootRef = useRef(null);
   const [adminMode, setAdminMode] = useState(false);
   const [tab, setTab] = useState(() => {
@@ -128,7 +129,7 @@ export default function Dashboard({ user, onLogout, onUpdateUser, appBooting = f
   useGlobalSiteText(`dashboard:${tab}`, siteTextRootRef);
   const isPhone = useMediaQuery("(max-width: 800px)");
   const cachedRef = useRef(null);
-  if (cachedRef.current === null) cachedRef.current = getSessionData();
+  if (cachedRef.current === null) cachedRef.current = demoMode ? cloneDemoData(DEMO_USER_DATA) : getSessionData();
   const cached = cachedRef.current;
   const dataVersionRef = useRef(cached?.version || 1);
   const [loaded, setLoaded] = useState(!!cached);
@@ -246,6 +247,11 @@ export default function Dashboard({ user, onLogout, onUpdateUser, appBooting = f
   const persistColumn = useCallback(async (column, data, applyLocal) => {
     applyLocal(data);
     if (column === "malla") setHayMallaGuardada(true);
+    if (demoMode) {
+      await saveUserData({ [column]: data }, dataVersionRef.current);
+      notify("Cambios guardados solo en esta demostración");
+      return;
+    }
     updateSessionData({ [column]: data });
 
     if (!navigator.onLine) {
@@ -289,7 +295,7 @@ export default function Dashboard({ user, onLogout, onUpdateUser, appBooting = f
     queueSave(column, data, dataVersionRef.current, user.username);
     setPendingCount(Object.keys(getPendingSaves(user.username)).length);
     notify("Sin conexión: tus cambios quedaron guardados y se sincronizarán al volver.");
-  }, [user.username, notify]);
+  }, [user.username, notify, demoMode]);
 
   useEffect(() => {
     const flush = async () => {
@@ -333,6 +339,7 @@ export default function Dashboard({ user, onLogout, onUpdateUser, appBooting = f
       if (okCount > 0) notify(`${okCount} cambio(s) sincronizado(s) con la nube`);
     };
 
+    if (demoMode) return undefined;
     const onOnline = () => { setIsOffline(false); flush(); };
     const onOffline = () => { setIsOffline(true); };
 
@@ -344,7 +351,7 @@ export default function Dashboard({ user, onLogout, onUpdateUser, appBooting = f
       window.removeEventListener("online", onOnline);
       window.removeEventListener("offline", onOffline);
     };
-  }, [user.username, notify, baseMalla, esPlan2022]);
+  }, [user.username, notify, baseMalla, esPlan2022, demoMode]);
 
   useEffect(() => {
     async function load() {
@@ -428,7 +435,7 @@ export default function Dashboard({ user, onLogout, onUpdateUser, appBooting = f
   const reminders = useReminders({
     items: asignacionesData?.items || [],
     eventos: calendarioData?.eventos || [],
-  });
+  }, !demoMode);
 
   const enrollMateriasFromPlan = useCallback((materiaIds) => {
     const idSet = new Set(materiaIds);
@@ -493,6 +500,11 @@ export default function Dashboard({ user, onLogout, onUpdateUser, appBooting = f
         data-site-text-scope={`dashboard:${tab}`}
         className={`${styles.main}${tab === "chat" ? ` ${styles.mainChat}` : ""}`}
       >
+        {demoMode && (
+          <div className={styles.demoNotice} role="note">
+            Vista de demostración · Perfil y datos ficticios; los cambios no se guardan en una cuenta real.
+          </div>
+        )}
         {showOnboarding && (
           <div className={styles.onboardingBar} ref={onboardingRef}>
             <div className={styles.onboardingCard}>
@@ -658,7 +670,7 @@ export default function Dashboard({ user, onLogout, onUpdateUser, appBooting = f
           )}
         </div>
       )}
-      <SecuritySetupModal />
+      <SecuritySetupModal disabled={demoMode} />
       {(isOffline || pendingCount > 0) && (
         <div className={styles.offlineBar}>
           <span className={styles.offlineDot} />

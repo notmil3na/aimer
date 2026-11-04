@@ -24,6 +24,8 @@ npm run build
 npm run preview
 ```
 
+La ruta `/demo` muestra el dashboard real con un perfil y datos académicos ficticios. En esa ruta las llamadas API se sustituyen por respuestas locales en memoria; no se necesita iniciar sesión y los cambios de demostración no llegan a producción.
+
 El despliegue de producción usa Cloudflare Workers, D1 y R2. Configura primero los secretos indicados en esta guía y luego aplica las migraciones, compila los assets y despliega:
 
 ```powershell

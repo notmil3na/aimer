@@ -20,6 +20,19 @@
   padding-bottom: env(safe-area-inset-bottom);
 }
 
+.demoNotice {
+  position: sticky;
+  z-index: 20;
+  top: 0;
+  padding: 8px 16px;
+  border-bottom: 1px solid color-mix(in srgb, var(--accent-border) 28%, transparent);
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--surface) 92%, var(--modal-bg));
+  font-size: 11px;
+  text-align: center;
+  backdrop-filter: blur(var(--glass-blur));
+}
+
 .toast {
   position: fixed;
   right: 20px;
