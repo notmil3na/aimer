@@ -1,4 +1,4 @@
-const CACHE = "aimer-v13";
+const CACHE = "aimer-v14";
 // a donde salta el servidor local de pruebas (vite preview), que no tiene /api
 const NEW_ORIGIN = "https://aimer-project.yaritzamilena4.workers.dev";
 // El salto es SOLO para localhost. Antes se aplicaba a cualquier origen distinto
@@ -16,8 +16,6 @@ const CORE = [
   "/icons/icon-512-maskable.png",
   "/icons/apple-touch-icon.png",
 ];
-const PRECACHE = [];
-
 const isSwVersion = (key) => key.startsWith("aimer-v");
 const toNumber = (key) => Number(key.replace(/^aimer-v/, "")) || 0;
 
@@ -108,8 +106,7 @@ self.addEventListener("install", (e) => {
     caches
       .open(CACHE)
       .then(async (c) => {
-        const list = self.registration.active ? [...CORE, ...PRECACHE] : CORE;
-        const jobs = [...new Set(list)].map(async (url) => {
+        const jobs = [...new Set(CORE)].map(async (url) => {
           try {
             const req = new Request(url, { cache: "no-store" });
             const res = await fetch(req);

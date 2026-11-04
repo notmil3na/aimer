@@ -203,26 +203,6 @@ export default function Login({ onLogin }) {
   const isRegister = tab === "register";
 
   useEffect(() => {
-    // El dashboard se calienta cuando el navegador ya pintó el formulario y
-    // está libre. Pedirlo al montar el login ponía a competir Dashboard,
-    // HorarioView y academic con el LCP de una pantalla que solo es un form.
-    const idle = window.requestIdleCallback
-      ? window.requestIdleCallback.bind(window)
-      : (cb) => setTimeout(cb, 1200);
-    const cancelIdle = window.cancelIdleCallback
-      ? window.cancelIdleCallback.bind(window)
-      : clearTimeout;
-
-    const id = idle(() => {
-      import("../pages/Dashboard");
-      import("../components/HorarioView");
-      import("../components/UpdatePrompt");
-    }, { timeout: 4000 });
-
-    return () => cancelIdle(id);
-  }, []);
-
-  useEffect(() => {
     if (!isRegister || !form.username.trim()) {
       setUsernameStatus("idle");
       return;

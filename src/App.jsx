@@ -2,7 +2,7 @@ import { Suspense, lazy, useState, useEffect, useRef, useCallback } from "react"
 const Login = lazy(() => import("./pages/Login"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const UpdatePrompt = lazy(() => import("./components/UpdatePrompt"));
-import { api, saveSession, clearSession, getSession, logout, prewarm } from "./api";
+import { api, saveSession, clearSession, getSession, logout } from "./api";
 import { getPhoto } from "./utils/photo";
 import useGlobalSiteText from "./hooks/useGlobalSiteText";
 import LoadingScreen from "./components/LoadingScreen";
@@ -152,7 +152,6 @@ export default function App() {
 
   useEffect(() => {
     let cancelled = false;
-    prewarm();
     (async () => {
       // las preferencias guardadas permiten pintar el tema al instante; la
       // sesión real la valida la cookie contra /auth/me.

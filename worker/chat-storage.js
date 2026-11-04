@@ -11,6 +11,48 @@ export const MAX_PENDING_UPLOADS = 30;
 // puede completarse, así que se borra para que no ocupe cuota para siempre.
 const PENDING_UPLOAD_TTL_MS = 6 * 60 * 60 * 1000;
 
+export async function deleteUserMessages(db, bucket, username, conversationId = null) {
+  const messageScope = conversationId
+    ? "m.sender = ? AND m.conversation_id = ?"
+    : "m.sender = ?";
+  const uploadScope = conversationId
+    ? "username = ? AND conversation_id = ?"
+    : "username = ?";
+  const scopeBindings = conversationId ? [username, conversationId] : [username];
+  const paths = await db
+    .prepare(
+      `SELECT a.storage_path AS path
+         FROM message_attachments a
+         JOIN messages m ON m.id = a.message_id
+        WHERE ${messageScope} AND a.storage_path IS NOT NULL
+       UNION
+       SELECT path FROM chat_uploads WHERE ${uploadScope}`
+    )
+    .bind(...scopeBindings, ...scopeBindings)
+    .all();
+  const uniquePaths = [...new Set((paths.results || []).map((row) => row.path).filter(Boolean))];
+
+  if (uniquePaths.length && !bucket) throw new Error("R2_BUCKET no está configurado");
+  for (let i = 0; i < uniquePaths.length; i += 1000) {
+    await bucket.delete(uniquePaths.slice(i, i + 1000));
+  }
+
+  const statements = [
+    db.prepare(
+      `DELETE FROM message_attachments WHERE message_id IN
+        (SELECT id FROM messages WHERE ${messageScope})`
+    ).bind(...scopeBindings),
+    db.prepare(
+      `DELETE FROM message_academic_items WHERE message_id IN
+        (SELECT id FROM messages WHERE ${messageScope})`
+    ).bind(...scopeBindings),
+    db.prepare(`DELETE FROM messages WHERE ${messageScope}`).bind(...scopeBindings),
+    db.prepare(`DELETE FROM chat_uploads WHERE ${uploadScope}`).bind(...scopeBindings),
+  ];
+  await db.batch(statements);
+  return uniquePaths.length;
+}
+
 export async function cleanupStaleUploads(db, bucket, username) {
   if (!bucket) return;
   const cutoff = new Date(Date.now() - PENDING_UPLOAD_TTL_MS).toISOString();

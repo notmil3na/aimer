@@ -195,11 +195,8 @@ export async function verifyPath(env, path, token) {
 }
 
 // ---- sesión en cookie HttpOnly ----------------------------------------------
-// El navegador guarda el JWT en una cookie que JavaScript no puede leer, así que
-// un XSS (o una extensión) ya no puede llevarse la sesión. `HttpOnly` la oculta
-// de document.cookie, `Secure` evita que viaje por http y `SameSite=Lax` corta
-// los POST de otros sitios (CSRF). El Bearer se sigue aceptando solo para no
-// romper clientes viejos durante el despliegue.
+// The HttpOnly cookie keeps the JWT inaccessible to JavaScript.
+// Secure and SameSite=Lax limit transport and cross-site request risks.
 
 export const SESSION_COOKIE = "aimer_session";
 
@@ -239,13 +236,8 @@ export function clearSessionCookie(c) {
 }
 
 export function getToken(c) {
-  // La cookie HttpOnly manda; el Bearer solo se acepta para migrar clientes
-  // viejos que todavía tengan el token en localStorage.
-  const cookie = readCookie(c, SESSION_COOKIE);
-  if (cookie) return cookie;
-  const header = c.req.header("authorization") || "";
-  if (header.startsWith("Bearer ")) return header.slice(7);
-  return null;
+  // Only the HttpOnly cookie is accepted as a credential.
+  return readCookie(c, SESSION_COOKIE);
 }
 
 async function tokenFingerprint(token) {

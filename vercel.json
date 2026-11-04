@@ -1,0 +1,9 @@
+{
+  "redirects": [
+    {
+      "source": "/:path*",
+      "destination": "https://aimer-project.yaritzamilena4.workers.dev/:path*",
+      "permanent": true
+    }
+  ]
+}

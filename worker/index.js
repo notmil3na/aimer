@@ -5,12 +5,11 @@
 import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
 
-import { setSessionCookie, validateSession } from "./lib.js";
-
 import { handler as login } from "./routes/auth/login.js";
 import { handler as register } from "./routes/auth/register.js";
 import { handler as me } from "./routes/auth/me.js";
 import { handler as logout } from "./routes/auth/logout.js";
+import { handler as deleteAccount } from "./routes/auth/delete-account.js";
 import { handler as security } from "./routes/auth/security.js";
 import { handler as forgotPassword } from "./routes/auth/forgot-password.js";
 import { handler as changePassword } from "./routes/auth/change-password.js";
@@ -57,17 +56,6 @@ app.use("/api/*", async (c, next) => {
     }
   }
 
-  // migración desde la sesión vieja en localStorage: el cliente aún manda
-  // `Authorization: Bearer`; si el token vale, se deja también la cookie
-  // HttpOnly. El cliente borra el token después de la primera respuesta buena.
-  const auth = c.req.header("authorization") || "";
-  if (auth.startsWith("Bearer ")) {
-    const token = auth.slice(7);
-    // Validar también revocación y session_version: un token viejo ya no debe
-    // convertirse de nuevo en cookie.
-    if (await validateSession(c, token)) setSessionCookie(c, token);
-  }
-
   await next();
 });
 
@@ -75,6 +63,7 @@ app.all("/api/auth/login", login);
 app.all("/api/auth/register", register);
 app.all("/api/auth/me", me);
 app.all("/api/auth/logout", logout);
+app.all("/api/auth/delete-account", deleteAccount);
 app.all("/api/auth/security", security);
 app.all("/api/auth/forgot-password", forgotPassword);
 app.all("/api/auth/change-password", changePassword);

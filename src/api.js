@@ -30,12 +30,7 @@ function stripLegacyToken() {
   }
 }
 
-/* Token de una sesión anterior a la cookie: se usa una sola vez para que el
-   servidor emita la cookie y después se borra del almacenamiento. */
-function legacyToken() {
-  const s = readSession();
-  return s && typeof s.token === "string" && s.token ? s.token : null;
-}
+stripLegacyToken();
 
 /* true cuando la sesión sobrevive al cierre del navegador (localStorage). */
 export function isPersistentSession() {
@@ -97,17 +92,12 @@ export function clearSession() {
 const PUBLIC_AUTH_PATHS = new Set(["/auth/login", "/auth/register"]);
 
 export async function api(path, { method = "GET", body, skipAuth = false, soft401 = false } = {}) {
-  const legacy = skipAuth ? null : legacyToken();
   let res;
   try {
     res = await fetch(BASE + path, {
       method,
       credentials: "same-origin", // la cookie HttpOnly viaja sola
-      headers: {
-        "Content-Type": "application/json",
-        // solo durante la migración: el servidor lo cambia por la cookie.
-        ...(legacy ? { Authorization: `Bearer ${legacy}` } : {}),
-      },
+      headers: { "Content-Type": "application/json" },
       body: body === undefined ? undefined : JSON.stringify(body),
     });
   } catch (netErr) {
@@ -146,7 +136,6 @@ export async function api(path, { method = "GET", body, skipAuth = false, soft40
     err.status = res.status;
     throw err;
   }
-  if (legacy) stripLegacyToken();
   if (data === null) {
     const err = new Error("El servidor no devolvió una respuesta válida");
     err.status = res.status;
@@ -157,27 +146,11 @@ export async function api(path, { method = "GET", body, skipAuth = false, soft40
 
 /* Cierra la sesión en el servidor (borra la cookie) y en el navegador. */
 export async function logout() {
-  // Leer el token viejo antes de borrar el almacenamiento: así el servidor
-  // también puede revocarlo si venimos de una sesión en localStorage.
-  const legacy = legacyToken();
   clearSession();
   try {
     await fetch(BASE + "/auth/logout", {
       method: "POST",
       credentials: "same-origin",
-      headers: legacy ? { Authorization: `Bearer ${legacy}` } : undefined,
     });
   } catch (_) {}
-}
-
-const WARM_PATHS = ["/auth/login", "/auth/me", "/user_data", "/auth/security"];
-
-export function prewarm() {
-  if (typeof fetch === "undefined" || typeof document === "undefined") return;
-  if (document.visibilityState === "hidden") return;
-  WARM_PATHS.forEach((path) => {
-    try {
-      fetch(BASE + path, { method: "GET", keepalive: true, credentials: "same-origin" }).catch(() => {});
-    } catch (_) {}
-  });
 }

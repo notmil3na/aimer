@@ -1,14 +1,16 @@
 import { useState, useEffect } from "react";
 import { api } from "../api";
 
-const cacheKey = (username) => `malla_photo_${username}`;
-
-export function setPhotoCache(username, photo) {
+function clearCachedPhotos() {
   try {
-    if (photo) localStorage.setItem(cacheKey(username), photo);
-    else localStorage.removeItem(cacheKey(username));
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith("malla_photo_")) localStorage.removeItem(key);
+    }
   } catch (_) {}
 }
+
+clearCachedPhotos();
 
 export async function compressPhoto(dataUrl, maxSize = 256, quality = 0.82) {
   if (typeof document === "undefined" || !dataUrl) return dataUrl;
@@ -39,7 +41,6 @@ async function healPhoto(username, photo) {
     const small = await compressPhoto(photo, 256, 0.82);
     if (small && small !== photo) {
       await api("/users", { method: "POST", body: { photo: small } });
-      setPhotoCache(username, small);
     }
   } catch (_) {}
 }
@@ -47,15 +48,8 @@ async function healPhoto(username, photo) {
 export async function getPhoto(username) {
   if (!username) return null;
   try {
-    const cached = localStorage.getItem(cacheKey(username));
-    if (cached) return cached;
-  } catch (_) {}
-  try {
     const { photo } = await api(`/photo/${encodeURIComponent(username)}`, { soft401: true });
-    if (photo) {
-      setPhotoCache(username, photo);
-      if (photo.length > 200000) healPhoto(username, photo);
-    }
+    if (photo && photo.length > 200000) healPhoto(username, photo);
     return photo || null;
   } catch (_) {
     return null;

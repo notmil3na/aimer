@@ -4,7 +4,7 @@ import { SEMESTER_CORTE } from "../utils/semesterCountdown";
 import { UNIVERSITIES, autoSemester } from "../utils/academic";
 import { calcCareerTime, estimateGraduation } from "../utils/careerProgress.js";
 import { semesterDatesFor, semesterCorteFor } from "../utils/semesterCountdown.js";
-import { getPhoto, compressPhoto, setPhotoCache } from "../utils/photo";
+import { getPhoto, compressPhoto } from "../utils/photo";
 import { FONT_OPTIONS } from "../utils/fonts";
 import { api, isPersistentSession } from "../api";
 import styles from "./SettingsView.module.css";
@@ -57,12 +57,15 @@ const INTERNAL_TABS = [
   { id: "apariencia",  label: "Apariencia",  Icon: IconPaint },
 ];
 
-export default function SettingsView({ user, onUpdate, malla, semestre, onSaveSemestre, adminMode = false, onToggleAdminMode }) {
+export default function SettingsView({ user, onUpdate, onLogout, malla, semestre, onSaveSemestre, adminMode = false, onToggleAdminMode }) {
   const [activeSection, setActiveSection] = useState("cuenta");
   const [passwordForm, setPasswordForm] = useState({ current: "", next: "", confirm: "" });
   const [passwordBusy, setPasswordBusy] = useState(false);
   const [passwordError, setPasswordError] = useState("");
   const [passwordSaved, setPasswordSaved] = useState(false);
+  const [deleteForm, setDeleteForm] = useState({ password: "", username: "" });
+  const [deleteBusy, setDeleteBusy] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
 
   const [form, setForm] = useState({
     name:         user.name         || "",
@@ -103,7 +106,6 @@ export default function SettingsView({ user, onUpdate, malla, semestre, onSaveSe
     if (key === lastSavedRef.current) return;
     lastSavedRef.current = key;
     onUpdate(payload);
-    if (form.photo) setPhotoCache(user.username, form.photo);
     if (semInicio && semFin && semInicio <= semFin) {
       onSaveSemestre({ inicio: semInicio, fin: semFin });
     }
@@ -180,6 +182,28 @@ export default function SettingsView({ user, onUpdate, malla, semestre, onSaveSe
       setPasswordError(error.message || "No se pudo cambiar la contraseña.");
     } finally {
       setPasswordBusy(false);
+    }
+  };
+
+  const handleDeleteAccount = async (e) => {
+    e.preventDefault();
+    setDeleteError("");
+    if (deleteForm.username !== user.username) {
+      setDeleteError("Escribe tu usuario exactamente para confirmar.");
+      return;
+    }
+
+    setDeleteBusy(true);
+    try {
+      await api("/auth/delete-account", {
+        method: "POST",
+        body: { currentPassword: deleteForm.password, confirmUsername: deleteForm.username },
+      });
+      onLogout();
+    } catch (error) {
+      setDeleteError(error.message || "No se pudo eliminar la cuenta.");
+    } finally {
+      setDeleteBusy(false);
     }
   };
 
@@ -523,6 +547,44 @@ export default function SettingsView({ user, onUpdate, malla, semestre, onSaveSe
               {passwordSaved && <p className={styles.passwordSuccess} role="status">Contraseña actualizada. Las demás sesiones se cerraron.</p>}
               <button className={styles.passwordButton} type="submit" disabled={passwordBusy}>
                 {passwordBusy ? "Actualizando…" : "Actualizar contraseña"}
+              </button>
+            </form>
+          </section>
+
+          <section className={`${styles.passwordCard} ${styles.deleteAccountCard}`}>
+            <h3 className={styles.careerTitle}>Eliminar cuenta</h3>
+            <p className={styles.passwordHint}>
+              Esta acción es permanente. Se eliminarán tu perfil, tus datos y tus mensajes y archivos enviados.
+              Los mensajes recibidos se conservarán en un chat archivado y anónimo para la otra persona.
+            </p>
+            <form className={styles.passwordForm} onSubmit={handleDeleteAccount}>
+              <div className={styles.passwordGrid}>
+                <div className={styles.field}>
+                  <label htmlFor="delete-account-password">Contraseña actual</label>
+                  <input
+                    id="delete-account-password"
+                    type="password"
+                    autoComplete="current-password"
+                    required
+                    value={deleteForm.password}
+                    onChange={(e) => setDeleteForm((form) => ({ ...form, password: e.target.value }))}
+                  />
+                </div>
+                <div className={styles.field}>
+                  <label htmlFor="delete-account-username">Escribe {user.username} para confirmar</label>
+                  <input
+                    id="delete-account-username"
+                    type="text"
+                    autoComplete="off"
+                    required
+                    value={deleteForm.username}
+                    onChange={(e) => setDeleteForm((form) => ({ ...form, username: e.target.value }))}
+                  />
+                </div>
+              </div>
+              {deleteError && <p className={styles.passwordError} role="alert">{deleteError}</p>}
+              <button className={`${styles.passwordButton} ${styles.deleteButton}`} type="submit" disabled={deleteBusy}>
+                {deleteBusy ? "Eliminando…" : "Eliminar mi cuenta"}
               </button>
             </form>
           </section>

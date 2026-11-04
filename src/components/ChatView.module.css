@@ -662,6 +662,13 @@
   background: color-mix(in srgb, var(--surface2) 70%, transparent);
   flex-shrink: 0;
 }
+.threadArchivedNotice {
+  border-top: 1px solid var(--border);
+  padding: 14px 18px;
+  color: var(--text-muted);
+  font-size: 12px;
+  text-align: center;
+}
 
 .composerInput {
   flex: 1;

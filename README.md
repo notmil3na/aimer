@@ -7,6 +7,47 @@ lugar y sin tener que andar con mil apps, excels y capturas perdidas en el celul
 Por qué existe
 Si quieres llevar la cuenta de qué materias ya viste, cuáles te faltan, qué prerrequisitos te están frenando tu hoja de vida y qué entregas tienes esta semana puede ser un caos si todo está regado. Aimer nació de la necesidad de tenerlo todo en un mismo lugar, que se vea bonito y que funcione incluso cuando el internet de la universidad decide no cooperar.
 
+Desarrollo y despliegue
+-----------------------
+
+Requiere Node.js y npm. Para instalar dependencias y levantar el frontend:
+
+```powershell
+npm ci
+npm run dev
+```
+
+En desarrollo, Vite reenvía `/api` al Worker de producción configurado en `vite.config.mjs`; las operaciones de API pueden modificar datos reales. Para compilar y revisar el sitio localmente:
+
+```powershell
+npm run build
+npm run preview
+```
+
+El despliegue de producción usa Cloudflare Workers, D1 y R2. Configura primero los secretos indicados en esta guía y luego aplica las migraciones, compila los assets y despliega:
+
+```powershell
+npx wrangler d1 migrations apply aimer --remote
+npm run build
+npx wrangler deploy
+```
+
+Vercel solo redirige el tráfico a la URL del Worker; no aloja el frontend ni el backend.
+
+El entorno `staging` tiene un Worker, una D1 y un bucket R2 separados, y no programa el cron diario. Para aplicar cambios y desplegar allí:
+
+```powershell
+npx wrangler d1 migrations apply aimer-staging --remote --env staging
+npm run build
+npx wrangler deploy --env staging
+```
+
+Los secretos de staging (`SESSION_SECRET`, `R2_SIGNING_SECRET`, `CRON_SECRET`, `VAPID_PUBLIC_KEY` y `VAPID_PRIVATE_KEY`) se configuran por separado con `npx wrangler secret put NOMBRE --env staging`; nunca reutilices secretos de producción.
+
+El cron diario de producción procesa datos y envía Web Push desde el Worker. Antes de aumentar su volumen o el costo de `scrypt`, mide tiempo de CPU y subrequests desde métricas/traces desplegadas. No ejecutes pruebas de carga ni el cron manual contra datos reales sin autorización.
+
+Medición inicial en staging (4 nov. 2026): seis inicios fallidos con usuario inexistente ejercitaron la verificación scrypt de relleno y registraron 38–52 ms de CPU por petición. Un recorrido manual del cron con 40 filas sintéticas y cero suscripciones válidas registró 42 ms de CPU, 1,27 s de pared, `checked: 40` y cero envíos. No se generaron notificaciones. Esta prueba no cubre el costo de enviar push ni la carga máxima; confirma el plan y su límite de CPU efectivo antes de concluir compatibilidad con el límite gratuito de 10 ms.
+
 Restablecimiento administrativo de contraseñas
 -----------------------------------------------
 

@@ -53,11 +53,11 @@ export async function handler(c) {
 
     if (q) {
       if (q.length < BUSQUEDA_MIN) return json(c, 200, { data: [], tooShort: true });
-      const like = `%${q}%`;
+      const like = `%${q.replace(/[\\%_]/g, "\\$&")}%`;
       const r = await all(
         db
           .prepare(
-            "SELECT username,name,photo FROM users WHERE (name LIKE ? OR username LIKE ?) AND username <> ? ORDER BY name LIMIT ?"
+            "SELECT username,name,photo FROM users WHERE (name LIKE ? ESCAPE '\\' OR username LIKE ? ESCAPE '\\') AND username <> ? ORDER BY name LIMIT ?"
           )
           .bind(like, like, me.username, LIMITE_BUSQUEDA)
       );

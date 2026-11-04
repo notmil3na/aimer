@@ -6,14 +6,10 @@ export async function handler(c) {
   const req = vreq(c);
   if (req.method !== "POST") return json(c, 405, { error: "method" });
 
-  // Revoca la cookie actual y, si un cliente viejo todavía manda el Bearer de
-  // localStorage, también ese token.
+  // Revoke the current session before clearing the cookie.
   const tokens = new Set();
   const cookieToken = getToken(c);
   if (cookieToken) tokens.add(cookieToken);
-  const auth = c.req.header("authorization") || "";
-  if (auth.startsWith("Bearer ")) tokens.add(auth.slice(7));
-
   for (const token of tokens) {
     const payload = await verifyToken(c, token);
     if (!payload) continue;

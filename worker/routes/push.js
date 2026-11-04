@@ -130,7 +130,7 @@ function computeDue(row, now) {
 
 function vapidFor(env) {
   return {
-    subject: env.VAPID_SUBJECT || "https://mallaunimag.com",
+    subject: env.VAPID_SUBJECT || "https://aimer-project.yaritzamilena4.workers.dev",
     publicKey: env.VAPID_PUBLIC_KEY || "",
     privateKey: env.VAPID_PRIVATE_KEY || "",
   };

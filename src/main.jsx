@@ -18,11 +18,6 @@ if (
   document.documentElement.dataset.performance = "low";
 }
 
-document.addEventListener("contextmenu", (e) => {
-  const permitido = e.target.closest("input, textarea, select, [contenteditable]:not([contenteditable='false']), .selectable");
-  if (!permitido) e.preventDefault();
-});
-
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ErrorBoundary>

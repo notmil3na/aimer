@@ -754,7 +754,7 @@ function ThreadView({ user, friend, onBack, onNotify, onToggleInfo, infoOpen, sh
         <Avatar u={friend} size={36} />
         <div className={styles.threadHeadInfo}>
           <span className={styles.threadName}>{friend.name || friend.username}</span>
-          <span className={styles.threadStatus}>@{other}</span>
+          <span className={styles.threadStatus}>{friend.archived ? "Historial archivado" : `@${other}`}</span>
         </div>
         <button className={`${styles.infoToggle} ${infoOpen ? styles.infoToggleOn : ""}`} onClick={onToggleInfo} title="Detalles">
           <IconUser size={16} />
@@ -767,8 +767,8 @@ function ThreadView({ user, friend, onBack, onNotify, onToggleInfo, infoOpen, sh
         ) : messages.length === 0 ? (
           <div className={styles.threadEmpty}>
             <span className={styles.threadEmptyIcon}><IconSparkle size={26} /></span>
-            <p>Este es el inicio de tu conversación.</p>
-            <p className={styles.threadEmptySub}>Saluda a {friend.name || "@" + other} y comparte asignaciones o apuntes.</p>
+            <p>{friend.archived ? "No quedan mensajes en este historial." : "Este es el inicio de tu conversación."}</p>
+            {!friend.archived && <p className={styles.threadEmptySub}>Saluda a {friend.name || "@" + other} y comparte asignaciones o apuntes.</p>}
           </div>
         ) : (
           messages.map((msg) => (
@@ -786,7 +786,11 @@ function ThreadView({ user, friend, onBack, onNotify, onToggleInfo, infoOpen, sh
 
       {error && <div className={styles.threadError}>{error}</div>}
 
-      <div className={styles.composer}>
+      {friend.archived ? (
+        <div className={styles.threadArchivedNotice}>
+          Este historial se conserva de forma anónima. No se pueden enviar mensajes nuevos.
+        </div>
+      ) : <div className={styles.composer}>
         <button
           className={styles.paperclip}
           onClick={() => setShareOpen((v) => !v)}
@@ -812,9 +816,9 @@ function ThreadView({ user, friend, onBack, onNotify, onToggleInfo, infoOpen, sh
         >
           <IconSend size={16} />
         </button>
-      </div>
+      </div>}
 
-      <SharePopover
+      {!friend.archived && <SharePopover
         open={shareOpen}
         onClose={() => setShareOpen(false)}
         myName={friend.name || other}
@@ -823,7 +827,7 @@ function ThreadView({ user, friend, onBack, onNotify, onToggleInfo, infoOpen, sh
         onPickImage={() => { setShareOpen(false); const inp = document.createElement("input"); inp.type = "file"; inp.accept = "image/*"; inp.onchange = (e) => { const f = e.target.files && e.target.files[0]; if (f) uploadAndSend(f); }; inp.click(); }}
         onPickFile={() => { setShareOpen(false); const inp = document.createElement("input"); inp.type = "file"; inp.onchange = (e) => { const f = e.target.files && e.target.files[0]; if (f) uploadAndSend(f); }; inp.click(); }}
         busy={sending}
-      />
+      />}
 
       {adding && (
         <div className={styles.addingBadge}><IconCheck size={12} /> Guardando…</div>
@@ -841,7 +845,7 @@ function InfoPanel({ friend, messages, onClose }) {
       <div className={styles.infoHead}>
         <Avatar u={friend} size={52} />
         <div className={styles.infoName}>{friend.name || friend.username}</div>
-        <div className={styles.infoUser}>@{friend.username}</div>
+        <div className={styles.infoUser}>{friend.archived ? "Historial archivado" : `@${friend.username}`}</div>
         <button className={styles.infoClose} onClick={onClose} title="Cerrar"><IconClose size={15} /></button>
       </div>
 
@@ -976,7 +980,7 @@ export default function ChatView({ user, malla, horarioData, notasClaseData, asi
   }, [overview]);
 
   const list = useMemo(() => {
-    const rows = amigos.map((u) => {
+    const activeRows = amigos.map((u) => {
       const c = overviewByPartner[u.username];
       return {
         key: u.username,
@@ -988,6 +992,24 @@ export default function ChatView({ user, malla, horarioData, notasClaseData, asi
         updatedAt: c && c.last ? new Date(c.last.created_at).getTime() : 0,
       };
     });
+    const activeUsernames = new Set(amigos.map((friend) => friend.username));
+    const archivedRows = (overview || [])
+      .filter((chat) => chat.partner && chat.partner.startsWith("deleted-") && !activeUsernames.has(chat.partner))
+      .map((chat) => ({
+        key: chat.partner,
+        partner: {
+          username: chat.partner,
+          name: "Cuenta eliminada",
+          hasPhoto: false,
+          archived: true,
+        },
+        conversation_id: chat.conversation_id,
+        last: chat.last,
+        unread: chat.unread || 0,
+        pinned: !!chat.pinned,
+        updatedAt: chat.last ? new Date(chat.last.created_at).getTime() : 0,
+      }));
+    const rows = [...activeRows, ...archivedRows];
     rows.sort((a, b) => {
       if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
       if (a.unread !== b.unread) return b.unread - a.unread;
@@ -995,7 +1017,7 @@ export default function ChatView({ user, malla, horarioData, notasClaseData, asi
       return (a.partner.name || a.partner.username).localeCompare(b.partner.name || b.partner.username);
     });
     return rows;
-  }, [amigos, overviewByPartner]);
+  }, [amigos, overviewByPartner, overview]);
 
   const filteredList = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -1007,7 +1029,7 @@ export default function ChatView({ user, malla, horarioData, notasClaseData, asi
     );
   }, [list, search]);
 
-  const activeFriend = amigos.find((u) => u.username === activeOther) || null;
+  const activeFriend = list.find((row) => row.key === activeOther)?.partner || null;
   const totalUnread = list.reduce((a, r) => a + r.unread, 0);
 
   const pendingCount = useMemo(
@@ -1103,7 +1125,7 @@ export default function ChatView({ user, malla, horarioData, notasClaseData, asi
     const res = await clearChatThread(key);
     if (res.needsMigration) { setNeedsMig(true); return; }
     if (!res.ok) { if (onNotify) onNotify(res.error || "No se pudo vaciar el chat"); return; }
-    if (onNotify) onNotify("Chat vaciado");
+    if (onNotify) onNotify("Tus mensajes y archivos se eliminaron; se conservan los de la otra persona.");
     setOverview((prev) => (prev || []).map((c) => (c.partner === key ? { ...c, last: null, unread: 0 } : c)));
     if (activeOther === key) setThreadNonce((n) => n + 1);
     loadOverview();
@@ -1116,7 +1138,7 @@ export default function ChatView({ user, malla, horarioData, notasClaseData, asi
     const res = await deleteChatThread(key);
     if (res.needsMigration) { setNeedsMig(true); return; }
     if (!res.ok) { if (onNotify) onNotify(res.error || "No se pudo eliminar el chat"); return; }
-    if (onNotify) onNotify("Chat eliminado");
+    if (onNotify) onNotify("Chat quitado de tu lista; tus mensajes y archivos se eliminaron.");
     setOverview((prev) => (prev || []).filter((c) => c.partner !== key));
     if (activeOther === key) { setActiveOther(null); setInfoOpen(false); setThreadMessages([]); }
     loadOverview();
@@ -1182,7 +1204,7 @@ export default function ChatView({ user, malla, horarioData, notasClaseData, asi
             </div>
           ) : loading && list.length === 0 ? (
             <div className={styles.chatEmpty}><span className={styles.loadingSpinner} /> Cargando…</div>
-          ) : amigos.length === 0 ? (
+          ) : list.length === 0 ? (
             <div className={styles.chatEmpty}>
               <span className={styles.threadEmptyIcon}><IconUser size={26} /></span>
               <p>Agrega amigos para chatear.</p>

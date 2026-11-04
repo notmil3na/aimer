@@ -600,6 +600,7 @@ export default function Dashboard({ user, onLogout, onUpdateUser, appBooting = f
               <SettingsView
                 user={user}
                 onUpdate={onUpdateUser}
+                onLogout={onLogout}
                 malla={malla}
                 semestre={semestre}
                 onSaveSemestre={saveSemestre}

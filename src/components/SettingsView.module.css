@@ -306,6 +306,12 @@
   cursor: pointer;
 }
 .passwordButton:disabled { opacity: 0.6; cursor: wait; }
+.deleteAccountCard { border-color: color-mix(in srgb, #e05252 45%, var(--border)); }
+.deleteButton {
+  border-color: #e05252;
+  background: color-mix(in srgb, #e05252 14%, transparent);
+  color: #e05252;
+}
 
 .cursandoCol {
   background: linear-gradient(135deg, color-mix(in srgb, var(--surface) 94%, transparent), color-mix(in srgb, var(--surface2) 90%, transparent));

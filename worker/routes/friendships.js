@@ -7,7 +7,10 @@ import {
   usedStorageBytes,
   pendingUploadCount,
   cleanupStaleUploads,
+  deleteUserMessages,
 } from "../chat-storage.js";
+
+const DELETED_ACCOUNT_PREFIX = "deleted-";
 
 function canonicalPair(a, b) {
   return a < b ? [a, b] : [b, a];
@@ -20,18 +23,6 @@ const MESSAGE_TYPES = ["text", "image", "file", "assignment", "note"];
 // (`Date.now().toString(36) + random`). Lo importante no es el formato sino
 // que sea seguro como segmento de ruta y que no exista ya en `messages`.
 const MESSAGE_ID_RE = /^[A-Za-z0-9_-]{6,64}$/;
-
-function newChannelToken() {
-  try {
-    return crypto.randomBytes(24).toString("hex");
-  } catch {
-    const b = new Uint8Array(24);
-    crypto.getRandomValues(b);
-    return Array.from(b)
-      .map((x) => x.toString(16).padStart(2, "0"))
-      .join("");
-  }
-}
 
 function newMessageId() {
   return uuid();
@@ -72,7 +63,11 @@ async function sonAmigos(db, a, b) {
     .prepare("SELECT * FROM friendships WHERE user_username = ? AND friend_username = ?")
     .bind(x, y)
     .first();
-  return { ok: !!(row && row.status === "aceptado"), friendRow: row || null };
+  return {
+    ok: !!(row && (row.status === "aceptado" || row.status === "archived")),
+    archived: !!(row && row.status === "archived"),
+    friendRow: row || null,
+  };
 }
 
 async function resolveConversationId(db, me, other) {
@@ -93,8 +88,8 @@ async function ensureConversation(db, me, other) {
   const id = uuid();
   const now = nowISO();
   await db
-    .prepare("INSERT INTO conversations (id, channel_token, created_at, updated_at) VALUES (?, ?, ?, ?)")
-    .bind(id, newChannelToken(), now, now)
+    .prepare("INSERT INTO conversations (id, created_at, updated_at) VALUES (?, ?, ?)")
+    .bind(id, now, now)
     .run();
 
   await db
@@ -128,14 +123,6 @@ async function membersOf(db, conversationId) {
     .bind(conversationId)
     .all();
   return res.results || [];
-}
-
-async function channelTokenOf(db, conversationId) {
-  const row = await db
-    .prepare("SELECT channel_token FROM conversations WHERE id = ?")
-    .bind(conversationId)
-    .first();
-  return row ? row.channel_token : "";
 }
 
 function userPublicInfo(row) {
@@ -201,7 +188,7 @@ async function handleChatList(db, me) {
   }
 
   const convRows = await db
-    .prepare(`SELECT id, channel_token, updated_at FROM conversations WHERE id IN (${ph})`)
+    .prepare(`SELECT id, updated_at FROM conversations WHERE id IN (${ph})`)
     .bind(...convIds)
     .all();
   const convMap = {};
@@ -276,10 +263,11 @@ async function handleChatList(db, me) {
       const prev = lastPreview(last);
       return {
         conversation_id: convId,
-        channel_token: conv.channel_token || "",
         updated_at: conv.updated_at || null,
         partner: partner || null,
-        partnerName: info[partner] ? info[partner].name : "",
+        partnerName: partner && partner.startsWith(DELETED_ACCOUNT_PREFIX)
+          ? "Cuenta eliminada"
+          : info[partner] ? info[partner].name : "",
         partnerHasPhoto: !!(info[partner] && info[partner].hasPhoto),
         pinned: pinnedByConv[convId],
         last: last
@@ -313,7 +301,7 @@ async function handleChatThread(db, env, me, other) {
   const resolved = await resolveConversationId(db, me, other);
   if (!resolved.conversationId) {
     return {
-      data: { conversation_id: null, channel_token: null, participants: [], messages: [] },
+      data: { conversation_id: null, participants: [], messages: [] },
     };
   }
   const conversationId = resolved.conversationId;
@@ -361,7 +349,6 @@ async function handleChatThread(db, env, me, other) {
   const aiByMsg = {};
   for (const item of academicItems || []) aiByMsg[item.message_id] = item;
 
-  const channel_token = await channelTokenOf(db, conversationId);
   const info = await usersInfo(db, usernames);
 
   const messages = visible.map((m) => {
@@ -383,13 +370,16 @@ async function handleChatThread(db, env, me, other) {
   });
 
   const participants = usernames
-    .map((u) => info[u] || { username: u, name: u, hasPhoto: false })
+    .map((u) => info[u] || {
+      username: u,
+      name: u.startsWith(DELETED_ACCOUNT_PREFIX) ? "Cuenta eliminada" : u,
+      hasPhoto: false,
+    })
     .sort((x, y) => (x.username === me ? -1 : 1));
 
   return {
     data: {
       conversation_id: conversationId,
-      channel_token,
       participants,
       messages,
     },
@@ -399,12 +389,12 @@ async function handleChatThread(db, env, me, other) {
 async function actionChatOpen(db, env, me, other) {
   const friend = await sonAmigos(db, me, other);
   if (!friend.ok) return { error: "Solo puedes chatear con tus amigos", status: 403 };
+  if (friend.archived) return { error: "Esta conversación está archivada", status: 410 };
 
   const conv = await ensureConversation(db, me, other);
   if (!conv.conversation_id) return { error: "No se pudo abrir la conversación" };
 
-  const token = await channelTokenOf(db, conv.conversation_id);
-  return { ok: true, data: { conversation_id: conv.conversation_id, channel_token: token } };
+  return { ok: true, data: { conversation_id: conv.conversation_id } };
 }
 
 async function actionChatSend(db, env, me, other, body) {
@@ -417,6 +407,7 @@ async function actionChatSend(db, env, me, other, body) {
 
   const friend = await sonAmigos(db, me, other);
   if (!friend.ok) return { error: "Solo puedes chatear con tus amigos", status: 403 };
+  if (friend.archived) return { error: "Esta conversación está archivada", status: 410 };
 
   let conv = await resolveConversationId(db, me, other);
   let newConversation = false;
@@ -531,13 +522,11 @@ async function actionChatSend(db, env, me, other, body) {
     return { error: "No se pudo enviar el mensaje" };
   }
 
-  const token = await channelTokenOf(db, conversationId);
   return {
     ok: true,
     data: {
       message_id: id,
       conversation_id: conversationId,
-      channel_token: token,
       created_at: now,
       new_conversation: newConversation,
       message: { id, sender: me, message_type: p.type, content: p.content, read: 0, created_at: now },
@@ -573,11 +562,17 @@ async function actionChatPin(db, me, other, body) {
   return { ok: true, data: { pinned } };
 }
 
-async function actionChatClear(db, me, other) {
+async function actionChatClear(db, env, me, other) {
   const resolved = await resolveConversationId(db, me, other);
   if (!resolved.conversationId) return { ok: true };
 
   const now = nowISO();
+  try {
+    await deleteUserMessages(db, env.R2_BUCKET, me, resolved.conversationId);
+  } catch (error) {
+    console.error("no se pudieron borrar los mensajes propios del chat", error);
+    return { error: "No se pudieron eliminar tus mensajes y archivos" };
+  }
   await db
     .prepare("UPDATE conversation_members SET cleared_at = ?, last_read_at = ? WHERE conversation_id = ? AND username = ?")
     .bind(now, now, resolved.conversationId, me)
@@ -585,11 +580,17 @@ async function actionChatClear(db, me, other) {
   return { ok: true };
 }
 
-async function actionChatDelete(db, me, other) {
+async function actionChatDelete(db, env, me, other) {
   const resolved = await resolveConversationId(db, me, other);
   if (!resolved.conversationId) return { ok: true };
 
   const now = nowISO();
+  try {
+    await deleteUserMessages(db, env.R2_BUCKET, me, resolved.conversationId);
+  } catch (error) {
+    console.error("no se pudieron borrar los mensajes propios del chat", error);
+    return { error: "No se pudieron eliminar tus mensajes y archivos" };
+  }
   await db
     .prepare("UPDATE conversation_members SET cleared_at = ?, hidden_at = ?, pinned_at = NULL, last_read_at = ? WHERE conversation_id = ? AND username = ?")
     .bind(now, now, now, resolved.conversationId, me)
@@ -600,6 +601,7 @@ async function actionChatDelete(db, me, other) {
 async function actionChatUploadURL(db, env, me, other, body) {
   const friend = await sonAmigos(db, me, other);
   if (!friend.ok) return { error: "Solo puedes chatear con tus amigos", status: 403 };
+  if (friend.archived) return { error: "Esta conversación está archivada", status: 410 };
 
   const declaredSize = Number(body.file_size);
   if (!Number.isFinite(declaredSize) || declaredSize < 0) {
@@ -687,13 +689,10 @@ async function actionChatUploadURL(db, env, me, other, body) {
   }
 
   const token = await signPath(env, storagePath, 6 * 60 * 60);
-  const channel_token = await channelTokenOf(db, conversationId);
-
   return {
     ok: true,
     data: {
       conversation_id: conversationId,
-      channel_token,
       message_id: messageId,
       storage_path: storagePath,
       upload_url: `/api/chat-upload?path=${encodeURIComponent(storagePath)}&token=${token}`,
@@ -739,6 +738,7 @@ export async function handler(c) {
     const data = res.data || [];
     const map = {};
     for (const row of data) {
+      if (row.status === "archived") continue;
       const otherUser = row.user_username === username ? row.friend_username : row.user_username;
       map[otherUser] = { status: row.status, requestedBy: row.requested_by };
     }
@@ -759,8 +759,8 @@ export async function handler(c) {
       else if (action === "chatSend") r = await actionChatSend(db, c.env, username, other, body);
       else if (action === "chatRead") r = await actionChatRead(db, username, other);
       else if (action === "chatPin") r = await actionChatPin(db, username, other, body);
-      else if (action === "chatClear") r = await actionChatClear(db, username, other);
-      else if (action === "chatDelete") r = await actionChatDelete(db, username, other);
+      else if (action === "chatClear") r = await actionChatClear(db, c.env, username, other);
+      else if (action === "chatDelete") r = await actionChatDelete(db, c.env, username, other);
       else r = await actionChatUploadURL(db, c.env, username, other, body);
 
       if (r.needsMigration) return json(c, 200, { ok: false, needsMigration: true, error: "Chat no disponible" });
