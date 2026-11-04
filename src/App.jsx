@@ -1,6 +1,7 @@
 import { Suspense, lazy, useState, useEffect, useRef, useCallback } from "react";
 const Login = lazy(() => import("./pages/Login"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Demo = lazy(() => import("./pages/Demo"));
 const UpdatePrompt = lazy(() => import("./components/UpdatePrompt"));
 import { api, saveSession, clearSession, getSession, logout } from "./api";
 import { getPhoto } from "./utils/photo";
@@ -143,14 +144,16 @@ export async function saveUser(userData) {
 }
 
 export default function App() {
+  const isDemo = window.location.pathname.replace(/\/+$/, "") === "/demo";
   const [user, setUser]   = useState(null);
-  const [ready, setReady] = useState(false);
-  const [boot, setBoot] = useState(true);
+  const [ready, setReady] = useState(isDemo);
+  const [boot, setBoot] = useState(!isDemo);
   const publicScopeRef = useRef(null);
   const finishBoot = useCallback(() => setBoot(false), []);
-  useGlobalSiteText(user ? "" : "login", publicScopeRef, false);
+  useGlobalSiteText(isDemo || user ? "" : "login", publicScopeRef, false);
 
   useEffect(() => {
+    if (isDemo) return undefined;
     let cancelled = false;
     (async () => {
       // las preferencias guardadas permiten pintar el tema al instante; la
@@ -189,7 +192,7 @@ export default function App() {
       if (!cancelled) setReady(true);
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [isDemo]);
 
   const handleLogin = (auth, remember = true) => {
     if (!auth?.user) return;
@@ -217,7 +220,9 @@ export default function App() {
     <>
       {ready && (
         <Suspense fallback={<LoadingScreen progress={90} />}>
-          {user ? (
+          {isDemo ? (
+            <Demo />
+          ) : user ? (
             <Dashboard
               user={user}
               onLogout={handleLogout}
