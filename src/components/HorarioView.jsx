@@ -17,6 +17,7 @@ import {
   IconChevronLeft, IconChevronRight
 } from "./Icons";
 import useBodyScrollLock from "../hooks/useBodyScrollLock";
+import HorarioOcrImportModal from "./HorarioOcrImportModal";
 
 const HorarioExport = lazy(() => import("./HorarioExport"));
 const HorarioWallpaper = lazy(() => import("./HorarioWallpaper"));
@@ -110,6 +111,7 @@ function buildEditando(clases, idx) {
         edificio: clase.edificio||"", lado: clase.lado||"", salon: clase.salon||"",
         dia2: other.dia, horaInicio2: other.horaInicio, horaFin2: other.horaFin,
         edificio2: other.edificio||"", lado2: other.lado||"", salon2: other.salon||"",
+        salonLabel: clase.salonLabel||"", salonLabel2: other.salonLabel||"",
         segundoDiaActivo: true,
       };
     }
@@ -120,6 +122,7 @@ function buildEditando(clases, idx) {
     notas: clase.notas||"",
     dia: clase.dia, horaInicio: clase.horaInicio, horaFin: clase.horaFin,
     edificio: clase.edificio||"", lado: clase.lado||"", salon: clase.salon||"",
+    salonLabel: clase.salonLabel||"",
     segundoDiaActivo: false,
   };
 }
@@ -147,11 +150,13 @@ function ClaseModal({ materiasDisponibles, allMaterias, existingClases, editIdxS
     horaInicio: normalizeHora(editando.horaInicio)||"07:00 a. m.",
     horaFin: normalizeHora(editando.horaFin)||"09:00 a. m.",
     edificio: editando.edificio||"", lado: editando.lado||"", salon: editando.salon||"",
+    salonLabel: editando.salonLabel||"",
     segundoDiaActivo: !!editando.segundoDiaActivo,
     dia2: editando.dia2||"",
     horaInicio2: normalizeHora(editando.horaInicio2)||"07:00 a. m.",
     horaFin2: normalizeHora(editando.horaFin2)||"09:00 a. m.",
     edificio2: editando.edificio2||"", lado2: editando.lado2||"", salon2: editando.salon2||"",
+    salonLabel2: editando.salonLabel2||"",
     notas: editando.notas||"",
   } : {
     materiaId: prefill?.materiaId
@@ -161,6 +166,7 @@ function ClaseModal({ materiasDisponibles, allMaterias, existingClases, editIdxS
     horaInicio: normalizeHora(prefill?.horaInicio) || "07:00 a. m.",
     horaFin: normalizeHora(prefill?.horaFin) || "09:00 a. m.",
     edificio: "", lado: "", salon: "", grupo: "", profesor: "",
+    salonLabel: "", salonLabel2: "",
     segundoDiaActivo: false, dia2: "", horaInicio2: "07:00 a. m.", horaFin2: "09:00 a. m.",
     edificio2: "", lado2: "", salon2: "", notas: "",
   });
@@ -202,8 +208,8 @@ function ClaseModal({ materiasDisponibles, allMaterias, existingClases, editIdxS
 
   const ed  = EDIFICIOS.find(e=>e.id===form.edificio);
   const ed2 = EDIFICIOS.find(e=>e.id===form.edificio2);
-  const salonLabel  = form.edificio  ? buildSalonLabel(form.edificio,  form.lado,  form.salon)  : "";
-  const salonLabel2 = form.edificio2 ? buildSalonLabel(form.edificio2, form.lado2, form.salon2) : "";
+  const salonLabel  = form.edificio  ? buildSalonLabel(form.edificio,  form.lado,  form.salon)  : form.salonLabel||"";
+  const salonLabel2 = form.edificio2 ? buildSalonLabel(form.edificio2, form.lado2, form.salon2) : form.salonLabel2||"";
 
   const handleSave = () => {
     if (!form.materiaId||!form.dia||!form.horaInicio||!form.horaFin) return;
@@ -330,7 +336,7 @@ function ClaseModal({ materiasDisponibles, allMaterias, existingClases, editIdxS
               {EDIFICIOS.map(edif=>(
                 <button key={edif.id}
                   className={`${styles.edificioBtn} ${form.edificio===edif.id?styles.edificioBtnActive:""}`}
-                  onClick={()=>setForm(f=>({...f,edificio:edif.id,lado:"",salon:""}))}>
+                  onClick={()=>setForm(f=>({...f,edificio:edif.id,lado:"",salon:"",salonLabel:""}))}>
                   <span>{edif.IconComp ? <edif.IconComp size={14} /> : null}</span><span>{edif.nombre}</span>
                 </button>
               ))}
@@ -357,7 +363,7 @@ function ClaseModal({ materiasDisponibles, allMaterias, existingClases, editIdxS
                 {[...(ed?.salones||[]), ...(customSalones[form.edificio]||[])].map(s=>(
                   <button key={s}
                     className={`${styles.salonBtn} ${form.salon===s?styles.salonBtnActive:""}`}
-                    onClick={()=>setForm(f=>({...f,salon:s}))}>
+                    onClick={()=>setForm(f=>({...f,salon:s,salonLabel:""}))}>
                     {s}
                   </button>
                 ))}
@@ -371,6 +377,14 @@ function ClaseModal({ materiasDisponibles, allMaterias, existingClases, editIdxS
                   <button type="button" className={styles.btnSecondary} onClick={()=>commitOtro(1)}>+ Agregar</button>
                 </div>
               )}
+            </div>
+          )}
+          {!form.edificio && (
+            <div className={styles.formField}>
+              <label>Lugar personalizado (opcional)</label>
+              <input type="text" className={styles.input} value={form.salonLabel}
+                placeholder="Edificio, salón o enlace virtual"
+                onChange={e=>setForm(f=>({...f,salonLabel:e.target.value}))} />
             </div>
           )}
           {salonLabel && <div className={styles.salonPreview}><IconLocation size={12} /> {salonLabel}</div>}
@@ -419,7 +433,7 @@ function ClaseModal({ materiasDisponibles, allMaterias, existingClases, editIdxS
                 {EDIFICIOS.map(edif=>(
                   <button key={edif.id}
                     className={`${styles.edificioBtn} ${form.edificio2===edif.id?styles.edificioBtnActive:""}`}
-                    onClick={()=>setForm(f=>({...f,edificio2:edif.id,lado2:"",salon2:""}))}>
+                    onClick={()=>setForm(f=>({...f,edificio2:edif.id,lado2:"",salon2:"",salonLabel2:""}))}>
                     <span>{edif.IconComp ? <edif.IconComp size={14} /> : null}</span><span>{edif.nombre}</span>
                   </button>
                 ))}
@@ -446,7 +460,7 @@ function ClaseModal({ materiasDisponibles, allMaterias, existingClases, editIdxS
                   {[...(ed2?.salones||[]), ...(customSalones[form.edificio2]||[])].map(s=>(
                     <button key={s}
                       className={`${styles.salonBtn} ${form.salon2===s?styles.salonBtnActive:""}`}
-                      onClick={()=>setForm(f=>({...f,salon2:s}))}>
+                      onClick={()=>setForm(f=>({...f,salon2:s,salonLabel2:""}))}>
                       {s}
                     </button>
                   ))}
@@ -460,6 +474,14 @@ function ClaseModal({ materiasDisponibles, allMaterias, existingClases, editIdxS
                     <button type="button" className={styles.btnSecondary} onClick={()=>commitOtro(2)}>+ Agregar</button>
                   </div>
                 )}
+              </div>
+            )}
+            {!form.edificio2 && (
+              <div className={styles.formField}>
+                <label>Lugar personalizado día 2 (opcional)</label>
+                <input type="text" className={styles.input} value={form.salonLabel2}
+                  placeholder="Edificio, salón o enlace virtual"
+                  onChange={e=>setForm(f=>({...f,salonLabel2:e.target.value}))} />
               </div>
             )}
             {salonLabel2 && <div className={styles.salonPreview}><IconLocation size={12} /> {salonLabel2}</div>}
@@ -1028,6 +1050,7 @@ export default function HorarioView({ malla, horarioData, planData, onSave, onSa
   const [modalPrefill, setModalPrefill] = useState(null);
   const [showExport, setShowExport] = useState(false);
   const [showWallpaper, setShowWallpaper] = useState(false);
+  const [showOcrImport, setShowOcrImport] = useState(false);
   const [dragMateriaId, setDragMateriaId] = useState(null);
   const [dragHover, setDragHover] = useState(null);
   const [touchDrag, setTouchDrag] = useState(null);
@@ -1088,6 +1111,41 @@ export default function HorarioView({ malla, horarioData, planData, onSave, onSa
   const handleOpenWallpaper = () => {
     setShowExport(false);
     setShowWallpaper(true);
+  };
+
+  const handleImportOcr = (clases, materiaIds = [], replaceCurrent = false) => {
+    const currentKeys = new Set(replaceCurrent ? [] : data.clases.map((clase) =>
+      [clase.materiaId, clase.dia, clase.horaInicio, clase.horaFin].join("|")
+    ));
+    const importedClasses = clases.filter((clase) => {
+      const key = [clase.materiaId, clase.dia, clase.horaInicio, clase.horaFin].join("|");
+      if (currentKeys.has(key)) return false;
+      currentKeys.add(key);
+      return true;
+    });
+    const finalClasses = replaceCurrent ? importedClasses : [...data.clases, ...importedClasses];
+    const dias = [...new Set(finalClasses.map((clase) => clase.dia))]
+      .filter((dia) => TODOS_DIAS.some((item) => item.id === dia))
+      .sort((a, b) => TODOS_DIAS.findIndex((item) => item.id === a) - TODOS_DIAS.findIndex((item) => item.id === b));
+    const updated = { dias, clases: finalClasses };
+    setData(updated);
+    onSave(updated);
+    if (materiaIds.length) onEnrollMaterias?.(materiaIds);
+
+    const customSalones = getCustomSalones();
+    for (const clase of importedClasses) {
+      if (!clase.edificio || !clase.salon) continue;
+      const building = EDIFICIOS.find((item) => item.id === clase.edificio);
+      if (building && !building.salones.includes(clase.salon)) {
+        const list = customSalones[clase.edificio] || [];
+        if (!list.includes(clase.salon)) customSalones[clase.edificio] = [...list, clase.salon];
+      }
+    }
+    saveCustomSalones(customSalones);
+    setShowOcrImport(false);
+    onNotify?.(importedClasses.length
+      ? `Se importaron ${importedClasses.length} clases desde la imagen`
+      : "Esas clases ya estaban en tu horario");
   };
 
   const diasActivos=TODOS_DIAS.filter(d=>data.dias.includes(d.id));
@@ -1256,6 +1314,11 @@ export default function HorarioView({ malla, horarioData, planData, onSave, onSa
               + Añadir clase
             </button>
           )}
+          {mode==="horario" && (
+            <button className={styles.exportBtn} onClick={()=>setShowOcrImport(true)}>
+              <IconSchedule size={13} /> Importar desde imagen
+            </button>
+          )}
         </div>
       </div>
 
@@ -1320,7 +1383,7 @@ export default function HorarioView({ malla, horarioData, planData, onSave, onSa
           </div>
         )}
 
-        {materiasActuales.length===0 && (
+        {materiasActuales.length===0 && data.clases.length===0 && (
           <div className={styles.emptyState}>
             <span className={styles.emptyIcon}><IconSchedule size={36} /></span>
             <p>No tienes materias en estado <strong>Cursando</strong>.</p>
@@ -1373,7 +1436,7 @@ export default function HorarioView({ malla, horarioData, planData, onSave, onSa
                         const globalIdx=data.clases.indexOf(clase);
                         const start=horaIdx(clase.horaInicio), end=horaIdx(clase.horaFin);
                         if(start<0||end<=start) return null;
-                        const materia=materiasActuales.find(m=>m.id===clase.materiaId);
+                        const materia=allMaterias.find(m=>m.id===clase.materiaId);
                         return (
                           <ClaseBloque key={i} clase={clase} materia={materia}
                             color={colorMap[clase.materiaId]||"var(--accent)"}
@@ -1411,6 +1474,15 @@ export default function HorarioView({ malla, horarioData, planData, onSave, onSa
           mainDias={data.dias}
           onTransferToHorario={handleTransferPlanToHorario}
           onEnrollMaterias={onEnrollMaterias}
+        />
+      )}
+
+      {showOcrImport && (
+        <HorarioOcrImportModal
+          materias={allMaterias}
+          existingCount={data.clases.length}
+          onClose={()=>setShowOcrImport(false)}
+          onImport={handleImportOcr}
         />
       )}
 
