@@ -1,11 +1,19 @@
 import { envReady, json, readBody, hashPassword, toUserRow, vreq, getClientIP } from "../../lib.js";
 import { jstringify } from "../../db.js";
 import { checkAndIncrement } from "../../rate-limit.js";
+import { SECURITY_QUESTIONS } from "../../security-questions.js";
 
 const USERNAME_RE = /^[a-zA-Z0-9._-]{2,20}$/;
 
 // 5 registros por IP en 1 hora → bloqueo 1 hora.
 const REGISTER_IP_LIMIT = { maxAttempts: 5, windowSec: 3600, lockoutSec: 3600 };
+
+function newSessionVersion() {
+  const words = crypto.getRandomValues(new Uint32Array(2));
+  // 52 bits para conservar margen al incrementar y evitar reutilizar la
+  // versión de sesión de una cuenta eliminada con el mismo nombre.
+  return (words[0] & 0x000fffff) * 0x100000000 + words[1];
+}
 
 export async function handler(c) {
   const req = vreq(c);
@@ -49,6 +57,7 @@ export async function handler(c) {
   const row = {
     username,
     password: hashed,
+    session_version: newSessionVersion(),
     ...toUserRow(body),
     photo: null,
     app_mode: body.appMode ?? "light",
@@ -65,6 +74,18 @@ export async function handler(c) {
 
   const securityQuestion = String(body.securityQuestion || "").trim();
   const securityAnswer = String(body.securityAnswer || "").trim();
+  if (securityQuestion && !SECURITY_QUESTIONS.includes(securityQuestion)) {
+    return json(c, 400, { error: "Selecciona una pregunta de seguridad de la lista" });
+  }
+  if (Boolean(securityQuestion) !== Boolean(securityAnswer)) {
+    return json(c, 400, { error: "Elige una pregunta y escribe su respuesta, o deja ambas vacías" });
+  }
+  if (securityAnswer && securityAnswer.length < 4) {
+    return json(c, 400, { error: "La respuesta de seguridad debe tener al menos 4 caracteres" });
+  }
+  if (securityAnswer.length > 200) {
+    return json(c, 400, { error: "La respuesta de seguridad es demasiado larga" });
+  }
   if (securityQuestion && securityAnswer) {
     row.security_question = securityQuestion;
     // Normalizar la respuesta: trim + lowercase antes de hashear.
@@ -76,14 +97,15 @@ export async function handler(c) {
     await db
       .prepare(
         `INSERT INTO users (
-          username,password,name,university,career,semester,ingreso_corte,photo,
+          username,password,session_version,name,university,career,semester,ingreso_corte,photo,
           app_mode,app_theme,theme_colors,border_radius,font_scale,font_body,
           security_question,security_answer
-        ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
+        ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
       )
       .bind(
         row.username,
         row.password,
+        row.session_version,
         row.name ?? "",
         row.university ?? "",
         row.career ?? "",

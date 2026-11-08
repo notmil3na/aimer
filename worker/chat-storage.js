@@ -15,6 +15,9 @@ export async function deleteUserMessages(db, bucket, username, conversationId = 
   const messageScope = conversationId
     ? "m.sender = ? AND m.conversation_id = ?"
     : "m.sender = ?";
+  const messageDeleteScope = conversationId
+    ? "sender = ? AND conversation_id = ?"
+    : "sender = ?";
   const uploadScope = conversationId
     ? "username = ? AND conversation_id = ?"
     : "username = ?";
@@ -33,23 +36,26 @@ export async function deleteUserMessages(db, bucket, username, conversationId = 
   const uniquePaths = [...new Set((paths.results || []).map((row) => row.path).filter(Boolean))];
 
   if (uniquePaths.length && !bucket) throw new Error("R2_BUCKET no está configurado");
-  for (let i = 0; i < uniquePaths.length; i += 1000) {
-    await bucket.delete(uniquePaths.slice(i, i + 1000));
-  }
 
   const statements = [
     db.prepare(
       `DELETE FROM message_attachments WHERE message_id IN
-        (SELECT id FROM messages WHERE ${messageScope})`
+        (SELECT id FROM messages WHERE ${messageDeleteScope})`
     ).bind(...scopeBindings),
     db.prepare(
       `DELETE FROM message_academic_items WHERE message_id IN
-        (SELECT id FROM messages WHERE ${messageScope})`
+        (SELECT id FROM messages WHERE ${messageDeleteScope})`
     ).bind(...scopeBindings),
-    db.prepare(`DELETE FROM messages WHERE ${messageScope}`).bind(...scopeBindings),
+    db.prepare(`DELETE FROM messages WHERE ${messageDeleteScope}`).bind(...scopeBindings),
     db.prepare(`DELETE FROM chat_uploads WHERE ${uploadScope}`).bind(...scopeBindings),
   ];
   await db.batch(statements);
+
+  // Elimina primero las referencias de la base de datos. Si R2 falla, los
+  // mensajes siguen borrados y no quedan apuntando a archivos inexistentes.
+  for (let i = 0; i < uniquePaths.length; i += 1000) {
+    await bucket.delete(uniquePaths.slice(i, i + 1000));
+  }
   return uniquePaths.length;
 }
 
@@ -65,13 +71,13 @@ export async function cleanupStaleUploads(db, bucket, username) {
   const paths = (stale.results || []).map((row) => row.path);
   if (!paths.length) return;
 
+  const placeholders = paths.map(() => "?").join(",");
+  await db.prepare(`DELETE FROM chat_uploads WHERE path IN (${placeholders})`).bind(...paths).run();
   for (const path of paths) {
     try {
       await bucket.delete(path);
     } catch (_) {}
   }
-  const placeholders = paths.map(() => "?").join(",");
-  await db.prepare(`DELETE FROM chat_uploads WHERE path IN (${placeholders})`).bind(...paths).run();
 }
 
 // Bytes ocupados por un usuario: adjuntos ya enviados + subidas todavía sin

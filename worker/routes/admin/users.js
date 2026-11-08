@@ -1,5 +1,6 @@
 import { hashPassword, json, readBody, requireAdmin, toUserRow, vreq } from "../../lib.js";
 import { all } from "../../db.js";
+import { SECURITY_QUESTIONS } from "../../security-questions.js";
 
 const USERNAME_RE = /^[a-zA-Z0-9._-]{2,20}$/;
 
@@ -36,11 +37,11 @@ export async function handler(c) {
       if (body.user?.securityQuestion !== undefined) {
         const securityQuestion = String(body.user.securityQuestion || "").trim();
         const securityAnswer = String(body.securityAnswer || "").trim();
-        if (securityQuestion.length > 300) {
-          return json(c, 400, { error: "La pregunta de seguridad es demasiado larga" });
+        if (securityQuestion && !SECURITY_QUESTIONS.includes(securityQuestion)) {
+          return json(c, 400, { error: "Selecciona una pregunta de seguridad de la lista" });
         }
-        if (securityAnswer && (securityAnswer.length < 4 || securityAnswer.length > 500)) {
-          return json(c, 400, { error: "La respuesta de seguridad debe tener entre 4 y 500 caracteres" });
+        if (securityAnswer && (securityAnswer.length < 4 || securityAnswer.length > 200)) {
+          return json(c, 400, { error: "La respuesta de seguridad debe tener entre 4 y 200 caracteres" });
         }
 
         const current = await db.prepare(

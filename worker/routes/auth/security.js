@@ -3,12 +3,12 @@ import {
   isColumnMissing, vreq, getClientIP,
 } from "../../lib.js";
 import { checkAndIncrement, resetLimit } from "../../rate-limit.js";
+import { SECURITY_QUESTIONS } from "../../security-questions.js";
 
 // 5 intentos por usuario en 15 min → bloqueo 15 min.
 // 20 intentos por IP en 15 min → bloqueo 30 min.
 const SECURITY_USER_LIMIT = { maxAttempts: 5, windowSec: 900, lockoutSec: 900 };
 const SECURITY_IP_LIMIT = { maxAttempts: 20, windowSec: 900, lockoutSec: 1800 };
-const MAX_QUESTION_CHARS = 200;
 const MAX_ANSWER_CHARS = 200;
 
 export async function handler(c) {
@@ -36,8 +36,8 @@ export async function handler(c) {
     const q = String(question || "").trim();
     const a = String(answer || "").trim().toLowerCase();
     if (!q || !a) return json(c, 400, { error: "Pregunta y respuesta son obligatorias" });
-    if (q.length > MAX_QUESTION_CHARS) {
-      return json(c, 400, { error: "La pregunta es demasiado larga" });
+    if (!SECURITY_QUESTIONS.includes(q)) {
+      return json(c, 400, { error: "Selecciona una pregunta de seguridad de la lista" });
     }
     if (a.length < 3 || a.length > MAX_ANSWER_CHARS) {
       return json(c, 400, { error: "La respuesta debe tener entre 3 y 200 caracteres" });

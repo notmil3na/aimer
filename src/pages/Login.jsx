@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useId } from "react";
 import { CORTES } from "../utils/cortes";
 import { SEMESTER_CORTE } from "../utils/semesterCountdown";
 import { UNIVERSITIES, autoSemester } from "../utils/academic";
+import { SECURITY_QUESTIONS } from "../utils/securityQuestions";
 import { api } from "../api";
 import styles from "./Login.module.css";
 import { IconCheck, IconWarning } from "../components/Icons";
@@ -23,8 +24,6 @@ const MINI_CARD = {
   text: "Horario, notas y asignaciones en un solo lugar.",
   dots: [DEFAULT_THEME_COLORS.cursando, DEFAULT_THEME_COLORS.aprobada, DEFAULT_THEME_COLORS.faltante],
 };
-
-import { SECURITY_QUESTIONS } from "../utils/securityQuestions";
 
 function EyeIcon({ off }) {
   return (
@@ -54,6 +53,7 @@ function ForgotPasswordModal({ onClose }) {
   const [step, setStep] = useState("username");
   const [username, setUsername] = useState("");
   const [question, setQuestion] = useState("");
+  const [questions, setQuestions] = useState(SECURITY_QUESTIONS);
   const [answer, setAnswer] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [error, setError] = useState("");
@@ -79,8 +79,9 @@ function ForgotPasswordModal({ onClose }) {
         body: { username: username.trim() },
       });
       setLoading(false);
-      if (res.question) {
-        setQuestion(res.question);
+      if (Array.isArray(res.questions)) {
+        setQuestions(res.questions);
+        setQuestion("");
         setStep("answer");
       } else {
         setError("No se pudo recuperar la cuenta");
@@ -94,13 +95,14 @@ function ForgotPasswordModal({ onClose }) {
   const handleReset = async (e) => {
     e.preventDefault();
     setError("");
+    if (!question) return setError("Selecciona tu pregunta de seguridad");
     if (!answer.trim()) return setError("Escribe la respuesta");
     if (newPassword.length < 6) return setError("La contraseña debe tener al menos 6 caracteres");
     setLoading(true);
     try {
       await api("/auth/forgot-password", {
         method: "POST", skipAuth: true,
-        body: { username: username.trim(), answer: answer.trim(), newPassword },
+        body: { username: username.trim(), question, answer: answer.trim(), newPassword },
       });
       setLoading(false);
       setSuccess("¡Contraseña restablecida! Ya puedes iniciar sesión.");
@@ -127,7 +129,7 @@ function ForgotPasswordModal({ onClose }) {
 
         {step === "username" && (
           <form onSubmit={handleUsername} className={styles.modalForm}>
-            <p className={styles.modalText}>Escribe tu usuario para ver tu pregunta de seguridad.</p>
+            <p className={styles.modalText}>Escribe tu usuario para continuar con la recuperación.</p>
             <div className={styles.field}>
               <label htmlFor={`${uid}-user`}>Usuario</label>
               <div className={styles.inputWrap}>
@@ -145,7 +147,15 @@ function ForgotPasswordModal({ onClose }) {
 
         {step === "answer" && (
           <form onSubmit={handleReset} className={styles.modalForm}>
-            <p className={styles.modalText}>{question}</p>
+            <p className={styles.modalText}>Elige la pregunta que configuraste en tu cuenta.</p>
+            <div className={styles.field}>
+              <label htmlFor={`${uid}-question`}>Pregunta de seguridad</label>
+              <select id={`${uid}-question`} className={styles.selectInput} value={question}
+                onChange={(e) => setQuestion(e.target.value)} required>
+                <option value="" disabled>Selecciona una pregunta</option>
+                {questions.map((item) => <option key={item} value={item}>{item}</option>)}
+              </select>
+            </div>
             <div className={styles.field}>
               <label htmlFor={`${uid}-answer`}>Tu respuesta</label>
               <div className={styles.inputWrap}>

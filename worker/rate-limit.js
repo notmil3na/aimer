@@ -20,64 +20,55 @@
 export async function checkAndIncrement(db, key, { maxAttempts, windowSec, lockoutSec }) {
   const now = new Date();
   const nowISO = now.toISOString();
+  const windowCutoff = new Date(now.getTime() - windowSec * 1000).toISOString();
+  const lockedUntil = new Date(now.getTime() + lockoutSec * 1000).toISOString();
 
+  // El upsert serializa el incremento por `key`: solicitudes simultáneas no
+  // pueden leer el mismo contador y aprobarse todas antes de actualizarlo.
   const row = await db
-    .prepare("SELECT attempts, locked_until, window_start FROM rate_limits WHERE key = ?")
-    .bind(key)
+    .prepare(
+      `INSERT INTO rate_limits (key, attempts, locked_until, window_start)
+       VALUES (?, 1, NULL, ?)
+       ON CONFLICT(key) DO UPDATE SET
+         attempts = CASE
+           WHEN rate_limits.locked_until > ? THEN rate_limits.attempts
+           WHEN rate_limits.locked_until IS NOT NULL OR rate_limits.window_start < ? THEN 1
+           ELSE rate_limits.attempts + 1
+         END,
+         locked_until = CASE
+           WHEN rate_limits.locked_until > ? THEN rate_limits.locked_until
+           WHEN rate_limits.locked_until IS NOT NULL OR rate_limits.window_start < ? THEN NULL
+           WHEN rate_limits.attempts >= ? THEN ?
+           ELSE NULL
+         END,
+         window_start = CASE
+           WHEN rate_limits.locked_until > ? THEN rate_limits.window_start
+           WHEN rate_limits.locked_until IS NOT NULL OR rate_limits.window_start < ? THEN ?
+           ELSE rate_limits.window_start
+         END
+       RETURNING attempts, locked_until`
+    )
+    .bind(
+      key,
+      nowISO,
+      nowISO,
+      windowCutoff,
+      nowISO,
+      windowCutoff,
+      maxAttempts,
+      lockedUntil,
+      nowISO,
+      windowCutoff,
+      nowISO,
+    )
     .first();
 
-  // ¿Está bloqueado?
-  if (row?.locked_until) {
-    const until = new Date(row.locked_until);
-    if (now < until) {
-      return { allowed: false, retryAfter: Math.ceil((until - now) / 1000) };
-    }
-    // El bloqueo expiró → reiniciar
-    await db
-      .prepare("UPDATE rate_limits SET attempts = 1, locked_until = NULL, window_start = ? WHERE key = ?")
-      .bind(nowISO, key)
-      .run();
-    return { allowed: true, retryAfter: 0 };
-  }
-
-  if (!row) {
-    // Primera vez
-    await db
-      .prepare("INSERT INTO rate_limits (key, attempts, locked_until, window_start) VALUES (?, 1, NULL, ?)")
-      .bind(key, nowISO)
-      .run();
-    return { allowed: true, retryAfter: 0 };
-  }
-
-  // ¿La ventana expiró?
-  const windowStart = new Date(row.window_start);
-  if (now - windowStart > windowSec * 1000) {
-    // Reiniciar ventana
-    await db
-      .prepare("UPDATE rate_limits SET attempts = 1, locked_until = NULL, window_start = ? WHERE key = ?")
-      .bind(nowISO, key)
-      .run();
-    return { allowed: true, retryAfter: 0 };
-  }
-
-  const newAttempts = row.attempts + 1;
-
-  if (newAttempts > maxAttempts) {
-    // Bloquear
-    const lockedUntil = new Date(now.getTime() + lockoutSec * 1000).toISOString();
-    await db
-      .prepare("UPDATE rate_limits SET attempts = ?, locked_until = ?, window_start = ? WHERE key = ?")
-      .bind(newAttempts, lockedUntil, row.window_start, key)
-      .run();
-    return { allowed: false, retryAfter: lockoutSec };
-  }
-
-  // Incrementar
-  await db
-    .prepare("UPDATE rate_limits SET attempts = ? WHERE key = ?")
-    .bind(newAttempts, key)
-    .run();
-  return { allowed: true, retryAfter: 0 };
+  const until = row?.locked_until ? new Date(row.locked_until) : null;
+  const retryAfter = until && until > now ? Math.ceil((until - now) / 1000) : 0;
+  return {
+    allowed: Number(row?.attempts) <= maxAttempts && retryAfter === 0,
+    retryAfter,
+  };
 }
 
 /**

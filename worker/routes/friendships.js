@@ -326,17 +326,27 @@ async function handleChatThread(db, env, me, other) {
   let attachments = [];
   let academicItems = [];
   if (ids.length) {
-    const ph = ids.map(() => "?").join(",");
-    const att = await db
-      .prepare(`SELECT * FROM message_attachments WHERE message_id IN (${ph}) ORDER BY created_at ASC`)
-      .bind(...ids)
-      .all();
-    attachments = att.results || [];
-    const ai = await db
-      .prepare(`SELECT * FROM message_academic_items WHERE message_id IN (${ph}) ORDER BY created_at ASC`)
-      .bind(...ids)
-      .all();
-    academicItems = ai.results || [];
+    // D1 limita la cantidad de parámetros enlazados por consulta; dividir los
+    // IDs evita que el hilo falle cuando supera aproximadamente 100 mensajes.
+    const MESSAGE_ID_BATCH_SIZE = 90;
+    for (let i = 0; i < ids.length; i += MESSAGE_ID_BATCH_SIZE) {
+      const batchIds = ids.slice(i, i + MESSAGE_ID_BATCH_SIZE);
+      const ph = batchIds.map(() => "?").join(",");
+      const [att, ai] = await Promise.all([
+        db
+          .prepare(`SELECT * FROM message_attachments WHERE message_id IN (${ph}) ORDER BY created_at ASC`)
+          .bind(...batchIds)
+          .all(),
+        db
+          .prepare(`SELECT * FROM message_academic_items WHERE message_id IN (${ph}) ORDER BY created_at ASC`)
+          .bind(...batchIds)
+          .all(),
+      ]);
+      attachments.push(...(att.results || []));
+      academicItems.push(...(ai.results || []));
+    }
+    attachments.sort((a, b) => a.created_at.localeCompare(b.created_at));
+    academicItems.sort((a, b) => a.created_at.localeCompare(b.created_at));
   }
 
   const attByMsg = {};

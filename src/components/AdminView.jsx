@@ -67,7 +67,7 @@ export default function AdminView() {
           user: {
             ...editUser,
             ingresoCorte: editUser.ingreso_corte,
-            securityQuestion,
+            ...(securityQuestion !== editUser.originalSecurityQuestion && { securityQuestion }),
           },
           ...(securityAnswer && { securityAnswer }),
         },
