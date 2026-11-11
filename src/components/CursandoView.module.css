@@ -760,27 +760,15 @@
 }
 
 .card {
-  background: linear-gradient(
-    110deg,
-    color-mix(in srgb, var(--card-color, var(--accent)) 16%, var(--modal-bg2)) 0%,
-    color-mix(in srgb, var(--card-color, var(--accent)) 7%, var(--modal-bg2)) 48%,
-    var(--modal-bg2) 100%
-  );
-  border: 2px solid color-mix(in srgb, var(--card-outline, var(--card-color, var(--accent-border))) 78%, var(--modal-border));
+  background: var(--modal-bg2);
+  border: 2px solid var(--card-outline);
   box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--card-color, var(--accent)) 16%, transparent),
-    0 8px 22px rgba(0, 0, 0, 0.16),
-    0 8px 22px color-mix(in srgb, var(--card-color, var(--accent)) 12%, transparent);
+    0 8px 22px rgba(0, 0, 0, 0.14);
   transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 [data-theme="light"] .card {
-  background: linear-gradient(
-    110deg,
-    color-mix(in srgb, var(--card-color, var(--accent)) 12%, var(--modal-bg2)) 0%,
-    color-mix(in srgb, var(--card-color, var(--accent)) 5%, var(--modal-bg2)) 48%,
-    var(--modal-bg2) 100%
-  );
+  background: var(--modal-bg2);
 }
 
 .card::before {
@@ -790,7 +778,7 @@
 .cardId {
   padding: 4px 8px;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--card-color, var(--accent)) 18%, var(--modal-bg));
+  background: color-mix(in srgb, var(--card-outline) 14%, var(--modal-bg));
 }
 
 [data-theme="light"] .card {
@@ -801,17 +789,11 @@
 }
 
 .card:hover {
-  background: linear-gradient(
-    110deg,
-    color-mix(in srgb, var(--card-color, var(--accent)) 22%, var(--modal-bg2)) 0%,
-    color-mix(in srgb, var(--card-color, var(--accent)) 10%, var(--modal-bg2)) 55%,
-    var(--modal-bg2) 100%
-  );
-  border-color: var(--card-outline, var(--card-color, var(--accent-border)));
+  background: var(--modal-bg2);
+  border-color: var(--card-outline);
   box-shadow:
-    0 0 0 2px color-mix(in srgb, var(--card-color, var(--accent)) 22%, transparent),
     0 12px 28px rgba(0, 0, 0, 0.18),
-    0 12px 28px color-mix(in srgb, var(--card-color, var(--accent)) 18%, transparent);
+    0 0 0 1px color-mix(in srgb, var(--card-outline) 24%, transparent);
   transform: translateY(-2px);
 }
 
@@ -822,10 +804,10 @@
   width: 100%;
   min-height: 44px;
   padding: 10px 14px;
-  border: 1px solid color-mix(in srgb, var(--accent-border) 32%, var(--modal-border));
+  border: 1px solid var(--modal-border);
   border-radius: 12px;
-  background: color-mix(in srgb, var(--accent) 7%, var(--modal-bg2));
-  color: var(--accent-text);
+  background: var(--modal-bg);
+  color: var(--modal-text);
   font: 600 12px var(--font-body);
   text-align: left;
   cursor: pointer;
@@ -833,27 +815,23 @@
 }
 
 .profesorToggle:hover {
-  border-color: color-mix(in srgb, var(--accent-border) 62%, var(--modal-border));
-  background: color-mix(in srgb, var(--accent) 11%, var(--modal-bg2));
-  box-shadow: 0 3px 12px color-mix(in srgb, var(--accent) 12%, transparent);
+  border-color: var(--card-outline);
+  background: var(--modal-bg);
+  box-shadow: none;
 }
 
 .corteSection {
-  background: color-mix(in srgb, var(--card-color, var(--accent)) 5%, var(--modal-bg2));
-  border-color: color-mix(in srgb, var(--card-color, var(--accent-border)) 48%, var(--modal-border));
-  box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--card-color, var(--accent)) 10%, transparent),
-    0 5px 16px color-mix(in srgb, var(--card-color, var(--accent)) 10%, transparent);
+  background: var(--modal-bg);
+  border-color: var(--modal-border);
+  box-shadow: none;
   transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
 }
 
 .corteSection:hover {
-  background: color-mix(in srgb, var(--card-color, var(--accent)) 8%, var(--modal-bg2));
-  border-color: color-mix(in srgb, var(--card-color, var(--accent-border)) 72%, var(--modal-border));
-  box-shadow:
-    0 0 0 2px color-mix(in srgb, var(--card-color, var(--accent)) 16%, transparent),
-    0 8px 20px color-mix(in srgb, var(--card-color, var(--accent)) 16%, transparent);
-  transform: translateY(-1px);
+  background: var(--modal-bg);
+  border-color: var(--modal-border);
+  box-shadow: none;
+  transform: none;
 }
 
 .corteChip {
@@ -861,10 +839,10 @@
   align-items: center;
   gap: 8px;
   padding: 6px 10px 6px 6px;
-  border: 1px solid color-mix(in srgb, var(--card-color, var(--accent-border)) 38%, var(--modal-border));
+  border: 1px solid color-mix(in srgb, var(--card-outline) 48%, var(--modal-border));
   border-radius: 9px;
-  color: var(--card-color, var(--accent-text));
-  background: color-mix(in srgb, var(--card-color, var(--accent)) 12%, var(--modal-bg2));
+  color: var(--card-outline);
+  background: color-mix(in srgb, var(--card-outline) 9%, var(--modal-bg2));
   font-size: 11px;
   letter-spacing: 0.02em;
   text-transform: none;
@@ -876,13 +854,53 @@
   width: 24px;
   height: 24px;
   border-radius: 6px;
-  background: color-mix(in srgb, var(--card-color, var(--accent)) 22%, var(--modal-bg));
-  color: var(--card-color, var(--accent-text));
+  background: color-mix(in srgb, var(--card-outline) 16%, var(--modal-bg));
+  color: var(--card-outline);
   font-size: 10px;
   font-variant-numeric: tabular-nums;
 }
 
 .corteHeaderRight .inputGroup { width: 124px; }
+
+.gradesHint {
+  margin: 4px 0 0;
+  max-width: 560px;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.card .corteNameInput:focus,
+.card .itemNameInput:focus,
+.card .textInput:focus,
+.card .notaInput:focus,
+.card .pesoInput:focus {
+  border-color: var(--card-outline);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--card-outline) 16%, transparent);
+}
+
+.card .corteExpandBtn:hover,
+.card .addItemBtn:hover,
+.card .addBtn:hover {
+  border-color: var(--card-outline);
+  color: var(--card-outline);
+  background: var(--modal-bg);
+}
+
+.card .addBtn { color: var(--modal-text); }
+
+.card .itemRow:hover,
+.card .notaFinalRow:hover {
+  border-color: var(--modal-border);
+  box-shadow: none;
+}
+
+.card .notaFinalRow { border-color: var(--modal-border); }
+
+.card .itemDot {
+  background: color-mix(in srgb, var(--card-outline) 14%, var(--modal-bg2));
+  color: var(--card-outline);
+}
 
 
 @media (max-width: 680px) {

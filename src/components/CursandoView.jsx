@@ -109,17 +109,17 @@ function CorteItemRow({ item, idx, onChange, onRemove, max }) {
         />
       </div>
       <div className={styles.inputGroup}>
-        <label>Valoración</label>
+        <label>Puntos posibles</label>
         <input
           type="number" min={1} max={500} step="0.1"
           className={styles.pesoInput}
           value={item.notaMax ?? ""}
-          placeholder="—"
+          placeholder="Ej. 50"
           onChange={e => onChange({ ...item, notaMax: e.target.value })}
         />
       </div>
       <div className={styles.inputGroup}>
-        <label>Nota obtenida</label>
+        <label>Puntos obtenidos</label>
         <input
           type="number" min={NOTA_MIN} max={item.notaMax || max} step="0.1"
           className={styles.notaInput}
@@ -134,7 +134,7 @@ function CorteItemRow({ item, idx, onChange, onRemove, max }) {
 }
 
 function CorteRow({ corte, idx, onChange, onRemove, canRemove }) {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(idx === 0);
   const corteNota = calcCorteNota(corte.items);
   const cortePeso = parseFloat(corte.peso) || 0;
   const cortePct = corteNota !== null && cortePeso > 0 ? (corteNota / cortePeso) * 500 : null;
@@ -178,7 +178,7 @@ function CorteRow({ corte, idx, onChange, onRemove, canRemove }) {
             </span>
           )}
           <div className={styles.inputGroup}>
-            <label>Valoración total</label>
+            <label>Puntos del corte</label>
             <input
               type="number" min={1} max={500}
               className={styles.pesoInput}
@@ -206,7 +206,7 @@ function CorteRow({ corte, idx, onChange, onRemove, canRemove }) {
                 onRemove={() => removeItem(i)}
               />
             ))}
-            <button className={styles.addItemBtn} onClick={addItem}><IconPlus size={11} /> Evaluar</button>
+            <button className={styles.addItemBtn} onClick={addItem}><IconPlus size={11} /> Agregar evaluación</button>
           </div>
 
           {corteNota !== null && (
@@ -333,7 +333,10 @@ function MateriaCard({ materia, data, onChange, colors, borderRadius, horarioCla
 
           <div className={styles.cortesSection}>
             <div className={styles.sectionHeader}>
-              <span className={styles.sectionLabel}>Cortes y evaluaciones</span>
+              <div>
+                <span className={styles.sectionLabel}>Notas por corte</span>
+                <p className={styles.gradesHint}>Agrega cada evaluación con sus puntos posibles y los que obtuviste. La nota final se calcula sobre 500 puntos.</p>
+              </div>
               {d.cortes.length < 3 && (
                  <button className={styles.addBtn} onClick={addCorte}><IconPlus size={11} /> Corte</button>
               )}
