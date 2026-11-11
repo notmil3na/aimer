@@ -333,10 +333,7 @@ function MateriaCard({ materia, data, onChange, colors, borderRadius, horarioCla
 
           <div className={styles.cortesSection}>
             <div className={styles.sectionHeader}>
-              <div>
-                <span className={styles.sectionLabel}>Notas por corte</span>
-                <p className={styles.gradesHint}>Agrega cada evaluación con sus puntos posibles y los que obtuviste. La nota final se calcula sobre 500 puntos.</p>
-              </div>
+              <span className={styles.sectionLabel}>Notas por corte</span>
               {d.cortes.length < 3 && (
                  <button className={styles.addBtn} onClick={addCorte}><IconPlus size={11} /> Corte</button>
               )}

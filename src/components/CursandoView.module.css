@@ -821,28 +821,64 @@
 }
 
 .corteSection {
-  background: var(--modal-bg);
-  border-color: var(--modal-border);
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--modal-border);
+  border-radius: 0;
   box-shadow: none;
-  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+  transition: none;
 }
 
 .corteSection:hover {
-  background: var(--modal-bg);
+  background: transparent;
   border-color: var(--modal-border);
   box-shadow: none;
   transform: none;
+}
+
+.corteHeader {
+  padding: 12px 4px;
+  background: transparent;
+  border: 0;
+}
+
+.corteHeaderExpanded { border-bottom: 0; }
+
+.corteContent {
+  background: transparent;
+  border-radius: 0;
+}
+
+.itemsPanel {
+  padding: 4px 4px 14px;
+  background: transparent;
+}
+
+.itemsEmpty {
+  padding: 8px 0;
+  background: transparent;
+  border: 0;
+}
+
+.itemRow {
+  background: color-mix(in srgb, var(--card-outline) 5%, var(--modal-bg2));
+  border: 0;
+  border-radius: 10px;
+  box-shadow: none;
+}
+
+.itemRow:hover {
+  background: color-mix(in srgb, var(--card-outline) 8%, var(--modal-bg2));
 }
 
 .corteChip {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 10px 6px 6px;
-  border: 1px solid color-mix(in srgb, var(--card-outline) 48%, var(--modal-border));
-  border-radius: 9px;
-  color: var(--card-outline);
-  background: color-mix(in srgb, var(--card-outline) 9%, var(--modal-bg2));
+  padding: 0;
+  border: 0;
+  color: var(--modal-text);
+  background: transparent;
   font-size: 11px;
   letter-spacing: 0.02em;
   text-transform: none;
@@ -861,14 +897,6 @@
 }
 
 .corteHeaderRight .inputGroup { width: 124px; }
-
-.gradesHint {
-  margin: 4px 0 0;
-  max-width: 560px;
-  color: var(--text-muted);
-  font-size: 12px;
-  line-height: 1.5;
-}
 
 .card .corteNameInput:focus,
 .card .itemNameInput:focus,
