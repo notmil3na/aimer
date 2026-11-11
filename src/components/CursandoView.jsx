@@ -8,6 +8,13 @@ const NOTA_MAX  = 500;
 const NOTA_PASS = 300;
 
 const PESOS_DEFAULT = [150, 150, 200];
+const CARD_OUTLINE_COLORS = ["#8b7cf6", "#42b8a5", "#e29a4b", "#e16f8c", "#5799e8", "#a479d8", "#68ae65", "#d47745"];
+
+function outlineColorFor(id) {
+  let hash = 0;
+  for (const char of id || "") hash = (hash * 31 + char.charCodeAt(0)) | 0;
+  return CARD_OUTLINE_COLORS[Math.abs(hash) % CARD_OUTLINE_COLORS.length];
+}
 
 function migrateCortes(cortes) {
   if (!cortes || cortes.length === 0) {
@@ -262,7 +269,7 @@ function MateriaCard({ materia, data, onChange, colors, borderRadius, horarioCla
   return (
     <div
       className={styles.card}
-      style={{ "--card-color": cardColor, borderRadius: `${borderRadius ?? 12}px` }}
+      style={{ "--card-color": cardColor, "--card-outline": outlineColorFor(materia.id), borderRadius: `${borderRadius ?? 12}px` }}
     >
       <button className={styles.cardHeader} onClick={() => setExpanded(v => !v)} aria-expanded={expanded}>
         <div className={styles.cardMeta}>

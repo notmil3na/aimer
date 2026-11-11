@@ -766,7 +766,7 @@
     color-mix(in srgb, var(--card-color, var(--accent)) 7%, var(--modal-bg2)) 48%,
     var(--modal-bg2) 100%
   );
-  border: 1.5px solid color-mix(in srgb, var(--card-color, var(--accent-border)) 68%, var(--modal-border));
+  border: 2px solid color-mix(in srgb, var(--card-outline, var(--card-color, var(--accent-border))) 78%, var(--modal-border));
   box-shadow:
     0 0 0 1px color-mix(in srgb, var(--card-color, var(--accent)) 16%, transparent),
     0 8px 22px rgba(0, 0, 0, 0.16),
@@ -784,13 +784,7 @@
 }
 
 .card::before {
-  content: "";
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 5px;
-  border-radius: inherit;
-  background: var(--card-color, var(--accent));
-  pointer-events: none;
+  content: none;
 }
 
 .cardId {
@@ -813,7 +807,7 @@
     color-mix(in srgb, var(--card-color, var(--accent)) 10%, var(--modal-bg2)) 55%,
     var(--modal-bg2) 100%
   );
-  border-color: color-mix(in srgb, var(--card-color, var(--accent-border)) 92%, white);
+  border-color: var(--card-outline, var(--card-color, var(--accent-border)));
   box-shadow:
     0 0 0 2px color-mix(in srgb, var(--card-color, var(--accent)) 22%, transparent),
     0 12px 28px rgba(0, 0, 0, 0.18),
