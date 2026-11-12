@@ -178,13 +178,16 @@ function AsignacionCard({ item, allMaterias, onUpdate, onDelete, onEdit, onSyncC
         <div className={styles.cardExpanded}>
           <div className={styles.gradeRow}>
             <div className={styles.formField}>
-              <label>Nota /{item.valoracion || "?"}</label>
-              <input type="number" min={0} max={Number(item.valoracion) || 500} step="0.1"
-                className={styles.gradeInput} value={gradeDraft}
-                placeholder="—"
-                onChange={e => setGradeDraft(e.target.value)}
-                onBlur={() => handleGrade(gradeDraft)}
-                onKeyDown={e => { if (e.key === "Enter") e.currentTarget.blur(); }} />
+              <label htmlFor={`grade-${item.id}`}>Nota obtenida</label>
+              <div className={styles.gradeInputWrap}>
+                <input id={`grade-${item.id}`} type="number" min={0} max={Number(item.valoracion) || 500} step="0.1"
+                  className={styles.gradeInput} value={gradeDraft}
+                  placeholder="—"
+                  onChange={e => setGradeDraft(e.target.value)}
+                  onBlur={() => handleGrade(gradeDraft)}
+                  onKeyDown={e => { if (e.key === "Enter") e.currentTarget.blur(); }} />
+                <span className={styles.gradeDenominator}>/ {item.valoracion || "?"}</span>
+              </div>
             </div>
             {item.nota !== undefined && item.nota !== null && (
               <span className={styles.gradeBadge}
@@ -196,11 +199,14 @@ function AsignacionCard({ item, allMaterias, onUpdate, onDelete, onEdit, onSyncC
           </div>
 
           {isExamenQuiz && (
-            <div className={styles.temasSection}>
-              <div className={styles.temasHeader}>
-                <span className={styles.temasLabel}>Temas evaluados</span>
-                <span className={styles.temasCount}>{temasDone}/{temasTotal}</span>
-              </div>
+            <details className={styles.temasSection}>
+              <summary className={styles.temasHeader}>
+                <span className={styles.temasSummaryTitle}>
+                  <span className={styles.temasLabel}>Temas evaluados</span>
+                  <span className={styles.temasCount}>{temasDone} de {temasTotal} completados</span>
+                </span>
+                <IconChevronDown size={15} />
+              </summary>
               <div className={styles.temasList}>
                 {temasSorted.map((tema, i) => (
                   <div key={tema.id} className={`${styles.temaRow} ${tema.estudiado ? styles.temaRowDone : ""}`}
@@ -217,7 +223,7 @@ function AsignacionCard({ item, allMaterias, onUpdate, onDelete, onEdit, onSyncC
                 ))}
                 <button className={styles.addItemBtn} onClick={addTema}>+ Tema</button>
               </div>
-            </div>
+            </details>
           )}
 
           <div className={styles.cardActions}>

@@ -1046,6 +1046,15 @@
   border: 0;
 }
 .itemsEmpty { padding: 12px 2px; }
+.itemDot {
+  width: 25px;
+  height: 25px;
+  border: 1px solid color-mix(in srgb, var(--card-outline) 24%, var(--modal-border));
+  background: color-mix(in srgb, var(--card-outline) 8%, var(--modal-bg));
+  color: var(--card-outline);
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+}
 .addItemBtn {
   min-height: 36px;
   margin-top: 8px;
@@ -1056,6 +1065,30 @@
   color: var(--card-outline);
 }
 .addItemBtn:hover { background: transparent; color: var(--card-outline); text-decoration: underline; }
+.itemNameInput {
+  border-bottom: 1px solid transparent;
+  color: var(--modal-text);
+  font-size: 13px;
+  font-weight: 550;
+}
+.itemNameInput:focus { border-bottom-color: var(--card-outline); }
+.itemRow .notaInput,
+.itemRow .pesoInput {
+  height: 40px;
+  padding: 8px 6px;
+  border-color: transparent;
+  border-bottom-color: var(--modal-border);
+  border-radius: 6px;
+  background: transparent;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.itemRow .notaInput:focus,
+.itemRow .pesoInput:focus {
+  border-color: color-mix(in srgb, var(--card-outline) 50%, var(--modal-border));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--card-outline) 12%, transparent);
+  background: color-mix(in srgb, var(--card-outline) 4%, var(--modal-bg));
+}
 
 @media (max-width: 680px) {
   .itemsHead,
