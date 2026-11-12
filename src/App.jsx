@@ -246,7 +246,11 @@ export default function App() {
               <Login onLogin={handleLogin} />
             </div>
           )}
-          {user && !isDemo && <UpdatePrompt />}
+        </Suspense>
+      )}
+      {ready && !isDemo && (
+        <Suspense fallback={null}>
+          <UpdatePrompt />
         </Suspense>
       )}
       {boot && <LoadingScreen ready={ready} onDone={finishBoot} />}

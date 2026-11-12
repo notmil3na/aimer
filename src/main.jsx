@@ -27,20 +27,26 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 )
 
 if ("serviceWorker" in navigator && import.meta.env.PROD) {
-  const dispatchUpdate = () => window.dispatchEvent(new Event("aimer:swupdate"));
+  let announcedWaitingWorker = null;
+  const dispatchUpdate = (worker) => {
+    if (!worker || announcedWaitingWorker === worker) return;
+    announcedWaitingWorker = worker;
+    window.__aimerUpdateAvailable = true;
+    window.dispatchEvent(new Event("aimer:swupdate"));
+  };
 
   const shouldPromptUpdate = (reg) =>
     !!(reg?.waiting && navigator.serviceWorker.controller);
 
   const checkWaiting = (reg) => {
-    if (shouldPromptUpdate(reg)) dispatchUpdate();
+    if (shouldPromptUpdate(reg)) dispatchUpdate(reg.waiting);
   };
 
   const trackWorker = (worker, reg) => {
     if (!worker) return;
     worker.addEventListener("statechange", () => {
       if (worker.state === "installed" && navigator.serviceWorker.controller) {
-        dispatchUpdate();
+        dispatchUpdate(reg?.waiting || worker);
       }
       if (worker.state === "installed" && reg?.waiting) {
         checkWaiting(reg);
@@ -81,7 +87,9 @@ if ("serviceWorker" in navigator && import.meta.env.PROD) {
   };
 
   navigator.serviceWorker.addEventListener("message", (event) => {
-    if (event.data?.type === "SW_WAITING") dispatchUpdate();
+    if (event.data?.type === "SW_WAITING") {
+      navigator.serviceWorker.getRegistration().then(checkWaiting).catch(() => {});
+    }
   });
 
   if (document.readyState === "complete") registerSw();
