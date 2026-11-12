@@ -8,12 +8,10 @@ const NOTA_MAX  = 500;
 const NOTA_PASS = 300;
 
 const PESOS_DEFAULT = [150, 150, 200];
-const CARD_OUTLINE_COLORS = ["#8b7cf6", "#42b8a5", "#e29a4b", "#e16f8c", "#5799e8", "#a479d8", "#68ae65", "#d47745"];
+const CARD_OUTLINE_COLORS = ["#7c3aed", "#0891b2", "#ea580c", "#db2777", "#2563eb", "#65a30d", "#ca8a04", "#0f766e"];
 
-function outlineColorFor(id) {
-  let hash = 0;
-  for (const char of id || "") hash = (hash * 31 + char.charCodeAt(0)) | 0;
-  return CARD_OUTLINE_COLORS[Math.abs(hash) % CARD_OUTLINE_COLORS.length];
+function outlineColorFor(index) {
+  return CARD_OUTLINE_COLORS[index % CARD_OUTLINE_COLORS.length];
 }
 
 function migrateCortes(cortes) {
@@ -229,7 +227,7 @@ function CorteRow({ corte, idx, onChange, onRemove, canRemove }) {
   );
 }
 
-function MateriaCard({ materia, data, onChange, colors, borderRadius, horarioClase }) {
+function MateriaCard({ materia, data, onChange, colors, borderRadius, horarioClase, colorIndex }) {
   const [expanded, setExpanded] = useState(false);
   const [profesorExpanded, setProfesorExpanded] = useState(false);
   const rawData = data || {
@@ -269,7 +267,7 @@ function MateriaCard({ materia, data, onChange, colors, borderRadius, horarioCla
   return (
     <div
       className={styles.card}
-      style={{ "--card-color": cardColor, "--card-outline": outlineColorFor(materia.id), borderRadius: `${borderRadius ?? 12}px` }}
+      style={{ "--card-color": cardColor, "--card-outline": outlineColorFor(colorIndex), borderRadius: `${borderRadius ?? 12}px` }}
     >
       <button className={styles.cardHeader} onClick={() => setExpanded(v => !v)} aria-expanded={expanded}>
         <div className={styles.cardMeta}>
@@ -510,7 +508,7 @@ export default function CursandoView({
       )}
 
       <div className={styles.cardsList}>
-        {materiasCursando.map(mat => (
+        {materiasCursando.map((mat, colorIndex) => (
           <MateriaCard
             key={mat.id}
             materia={mat}
@@ -519,6 +517,7 @@ export default function CursandoView({
             colors={colors}
             borderRadius={borderRadius}
             horarioClase={getHorarioForMateria(mat.id)}
+            colorIndex={colorIndex}
           />
         ))}
       </div>

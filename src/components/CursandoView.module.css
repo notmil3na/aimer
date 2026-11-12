@@ -763,12 +763,16 @@
   background: var(--modal-bg2);
   border: 2px solid var(--card-outline);
   box-shadow:
-    0 8px 22px rgba(0, 0, 0, 0.14);
+    0 10px 30px color-mix(in srgb, var(--card-outline) 26%, transparent),
+    0 5px 14px rgba(0, 0, 0, 0.12);
   transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 [data-theme="light"] .card {
   background: var(--modal-bg2);
+  box-shadow:
+    0 10px 30px color-mix(in srgb, var(--card-outline) 22%, transparent),
+    0 5px 14px rgba(35, 27, 48, 0.1);
 }
 
 .card::before {
@@ -781,19 +785,12 @@
   background: color-mix(in srgb, var(--card-outline) 14%, var(--modal-bg));
 }
 
-[data-theme="light"] .card {
-  box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--card-color, var(--accent)) 14%, transparent),
-    0 8px 24px rgba(62, 42, 84, 0.13),
-    0 8px 22px color-mix(in srgb, var(--card-color, var(--accent)) 10%, transparent);
-}
-
 .card:hover {
   background: var(--modal-bg2);
   border-color: var(--card-outline);
   box-shadow:
-    0 12px 28px rgba(0, 0, 0, 0.18),
-    0 0 0 1px color-mix(in srgb, var(--card-outline) 24%, transparent);
+    0 15px 38px color-mix(in srgb, var(--card-outline) 34%, transparent),
+    0 6px 16px rgba(0, 0, 0, 0.16);
   transform: translateY(-2px);
 }
 
