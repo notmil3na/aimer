@@ -102,7 +102,7 @@ function MateriaRow({ mat, semestre, notaData, onChange, colorAprobada, colorCur
   const showGradeFields = estado === "cursando" || estado === "aprobada";
 
   return (
-    <div className={`${styles.materiaRow} ${failed ? styles.materiaFailed : ""}`} style={{ "--materia-accent": color }}>
+    <div className={`${styles.materiaRow} ${failed ? styles.materiaFailed : ""}`}>
       <div className={styles.materiaBody}>
         <div className={styles.materiaTop}>
           <div>
