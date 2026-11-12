@@ -113,6 +113,7 @@
 }
 .fileTitle { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: var(--modal-text); font-size: 13px; font-weight: 700; }
 .fileTitle b { color: var(--accent-text); font-size: 9px; letter-spacing: .07em; text-transform: uppercase; }
+.fileHelper { color: var(--modal-muted); font-size: 10px; line-height: 1.35; }
 .fileHint { overflow: hidden; color: var(--modal-muted); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
 .privacy { margin-top: -3px; font-size: 11px; }
 

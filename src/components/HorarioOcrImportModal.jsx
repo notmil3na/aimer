@@ -158,6 +158,7 @@ export default function HorarioOcrImportModal({ materias, existingCount = 0, onC
               </p>
               <label className={styles.fileField}>
                 <span className={styles.fileTitle}>1. Tabla de materias y horas <b>Obligatoria</b></span>
+                <span className={styles.fileHelper}>En modo horizontal si estás desde el teléfono.</span>
                 <span className={styles.fileHint}>{scheduleFile?.name || "Elige una captura PNG, JPG o WebP"}</span>
                 <input type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => setScheduleFile(event.target.files?.[0] || null)} />
               </label>
