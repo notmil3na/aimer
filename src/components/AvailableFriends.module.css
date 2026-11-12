@@ -1,7 +1,7 @@
 .dispCard {
   background: linear-gradient(135deg, color-mix(in srgb, var(--surface) 94%, transparent), color-mix(in srgb, var(--surface2) 90%, transparent));
   border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
-  border-radius: 20px;
+  border-radius: 14px;
   box-shadow: 0 12px 26px rgba(0, 0, 0, 0.07);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));

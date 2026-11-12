@@ -72,10 +72,10 @@ input, textarea, select,
   --mesh-warm2: #a86b47;
 
   --glass-blur: 6px;
-  --radius-xl: 26px;
+  --radius-xl: 28px;
   --radius-lg: 18px;
-  --radius-md: 14px;
-  --radius-sm: 10px;
+  --radius-md: 10px;
+  --radius-sm: 6px;
   --shadow-soft: 0 8px 32px rgba(0,0,0,0.35);
   --shadow-lg: 0 20px 60px rgba(0,0,0,0.45);
 

@@ -81,7 +81,7 @@
   border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
-  border-radius: 24px; padding: 16px 22px; margin-bottom: 20px; gap: 12px;
+  border-radius: 12px; padding: 16px 22px; margin-bottom: 20px; gap: 12px;
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
 }
 .ponderadoLabel { font-size: 14px; font-weight: 600; color: var(--text); }
@@ -101,7 +101,7 @@
   border: 1px dashed var(--border);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
-  border-radius: 24px;
+  border-radius: 14px;
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
 }
 .emptyIcon { display: block; font-size: 32px; margin-bottom: 12px; }
@@ -356,7 +356,7 @@
   border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
-  border-radius: 22px; overflow: hidden;
+  border-radius: 8px; overflow: hidden;
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
 }
 .resumenTitle {

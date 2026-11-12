@@ -116,7 +116,7 @@
   justify-content: space-between;
   background: linear-gradient(135deg, color-mix(in srgb, var(--surface) 94%, transparent), color-mix(in srgb, var(--surface2) 90%, transparent));
   border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
-  border-radius: 24px;
+  border-radius: 14px;
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   padding: 18px 22px;
@@ -140,7 +140,7 @@
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
-  border-radius: 20px;
+  border-radius: 8px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
 }
 
@@ -198,7 +198,7 @@
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid color-mix(in srgb, var(--accent-border) 28%, transparent);
-  border-radius: 20px;
+  border-radius: 12px;
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
   transition: border-color 0.18s, box-shadow 0.18s;
 }
@@ -301,7 +301,7 @@
   border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
-  border-radius: 24px;
+  border-radius: 14px;
   margin-bottom: 18px;
   overflow: hidden;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
@@ -500,7 +500,7 @@
   border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
-  border-radius: 20px;
+  border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
 }
@@ -558,7 +558,7 @@
   border: 2px solid;
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
-  border-radius: 22px;
+  border-radius: 12px;
   padding: 18px 24px;
   font-size: 15px;
   font-weight: 600;
@@ -609,7 +609,7 @@
   line-height: 2;
   background: linear-gradient(135deg, color-mix(in srgb, var(--surface) 94%, transparent), color-mix(in srgb, var(--surface2) 90%, transparent));
   border: 1px dashed var(--border);
-  border-radius: 24px;
+  border-radius: 14px;
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
 }
 

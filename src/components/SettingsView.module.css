@@ -68,7 +68,7 @@
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
-  border-radius: 24px;
+  border-radius: 16px;
   padding: 18px 20px;
   margin-bottom: 20px;
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.06);
@@ -97,7 +97,7 @@
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
-  border-radius: 18px;
+  border-radius: 10px;
 }
 
 .careerLabel {
@@ -142,7 +142,7 @@
   border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
-  border-radius: 24px; padding: 28px 28px 24px;
+  border-radius: 18px; padding: 28px 28px 24px;
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.06);
 }
 
@@ -283,7 +283,7 @@
   padding: 22px 24px;
   background: linear-gradient(135deg, color-mix(in srgb, var(--surface) 94%, transparent), color-mix(in srgb, var(--surface2) 90%, transparent));
   border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
-  border-radius: 24px;
+  border-radius: 12px;
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.06);
 }
 .passwordHint { color: var(--text-muted); font-size: 13px; margin: -6px 0 18px; }
@@ -318,7 +318,7 @@
   border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
-  border-radius: 24px; overflow: hidden;
+  border-radius: 14px; overflow: hidden;
   display: flex; flex-direction: column;
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.06);
 }

@@ -293,7 +293,7 @@
 .miniCard {
   box-sizing: border-box;
   padding: 16px 18px;
-  border-radius: 24px;
+  border-radius: 10px;
   background: var(--paper);
   color: var(--ink);
   text-align: left;
@@ -494,7 +494,7 @@
   height: 50px;
   padding: 0 44px 0 18px;
   border: 1.5px solid transparent;
-  border-radius: 16px;
+  border-radius: 8px;
   background-color: var(--field);
   color: var(--ink);
   font-family: var(--sans);
@@ -733,7 +733,7 @@
   max-width: 400px;
   box-sizing: border-box;
   padding: 30px 28px 26px;
-  border-radius: 22px;
+  border-radius: 16px;
   background: var(--paper);
   color: var(--ink);
   box-shadow:

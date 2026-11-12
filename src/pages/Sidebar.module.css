@@ -78,7 +78,7 @@
   padding: 12px;
   background: var(--surface2);
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: 10px;
   margin-bottom: 20px;
   transition: background 0.3s;
 }
