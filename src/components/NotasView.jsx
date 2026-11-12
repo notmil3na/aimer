@@ -102,7 +102,7 @@ function MateriaRow({ mat, semestre, notaData, onChange, colorAprobada, colorCur
   const showGradeFields = estado === "cursando" || estado === "aprobada";
 
   return (
-    <div className={`${styles.materiaRow} ${failed ? styles.materiaFailed : ""}`}>
+    <div className={`${styles.materiaRow} ${failed ? styles.materiaFailed : ""}`} style={{ "--materia-accent": color }}>
       <div className={styles.materiaBody}>
         <div className={styles.materiaTop}>
           <div>
@@ -521,6 +521,7 @@ export default function NotasView({ malla, notas, onSave, user }) {
             <button
               type="button"
               className={styles.semHeader}
+              style={{ "--semester-accent": colorA }}
               aria-expanded={expandedSemesters.has(sem.semestre)}
               aria-controls={`notas-semestre-${sem.semestre}`}
               onClick={() => toggleSemester(sem.semestre)}
