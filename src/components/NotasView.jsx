@@ -325,11 +325,9 @@ export default function NotasView({ malla, notas, onSave, user }) {
             </p>
             <p className={styles.creditStatSub}>{pctAprobados}% del total</p>
           </div>
-          {globalPond && (
-            <span className={styles.globalVal} style={{ color: colorA }}>
-              {globalPond.valor.toFixed(1)}
-            </span>
-          )}
+          <span className={styles.globalVal} style={{ color: colorA }}>
+            {globalPond ? globalPond.valor.toFixed(1) : "—"}
+          </span>
         </div>
       </div>
 
