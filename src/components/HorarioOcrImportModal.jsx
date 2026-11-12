@@ -154,16 +154,16 @@ export default function HorarioOcrImportModal({ materias, existingCount = 0, onC
           {!draft && (
             <>
               <p className={styles.intro}>
-                Tómale una captura a tu horario desde Ayre y súbelo aquí para importarlo a Aimer.
+                Sube una captura completa de Ayre. Si las tablas aparecen en imágenes separadas, carga la de materias primero y la cuadrícula semanal como segunda imagen.
               </p>
               <label className={styles.fileField}>
                 <span className={styles.fileTitle}>1. Tabla de materias y horas <b>Obligatoria</b></span>
-                <span className={styles.fileHelper}>En modo horizontal si estás desde el teléfono.</span>
+                <span className={styles.fileHelper}>Debe mostrar asignaturas, docentes, grupos y días. También se acepta la captura completa con la cuadrícula semanal debajo.</span>
                 <span className={styles.fileHint}>{scheduleFile?.name || "Elige una captura PNG, JPG o WebP"}</span>
                 <input type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => setScheduleFile(event.target.files?.[0] || null)} />
               </label>
               <label className={styles.fileField}>
-                <span className={styles.fileTitle}>2. Tabla de salones <b>Opcional</b></span>
+                <span className={styles.fileTitle}>2. Cuadrícula semanal / salones <b>Opcional</b></span>
                 <span className={styles.fileHint}>{locationFile?.name || "Las filas deben conservar el mismo orden"}</span>
                 <input type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => setLocationFile(event.target.files?.[0] || null)} />
               </label>

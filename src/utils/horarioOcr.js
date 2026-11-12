@@ -34,7 +34,7 @@ function uniqueSorted(values, tolerance = 3) {
   }, []);
 }
 
-function detectTable(image) {
+function detectTables(image) {
   const maxDimension = 2200;
   const scale = Math.min(1, maxDimension / Math.max(image.width, image.height));
   const canvas = document.createElement("canvas");
@@ -45,33 +45,60 @@ function detectTable(image) {
   const { data, width, height } = context.getImageData(0, 0, canvas.width, canvas.height);
 
   const blueAt = (x, y) => isBluePixel(data, (y * width + x) * 4);
-  const verticalCandidates = [];
-  for (let x = 0; x < width; x++) {
-    let count = 0;
-    for (let y = 0; y < height; y++) if (blueAt(x, y)) count++;
-    if (count / height >= 0.38) verticalCandidates.push(x);
-  }
-  const verticalRuns = runs(verticalCandidates, 2).filter((group) => group.length <= 8);
-  const xs = verticalRuns.map(centerOf);
-  if (xs.length < 8) throw new Error("No identifiqué la tabla. Sube una captura nítida y completa.");
-
-  const left = xs[0], right = xs[xs.length - 1];
   const horizontalCandidates = [];
   for (let y = 0; y < height; y++) {
     let count = 0;
-    for (let x = left; x <= right; x++) if (blueAt(x, y)) count++;
-    if (count / (right - left + 1) >= 0.55) horizontalCandidates.push(y);
+    for (let x = 0; x < width; x++) if (blueAt(x, y)) count++;
+    if (count / width >= 0.5) horizontalCandidates.push(y);
   }
   const horizontalRuns = runs(horizontalCandidates, 2);
-  const ys = [];
-  for (const group of horizontalRuns) {
-    if (group.length >= 5) ys.push(group[0], group[group.length - 1]);
-    else ys.push(centerOf(group));
-  }
-  const yBounds = uniqueSorted(ys);
-  if (yBounds.length < 7) throw new Error("No identifiqué las filas. Usa una captura donde se vea toda la tabla.");
+  const yBounds = uniqueSorted(horizontalRuns.flatMap((group) => group.length >= 5
+    ? [group[0], group[group.length - 1]]
+    : [centerOf(group)]));
+  if (yBounds.length < 3) throw new Error("No identifiqué las filas. Usa una captura donde se vea toda la tabla.");
 
-  return { canvas, context, xs, yBounds, colCount: xs.length - 1, rowCount: yBounds.length - 1 };
+  // Analiza cada franja entre bordes horizontales por separado. Así una imagen
+  // que contiene la tabla de materias y la cuadrícula de salones no combina las
+  // columnas de ambas tablas en una sola estructura imposible.
+  const bands = [];
+  for (let index = 0; index < yBounds.length - 1; index++) {
+    const top = yBounds[index], bottom = yBounds[index + 1];
+    const bandHeight = bottom - top;
+    if (bandHeight < 8) continue;
+    const verticalCandidates = [];
+    for (let x = 0; x < width; x++) {
+      let count = 0;
+      for (let y = top + 2; y < bottom - 1; y++) if (blueAt(x, y)) count++;
+      if (count / Math.max(1, bandHeight - 3) >= 0.38) verticalCandidates.push(x);
+    }
+    const xs = runs(verticalCandidates, 2).filter((group) => group.length <= 8).map(centerOf);
+    if (xs.length >= 3) bands.push({ index, xs });
+  }
+
+  const sameColumns = (a, b) => a.length === b.length && a.every((x, i) => Math.abs(x - b[i]) <= 4);
+  const tables = [];
+  for (const band of bands) {
+    const last = tables[tables.length - 1];
+    if (last && last.endIndex === band.index && sameColumns(last.xs, band.xs)) {
+      last.endIndex = band.index + 1;
+      last.rowCount++;
+    } else {
+      tables.push({ canvas, context, xs: band.xs, startIndex: band.index, endIndex: band.index + 1, colCount: band.xs.length - 1, rowCount: 1 });
+    }
+  }
+  for (const table of tables) {
+    // Rebuild bounds from the original row-band indices; candidate tables hold
+    // one or more contiguous bands and use their exact outer grid lines.
+    table.yBounds = Array.from({ length: table.rowCount + 1 }, (_, i) => yBounds[table.startIndex + i]);
+    delete table.startIndex;
+    delete table.endIndex;
+  }
+  return tables;
+}
+
+function findTable(tables, expectedColumns) {
+  return tables.filter((table) => table.colCount === expectedColumns && table.rowCount >= 2)
+    .sort((a, b) => b.rowCount - a.rowCount)[0] || null;
 }
 
 function cellHasInk(context, x, y, width, height) {
@@ -157,10 +184,7 @@ async function recognizeCell(worker, table, row, col, numeric = false) {
   return cleanOcr(result.data.text);
 }
 
-function getDataRowCount(table, expectedColumns) {
-  if (table.colCount !== expectedColumns) {
-    throw new Error(`La tabla tiene ${table.colCount} columnas y esperaba ${expectedColumns}. Usa una captura de la tabla completa.`);
-  }
+function getDataRowCount(table) {
   const count = table.rowCount - 1;
   if (count < 1) throw new Error("La tabla no tiene filas de materias reconocibles.");
   return count;
@@ -174,10 +198,17 @@ export async function readScheduleImages(scheduleFile, locationFile, onProgress 
   const images = await Promise.all([createImageBitmap(scheduleFile), ...(locationFile ? [createImageBitmap(locationFile)] : [])]);
   let scheduleTable, locationTable, scheduleRowCount, locationRowCount;
   try {
-    scheduleTable = detectTable(images[0]);
-    scheduleRowCount = getDataRowCount(scheduleTable, 10);
-    locationTable = images[1] ? detectTable(images[1]) : null;
-    locationRowCount = locationTable ? getDataRowCount(locationTable, 7) : 0;
+    const mainTables = detectTables(images[0]);
+    scheduleTable = findTable(mainTables, 10);
+    if (!scheduleTable) {
+      const foundColumns = [...new Set(mainTables.map((table) => table.colCount))].join(", ");
+      throw new Error(foundColumns
+        ? `No encontré la tabla de materias de 10 columnas (detecté tablas de ${foundColumns}). Sube también la captura con asignaturas, docentes y días.`
+        : "No identifiqué una tabla completa. Sube una captura nítida con asignaturas, docentes y días.");
+    }
+    scheduleRowCount = getDataRowCount(scheduleTable);
+    locationTable = (images[1] ? findTable(detectTables(images[1]), 7) : null) || findTable(mainTables, 7);
+    locationRowCount = locationTable ? getDataRowCount(locationTable) : 0;
   } finally {
     images.forEach((image) => image.close());
   }
