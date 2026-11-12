@@ -44,15 +44,18 @@ export default function Sidebar({ user, tabs, activeTab, onTabChange, onLogout, 
 
   useEffect(() => {
     const lastTop = new WeakMap(); // último scrollTop visto, por cada elemento con scroll
+    const mainScroll = document.querySelector("main");
+    if (mainScroll) lastTop.set(mainScroll, mainScroll.scrollTop);
     const onScroll = (e) => {
       const el = e.target;
       if (!(el instanceof Element)) return;          // ignora el scroll del documento
       if (wrapRef.current?.contains(el)) return;     // ignora el scroll horizontal de la propia barra
       const top  = el.scrollTop;
-      const prev = lastTop.get(el) ?? top;
+      const prev = lastTop.get(el);
+      if (prev === undefined) { lastTop.set(el, top); return; }
       const delta = top - prev;
-      if (Math.abs(delta) < 8) return;               // evita parpadeos por movimientos mínimos
       lastTop.set(el, top);
+      if (Math.abs(delta) < 4) return;               // evita parpadeos por movimientos mínimos
       if (top < 40) setNavHidden(false);             // cerca del inicio: siempre visible
       else setNavHidden(delta > 0);                  // bajando = oculta, subiendo = muestra
     };

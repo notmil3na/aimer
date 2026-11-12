@@ -36,8 +36,8 @@ input, textarea, select,
      violeta azulado de antes (#0e0a18). --surface es blanco translucido, asi que
      el panel compuesto sobre --bg da #242322. */
   --bg:       #1a1918;
-  --surface:  rgba(255,255,255,0.045);
-  --surface2: rgba(255,255,255,0.075);
+  --surface:  rgba(255,255,255,0.065);
+  --surface2: rgba(255,255,255,0.105);
   /* --surface ya compuesto sobre --bg: es el fondo del area de contenido y lo
      que pinta el canvas del navegador (ver html mas abajo). */
   --bg-content: #242322;
