@@ -950,3 +950,127 @@
   .repRow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .repRow .removeBtn { grid-column: 2; grid-row: 3; justify-self: end; }
 }
+
+/* Layout compacto: los cortes funcionan como secciones seleccionables y cada
+   evaluación se lee como una fila, sin acumular tarjetas dentro de tarjetas. */
+.cortesSection { gap: 12px; }
+.corteTabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.corteTab {
+  display: grid;
+  justify-items: start;
+  gap: 4px;
+  min-width: 0;
+  min-height: 78px;
+  padding: 10px 12px;
+  border: 1px solid var(--modal-border);
+  border-radius: 10px;
+  background: var(--modal-bg);
+  color: var(--modal-text);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.18s, background 0.18s, box-shadow 0.18s;
+}
+.corteTab:hover { border-color: color-mix(in srgb, var(--card-outline) 55%, var(--modal-border)); }
+.corteTabActive {
+  border-color: var(--card-outline);
+  background: color-mix(in srgb, var(--card-outline) 9%, var(--modal-bg));
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--card-outline) 12%, transparent);
+}
+.corteTabName {
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+.corteTab strong { font-size: 16px; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.corteTabMeta { color: var(--text-muted); font-size: 10px; }
+
+.corteSection {
+  border: 0;
+  border-bottom: 1px solid var(--modal-border);
+}
+.corteHeader {
+  padding: 14px 0 10px;
+  border-bottom: 1px solid var(--modal-border);
+}
+.corteDetailTitle { color: var(--modal-text); font-size: 12px; font-weight: 650; }
+.corteContent { overflow: visible; }
+.itemsPanel { gap: 0; padding: 0 2px 12px; }
+.itemsHead,
+.itemRow {
+  display: grid;
+  grid-template-columns: minmax(140px, 1fr) repeat(2, minmax(100px, 128px)) 40px;
+  align-items: center;
+  gap: 12px;
+}
+.itemsHead {
+  padding: 11px 4px 8px;
+  color: var(--text-muted);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+.itemsHead span:not(:first-child) { text-align: center; }
+.itemRow {
+  padding: 8px 4px;
+  border: 0;
+  border-bottom: 1px solid var(--modal-border);
+  border-radius: 0;
+  background: transparent;
+}
+.itemRow:hover { background: color-mix(in srgb, var(--card-outline) 4%, transparent); box-shadow: none; }
+.itemIdentity { align-items: center; }
+.itemNameInput {
+  padding: 8px 2px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  font-size: 12px;
+}
+.itemRow .inputGroup { gap: 0; }
+.itemRow .inputGroup label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.itemsEmpty { padding: 12px 2px; }
+.addItemBtn {
+  min-height: 36px;
+  margin-top: 8px;
+  padding: 6px 4px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--card-outline);
+}
+.addItemBtn:hover { background: transparent; color: var(--card-outline); text-decoration: underline; }
+
+@media (max-width: 680px) {
+  .itemsHead,
+  .itemRow { grid-template-columns: minmax(0, 1fr) minmax(78px, 100px) minmax(78px, 100px) 36px; gap: 8px; }
+  .itemsHead span:first-child { visibility: hidden; }
+}
+@media (max-width: 420px) {
+  .corteTabs { gap: 6px; }
+  .corteTab { min-height: 72px; padding: 8px; }
+  .corteTab strong { font-size: 14px; }
+  .itemsHead,
+  .itemRow { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 36px; gap: 6px; }
+  .itemsHead span:first-child { display: none; }
+  .itemIdentity { grid-column: 1 / -1; }
+  .itemRow .inputGroup:nth-of-type(2) { grid-column: 1; }
+  .itemRow .inputGroup:nth-of-type(3) { grid-column: 2; }
+  .itemRow .removeBtn { grid-column: 3; grid-row: 2; }
+}

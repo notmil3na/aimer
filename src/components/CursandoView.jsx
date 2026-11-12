@@ -132,7 +132,6 @@ function CorteItemRow({ item, idx, onChange, onRemove, max }) {
 }
 
 function CorteRow({ corte, idx, onChange, onRemove, canRemove }) {
-  const [expanded, setExpanded] = useState(idx === 0);
   const corteNota = calcCorteNota(corte.items);
   const cortePeso = parseFloat(corte.peso) || 0;
   const cortePct = corteNota !== null && cortePeso > 0 ? (corteNota / cortePeso) * 500 : null;
@@ -153,28 +152,11 @@ function CorteRow({ corte, idx, onChange, onRemove, canRemove }) {
 
   return (
     <div className={styles.corteSection}>
-      <div className={`${styles.corteHeader} ${expanded ? styles.corteHeaderExpanded : ""}`}>
+      <div className={styles.corteHeader}>
         <div className={styles.corteHeaderLeft}>
-          <button
-            type="button"
-            className={styles.corteExpandBtn}
-            aria-expanded={expanded}
-            aria-label={`${expanded ? "Contraer" : "Expandir"} ${corte.nombre || `Corte ${idx + 1}`}`}
-            onClick={() => setExpanded(value => !value)}
-          >
-            {expanded ? <IconChevronUp size={13} /> : <IconChevronDown size={13} />}
-          </button>
-          <span className={styles.corteChip}>
-            <span className={styles.corteNumber}>{String(idx + 1).padStart(2, "0")}</span>
-            <span>Corte {idx + 1}</span>
-          </span>
+          <span className={styles.corteDetailTitle}>Evaluaciones del corte {idx + 1}</span>
         </div>
         <div className={styles.corteHeaderRight}>
-          {!expanded && corteNota !== null && (
-            <span className={styles.corteCollapsedScore}>
-              {corteNota}<span>/{cortePeso || "—"}</span>
-            </span>
-          )}
           <div className={styles.inputGroup}>
             <label>Puntos del corte</label>
             <input
@@ -190,11 +172,15 @@ function CorteRow({ corte, idx, onChange, onRemove, canRemove }) {
         </div>
       </div>
 
-      {expanded && (
         <div className={styles.corteContent}>
           <div className={styles.itemsPanel}>
+            {(corte.items || []).length > 0 && (
+              <div className={styles.itemsHead} aria-hidden="true">
+                <span>Evaluación</span><span>Puntos posibles</span><span>Puntos obtenidos</span><span />
+              </div>
+            )}
             {(corte.items || []).length === 0 && (
-              <p className={styles.itemsEmpty}>Aún no hay evaluaciones. Agrega una para empezar a sumar puntos.</p>
+              <p className={styles.itemsEmpty}>Todavía no hay evaluaciones en este corte.</p>
             )}
             {(corte.items || []).map((item, i) => (
               <CorteItemRow
@@ -222,7 +208,6 @@ function CorteRow({ corte, idx, onChange, onRemove, canRemove }) {
             </div>
           )}
         </div>
-      )}
     </div>
   );
 }
@@ -230,6 +215,7 @@ function CorteRow({ corte, idx, onChange, onRemove, canRemove }) {
 function MateriaCard({ materia, data, onChange, colors, borderRadius, horarioClase, colorIndex }) {
   const [expanded, setExpanded] = useState(false);
   const [profesorExpanded, setProfesorExpanded] = useState(false);
+  const [activeCorte, setActiveCorte] = useState(0);
   const rawData = data || {
     profesor: "", grupo: "", salon: "",
     cortes: [],
@@ -250,6 +236,7 @@ function MateriaCard({ materia, data, onChange, colors, borderRadius, horarioCla
   };
   const addCorte = () => {
     if (d.cortes.length >= 3) return;
+    setActiveCorte(d.cortes.length);
     onChange({ ...d, cortes: [...d.cortes, { nombre: `Corte ${d.cortes.length + 1}`, peso: PESOS_DEFAULT[d.cortes.length] ?? 100, items: [] }] });
   };
   const removeCorte = (i) => {
@@ -336,7 +323,26 @@ function MateriaCard({ materia, data, onChange, colors, borderRadius, horarioCla
                  <button className={styles.addBtn} onClick={addCorte}><IconPlus size={11} /> Corte</button>
               )}
             </div>
-            {d.cortes.map((c, i) => (
+            <div className={styles.corteTabs} role="group" aria-label={`Cortes de ${materia.nombre}`}>
+              {d.cortes.map((c, i) => {
+                const corteNota = calcCorteNota(c.items);
+                const selectedCorte = Math.min(activeCorte, d.cortes.length - 1) === i;
+                return (
+                  <button
+                    key={i}
+                    type="button"
+                    className={`${styles.corteTab} ${selectedCorte ? styles.corteTabActive : ""}`}
+                    aria-pressed={selectedCorte}
+                    onClick={() => setActiveCorte(i)}
+                  >
+                    <span className={styles.corteTabName}>Corte {String(i + 1).padStart(2, "0")}</span>
+                    <strong>{corteNota === null ? "Sin nota" : corteNota}</strong>
+                    <span className={styles.corteTabMeta}>{c.peso} pts</span>
+                  </button>
+                );
+              })}
+            </div>
+            {d.cortes.map((c, i) => i === Math.min(activeCorte, d.cortes.length - 1) && (
               <CorteRow
                 key={i} idx={i} corte={c}
                 onChange={val => updateCorte(i, val)}
