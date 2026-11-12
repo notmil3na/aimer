@@ -178,7 +178,7 @@ function AsignacionCard({ item, allMaterias, onUpdate, onDelete, onEdit, onSyncC
         <div className={styles.cardExpanded}>
           <div className={styles.gradeRow} style={{ "--grade-tone": item.nota === undefined || item.nota === null ? info.color : (item.nota / (Number(item.valoracion) || 100)) >= NOTA_PASS_PCT ? "#6ec88a" : "#e07070" }}>
             <div className={styles.formField}>
-              <label htmlFor={`grade-${item.id}`}>Nota obtenida</label>
+              <label htmlFor={`grade-${item.id}`}>Nota</label>
               <div className={styles.gradeInputWrap}>
                 <input id={`grade-${item.id}`} type="number" min={0} max={Number(item.valoracion) || 500} step="0.1"
                   className={styles.gradeInput} value={gradeDraft}

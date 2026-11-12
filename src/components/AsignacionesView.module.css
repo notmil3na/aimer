@@ -957,70 +957,75 @@
 
 .gradeRow {
   align-items: center;
-  gap: 18px;
-  min-height: 86px;
-  padding: 12px 18px;
+  gap: 14px;
+  min-height: 0;
+  padding: 4px 0 12px;
   border: 0;
-  border-left: 3px solid var(--grade-tone);
-  border-radius: 8px;
-  background: linear-gradient(100deg, color-mix(in srgb, var(--grade-tone) 8%, var(--modal-bg)), var(--modal-bg2));
-}
-.gradeRow .formField { flex: 1 1 220px; max-width: 320px; gap: 2px; }
-.gradeRow .formField label {
-  color: var(--modal-muted);
-  font-size: 9px;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-}
-.gradeInputWrap { width: min(100%, 260px); align-items: baseline; gap: 10px; }
-.gradeInput {
-  flex: 0 1 112px;
-  width: 112px;
-  min-height: 48px;
-  padding: 3px 0;
-  border: 0;
-  border-bottom: 1px solid color-mix(in srgb, var(--grade-tone) 40%, var(--modal-border));
+  border-bottom: 1px solid var(--modal-border);
   border-radius: 0;
   background: transparent;
+}
+.gradeRow .formField {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex: 0 1 auto;
+  max-width: none;
+  min-width: 0;
+  gap: 10px;
+}
+.gradeRow .formField label {
   color: var(--modal-text);
-  font-family: var(--font-display);
-  font-size: 30px;
+  font-size: 12px;
   font-weight: 600;
-  line-height: 1;
-  text-align: left;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.gradeInputWrap { width: auto; align-items: center; gap: 8px; }
+.gradeInput {
+  flex: 0 0 82px;
+  width: 82px;
+  min-height: 40px;
+  padding: 6px 8px;
+  border: 1px solid var(--modal-border);
+  border-radius: 7px;
+  background: var(--modal-bg2);
+  color: var(--modal-text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
   box-shadow: none;
 }
 .gradeInput:focus {
-  border-color: var(--grade-tone);
-  box-shadow: 0 1px 0 var(--grade-tone);
+  border-color: var(--accent-border);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 12%, transparent);
 }
 .gradeInput::-webkit-inner-spin-button,
 .gradeInput::-webkit-outer-spin-button { margin: 0; appearance: none; }
 .gradeInput[type="number"] { appearance: textfield; }
-.gradeDenominator { color: var(--modal-muted); font-size: 11px; font-weight: 500; }
+.gradeDenominator { color: var(--modal-muted); font-size: 11px; font-weight: 500; white-space: nowrap; }
 .gradeBadge {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 4px;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
   margin-left: auto;
-  padding: 0 0 0 18px;
-  border-left: 1px solid var(--modal-border);
+  padding: 0;
+  border: 0;
   border-radius: 0;
   background: transparent;
   color: var(--modal-muted);
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: .08em;
-  text-transform: uppercase;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
 }
-.gradeBadge strong { color: var(--grade-tone); font-size: 20px; font-variant-numeric: tabular-nums; letter-spacing: 0; }
-.gradeBadge small { color: var(--modal-muted); font-size: 12px; font-weight: 500; }
+.gradeBadge strong { color: var(--grade-tone); font-size: 13px; font-variant-numeric: tabular-nums; letter-spacing: 0; }
+.gradeBadge small { color: var(--modal-muted); font-size: 11px; font-weight: 500; }
 
 @media (max-width: 480px) {
-  .gradeRow { align-items: center; gap: 12px; padding: 12px; }
-  .gradeRow .formField { flex-basis: 160px; }
-  .gradeInputWrap { gap: 8px; }
-  .gradeInput { flex-basis: 90px; width: 90px; font-size: 27px; }
-  .gradeBadge { padding-left: 12px; }
+  .gradeRow { align-items: center; gap: 10px; padding: 4px 0 10px; }
+  .gradeRow .formField { flex: 0 1 auto; gap: 7px; }
+  .gradeInput { flex-basis: 72px; width: 72px; }
+  .gradeBadge { margin-left: auto; }
 }
