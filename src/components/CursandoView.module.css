@@ -981,14 +981,14 @@
   box-shadow: 0 4px 14px color-mix(in srgb, var(--card-outline) 12%, transparent);
 }
 .corteTabName {
-  color: var(--text-muted);
-  font-size: 10px;
+  color: var(--modal-text);
+  font-size: 12px;
   font-weight: 700;
-  letter-spacing: .07em;
-  text-transform: uppercase;
+  letter-spacing: 0;
 }
 .corteTab strong { font-size: 16px; font-variant-numeric: tabular-nums; line-height: 1.1; }
 .corteTabMeta { color: var(--text-muted); font-size: 10px; }
+.corteTabActive .corteTabName { color: var(--card-outline); }
 
 .corteSection {
   border: 0;
@@ -998,7 +998,7 @@
   padding: 14px 0 10px;
   border-bottom: 1px solid var(--modal-border);
 }
-.corteDetailTitle { color: var(--modal-text); font-size: 12px; font-weight: 650; }
+.corteDetailTitle { color: var(--card-outline); font-size: 14px; font-weight: 700; }
 .corteContent { overflow: visible; }
 .itemsPanel { gap: 0; padding: 0 2px 12px; }
 .itemsHead,
@@ -1083,6 +1083,25 @@
   text-align: center;
   font-variant-numeric: tabular-nums;
 }
+.itemRow .pesoInput {
+  height: 36px;
+  border-color: var(--modal-border);
+  background: var(--modal-bg);
+  color: var(--modal-muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+.itemRow .notaInput {
+  height: 42px;
+  border-color: color-mix(in srgb, var(--card-outline) 38%, var(--modal-border));
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--card-outline) 7%, var(--modal-bg));
+  color: var(--modal-text);
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 650;
+}
+.itemRow .notaInput::placeholder { color: var(--text-muted); font-size: 15px; font-weight: 400; }
 .itemRow .notaInput:focus,
 .itemRow .pesoInput:focus {
   border-color: color-mix(in srgb, var(--card-outline) 50%, var(--modal-border));
