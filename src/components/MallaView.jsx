@@ -9,6 +9,20 @@ import { getObligatorias } from "../utils/careerProgress.js";
 import MateriaCard from "./MateriaCard";
 import styles from "./MallaView.module.css";
 
+function getReadableTextColor(background) {
+  const raw = String(background || "").trim().replace("#", "");
+  const normalized = raw.length === 3
+    ? raw.split("").map((ch) => ch + ch).join("")
+    : raw;
+  if (!/^[0-9a-f]{6}$/i.test(normalized)) return "#0e0e14";
+
+  const channels = [0, 2, 4].map((offset) => parseInt(normalized.slice(offset, offset + 2), 16) / 255);
+  const luminance = channels
+    .map((channel) => channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4)
+    .reduce((sum, channel, index) => sum + channel * [0.2126, 0.7152, 0.0722][index], 0);
+  return luminance < 0.2 ? "#fffaf8" : "#18151a";
+}
+
 export default function MallaView({ malla: initialMalla, notas, onSave, user, onNotify, semestre, planAlternativo, etiquetaPlan }) {
   // La malla llega ya resuelta desde Dashboard: con los estados guardados del
   // usuario, o con el auto-aprobado de una cuenta que aún no tiene malla
@@ -539,7 +553,7 @@ export default function MallaView({ malla: initialMalla, notas, onSave, user, on
         <div className={styles.detailPanel} role="dialog" aria-modal="true" aria-label={`Detalle de ${selected.nombre}`}>
           <div className={styles.detailHeader}>
             <div>
-              <span className={styles.detailEstado} style={{ background: getColor(selected.estado), color: "#0e0e14" }}>
+              <span className={styles.detailEstado} style={{ background: getColor(selected.estado), color: getReadableTextColor(getColor(selected.estado)) }}>
                 {ESTADOS[selected.estado]?.label}
               </span>
               <h3 className={styles.detailName}>{selected.nombre}</h3>
@@ -585,7 +599,7 @@ export default function MallaView({ malla: initialMalla, notas, onSave, user, on
                     <button
                       key={k}
                       className={`${styles.estadoBtn} ${selected.estado === k ? styles.estadoBtnActive : ""}`}
-                      style={selected.estado === k ? { background: getColor(k), color: "#0e0e14" } : {}}
+                      style={selected.estado === k ? { background: getColor(k), color: getReadableTextColor(getColor(k)) } : {}}
                       onClick={() => {
                         handleEstadoChange(selected.id, k);
                       }}
@@ -665,7 +679,7 @@ export default function MallaView({ malla: initialMalla, notas, onSave, user, on
                 <div key={m.id} className={styles.confirmItem}>
                   <span className={styles.confirmItemId}>{m.id}</span>
                   <span className={styles.confirmItemName}>{m.nombre}</span>
-                  <span className={styles.confirmItemBadge} style={{ background: getColor(m.estado), color: "#0e0e14" }}>
+                  <span className={styles.confirmItemBadge} style={{ background: getColor(m.estado), color: getReadableTextColor(getColor(m.estado)) }}>
                     {ESTADOS[m.estado]?.label}
                   </span>
                 </div>

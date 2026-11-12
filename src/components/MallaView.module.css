@@ -380,7 +380,6 @@
 .estadoBtnActive {
   border-color: var(--accent-border);
   box-shadow: 0 0 0 2px rgba(var(--accent-rgb), 0.25);
-  color: #0e0e14;
 }
 
 .prereqList { display: flex; flex-direction: column; gap: 5px; }
