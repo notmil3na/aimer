@@ -1069,7 +1069,7 @@
   border-bottom: 1px solid transparent;
   color: var(--modal-text);
   font-size: 13px;
-  font-weight: 550;
+  font-weight: 700;
 }
 .itemNameInput:focus { border-bottom-color: var(--card-outline); }
 .itemRow .notaInput,
