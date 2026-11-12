@@ -176,7 +176,7 @@ function AsignacionCard({ item, allMaterias, onUpdate, onDelete, onEdit, onSyncC
 
       {expanded && (
         <div className={styles.cardExpanded}>
-          <div className={styles.gradeRow}>
+          <div className={styles.gradeRow} style={{ "--grade-tone": item.nota === undefined || item.nota === null ? info.color : (item.nota / (Number(item.valoracion) || 100)) >= NOTA_PASS_PCT ? "#6ec88a" : "#e07070" }}>
             <div className={styles.formField}>
               <label htmlFor={`grade-${item.id}`}>Nota obtenida</label>
               <div className={styles.gradeInputWrap}>
@@ -186,15 +186,14 @@ function AsignacionCard({ item, allMaterias, onUpdate, onDelete, onEdit, onSyncC
                   onChange={e => setGradeDraft(e.target.value)}
                   onBlur={() => handleGrade(gradeDraft)}
                   onKeyDown={e => { if (e.key === "Enter") e.currentTarget.blur(); }} />
-                <span className={styles.gradeDenominator}>/ {item.valoracion || "?"}</span>
+                <span className={styles.gradeDenominator}>de {item.valoracion || "?"} pts</span>
               </div>
             </div>
             {item.nota !== undefined && item.nota !== null && (
-              <span className={styles.gradeBadge}
-                style={{ color: (item.nota / (Number(item.valoracion) || 100)) >= NOTA_PASS_PCT ? "#6ec88a" : "#e07070",
-                  background: (item.nota / (Number(item.valoracion) || 100)) >= NOTA_PASS_PCT ? "rgba(110,200,138,0.15)" : "rgba(224,112,112,0.15)" }}>
-                = {(item.nota / (Number(item.valoracion) || 100) * 5).toFixed(2)} /5.0
-              </span>
+              <div className={styles.gradeBadge}>
+                <span>Equivalencia</span>
+                <strong>{(item.nota / (Number(item.valoracion) || 100) * 5).toFixed(2)}<small> / 5.0</small></strong>
+              </div>
             )}
           </div>
 
