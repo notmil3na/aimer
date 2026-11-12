@@ -922,28 +922,35 @@
 
 .temasSection {
   padding: 0;
-  overflow: hidden;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
 .temasHeader {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  min-height: 48px;
+  width: fit-content;
+  align-items: baseline;
+  justify-content: flex-start;
+  gap: 8px;
+  min-height: 32px;
   margin: 0;
+  padding: 4px 0;
   cursor: pointer;
   list-style: none;
 }
 .temasHeader::-webkit-details-marker { display: none; }
-.temasSummaryTitle { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.temasHeader > svg { flex: 0 0 auto; color: var(--modal-muted); transition: transform .18s ease; }
+.temasSummaryTitle { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.temasLabel { color: var(--accent-text); font-size: 12px; font-weight: 600; letter-spacing: 0; text-transform: none; }
+.temasHeader > svg { flex: 0 0 auto; color: var(--accent-text); transition: transform .18s ease; }
+.temasHeader:hover .temasLabel { text-decoration: underline; text-underline-offset: 3px; }
 .temasSection[open] .temasHeader > svg { transform: rotate(180deg); }
-.temasCount { padding: 3px 8px; border-radius: 999px; background: var(--modal-bg2); }
-.temasList { padding-top: 10px; border-top: 1px solid var(--modal-border); }
+.temasCount { color: var(--modal-muted); font-size: 11px; font-weight: 500; }
+.temasList { padding-top: 8px; }
 
 @media (max-width: 480px) {
   .gradeRow { align-items: center; flex-direction: row; padding: 12px; }
   .gradeRow .formField { flex: 1 1 170px; }
   .gradeBadge { margin-left: 0; }
-  .temasHeader { min-height: 44px; }
+  .temasHeader { min-height: 36px; }
 }
