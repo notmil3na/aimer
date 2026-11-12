@@ -992,3 +992,33 @@
 [data-theme="light"] .resumenRow { background: transparent; }
 [data-theme="light"] .projectionPanel,
 [data-theme="light"] .resumenTotal { background: var(--modal-bg2); }
+
+.semHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.semHeader:hover { background: color-mix(in srgb, var(--surface2) 48%, transparent); }
+.semHeader:focus-visible { outline: 2px solid var(--accent-border); outline-offset: 2px; }
+.semChevron { display: inline-flex; flex: 0 0 auto; align-self: center; color: var(--text-muted); transition: transform .2s ease, color .2s ease; }
+.semChevronOpen { transform: rotate(180deg); color: var(--accent-text); }
+.semBody { padding-bottom: 8px; }
+.materiaRow {
+  margin: 8px 0;
+  border: 1px solid var(--modal-border);
+  border-radius: 8px;
+  background: var(--modal-bg);
+  transform: none;
+}
+.materiaRow:hover { background: var(--modal-bg2); transform: none; }
+.materiaRow:last-child { border-bottom: 1px solid var(--modal-border); }
+.materiaBar { display: none; }

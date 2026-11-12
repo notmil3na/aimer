@@ -10,7 +10,7 @@ import {
   sanitizeNumericGrade,
 } from "../utils/gradeHelpers.js";
 import { projectDesiredAverage, calcGlobalPond, simulateFailMateria } from "../utils/careerProgress.js";
-import { IconCheck, IconX, IconClose, IconWarning } from "./Icons";
+import { IconCheck, IconX, IconClose, IconWarning, IconChevronDown } from "./Icons";
 
 function calcPonderado(materias, notasMap, semestreById) {
   let sumPond = 0, sumCred = 0;
@@ -103,8 +103,6 @@ function MateriaRow({ mat, semestre, notaData, onChange, colorAprobada, colorCur
 
   return (
     <div className={`${styles.materiaRow} ${failed ? styles.materiaFailed : ""}`}>
-      <div className={styles.materiaBar} style={{ background: color }} />
-
       <div className={styles.materiaBody}>
         <div className={styles.materiaTop}>
           <div>
@@ -204,6 +202,11 @@ export default function NotasView({ malla, notas, onSave, user }) {
   const [localNotas, setLocalNotas] = useState(notas || {});
   const [savedMsg, setSavedMsg]     = useState(false);
   const [view, setView]             = useState("semestres");
+  const [expandedSemesters, setExpandedSemesters] = useState(() => {
+    const active = (malla || []).filter((sem) => sem.materias.some((mat) => mat.estado === "cursando" || mat.estado === "aprobada"));
+    const current = active.find((sem) => sem.semestre === Number(user?.semester));
+    return new Set(current ? [current.semestre] : active.slice(0, 1).map((sem) => sem.semestre));
+  });
   const [showDesiredMode, setShowDesiredMode] = useState(false);
   const [desiredAvg, setDesiredAvg]           = useState("");
   const [showFailSim, setShowFailSim]         = useState(false);
@@ -264,6 +267,13 @@ export default function NotasView({ malla, notas, onSave, user }) {
     if (nota === undefined || nota === null || nota === "") return "—";
     return nota;
   };
+
+  const toggleSemester = (semester) => setExpandedSemesters((previous) => {
+    const next = new Set(previous);
+    if (next.has(semester)) next.delete(semester);
+    else next.add(semester);
+    return next;
+  });
 
   const projection = useMemo(() => (showDesiredMode && desiredAvg !== ""
     ? projectDesiredAverage(malla, localNotas, desiredAvg)
@@ -508,7 +518,13 @@ export default function NotasView({ malla, notas, onSave, user }) {
 
         return (
           <div key={sem.semestre} className={styles.semCard}>
-            <div className={styles.semHeader}>
+            <button
+              type="button"
+              className={styles.semHeader}
+              aria-expanded={expandedSemesters.has(sem.semestre)}
+              aria-controls={`notas-semestre-${sem.semestre}`}
+              onClick={() => toggleSemester(sem.semestre)}
+            >
               <div className={styles.semTitle}>
                 <span className={styles.semNum}>Semestre {sem.semestre}</span>
                 <span className={styles.semCreditos}>{activas.reduce((a, m) => a + m.creditos, 0)} créditos</span>
@@ -519,32 +535,39 @@ export default function NotasView({ malla, notas, onSave, user }) {
                   <span className={styles.semPondVal} style={{ color: colorA }}>{pond.valor.toFixed(1)}</span>
                 </div>
               )}
-            </div>
+              <span className={`${styles.semChevron} ${expandedSemesters.has(sem.semestre) ? styles.semChevronOpen : ""}`} aria-hidden="true">
+                <IconChevronDown size={17} />
+              </span>
+            </button>
 
-            <div className={styles.materiasList}>
-              {activas.map((mat) => (
-                <MateriaRow
-                  key={mat.id}
-                  mat={mat}
-                  semestre={sem.semestre}
-                  notaData={localNotas[mat.id]}
-                  onChange={(data) => updateNota(mat.id, data)}
-                  colorAprobada={colorA}
-                  colorCursando={colorC}
-                  colorFaltante={colorF}
-                />
-              ))}
-            </div>
+            {expandedSemesters.has(sem.semestre) && (
+              <div className={styles.semBody} id={`notas-semestre-${sem.semestre}`}>
+                <div className={styles.materiasList}>
+                  {activas.map((mat) => (
+                    <MateriaRow
+                      key={mat.id}
+                      mat={mat}
+                      semestre={sem.semestre}
+                      notaData={localNotas[mat.id]}
+                      onChange={(data) => updateNota(mat.id, data)}
+                      colorAprobada={colorA}
+                      colorCursando={colorC}
+                      colorFaltante={colorF}
+                    />
+                  ))}
+                </div>
 
-            {pond && (
-              <div className={styles.semFooter}>
-                <span>Suma ponderaciones: <strong>{pond.sumPond.toFixed(1)}</strong></span>
-                <span>÷</span>
-                <span>Créditos: <strong>{pond.creditos}</strong></span>
-                <span>=</span>
-                <span className={styles.semFooterResult} style={{ color: colorA }}>
-                  <strong>{pond.valor.toFixed(1)}</strong>
-                </span>
+                {pond && (
+                  <div className={styles.semFooter}>
+                    <span>Suma ponderaciones: <strong>{pond.sumPond.toFixed(1)}</strong></span>
+                    <span>÷</span>
+                    <span>Créditos: <strong>{pond.creditos}</strong></span>
+                    <span>=</span>
+                    <span className={styles.semFooterResult} style={{ color: colorA }}>
+                      <strong>{pond.valor.toFixed(1)}</strong>
+                    </span>
+                  </div>
+                )}
               </div>
             )}
           </div>
