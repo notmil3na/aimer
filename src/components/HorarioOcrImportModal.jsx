@@ -143,7 +143,7 @@ export default function HorarioOcrImportModal({ materias, existingCount = 0, onC
         <header className={styles.header}>
           <div>
             <span className={styles.eyebrow}>Importación inteligente</span>
-            <h2 id="horario-ocr-title">Leer horario desde imágenes</h2>
+            <h2 id="horario-ocr-title">Importa tu horario desde Ayre</h2>
           </div>
           <button type="button" className={styles.close} onClick={onClose} disabled={busy} aria-label="Cerrar">
             <IconClose size={16} />
@@ -154,7 +154,7 @@ export default function HorarioOcrImportModal({ materias, existingCount = 0, onC
           {!draft && (
             <>
               <p className={styles.intro}>
-                Sube la tabla de materias, docentes y horas. Si tienes la tabla de salones, añádela también para completar los lugares.
+                Tómale una captura a tu horario desde Ayre y súbelo aquí para importarlo a Aimer.
               </p>
               <label className={styles.fileField}>
                 <span className={styles.fileTitle}>1. Tabla de materias y horas <b>Obligatoria</b></span>
@@ -166,7 +166,6 @@ export default function HorarioOcrImportModal({ materias, existingCount = 0, onC
                 <span className={styles.fileHint}>{locationFile?.name || "Las filas deben conservar el mismo orden"}</span>
                 <input type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => setLocationFile(event.target.files?.[0] || null)} />
               </label>
-              <p className={styles.privacy}>Las imágenes se procesan en este dispositivo. La primera vez se descargan el motor OCR y el idioma español.</p>
               {busy && (
                 <div className={styles.progressBox}>
                   <div className={styles.progressTrack}><span style={{ width: `${Math.round(progress * 100)}%` }} /></div>
