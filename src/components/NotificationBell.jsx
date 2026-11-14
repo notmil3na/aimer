@@ -76,7 +76,7 @@ export default function NotificationBell({ due, permission, requestPermission, d
               <IconWarning size={12} /> Tu navegador no soporta notificaciones.
             </p>
           )}
-          {permission !== "granted" && permission !== "unsupported" && (
+          {!isPhone && permission !== "granted" && permission !== "unsupported" && (
             <div className={styles.enableRow}>
               <span>Recibe alertas del navegador</span>
               <button className={styles.enableBtn} onClick={requestPermission}>

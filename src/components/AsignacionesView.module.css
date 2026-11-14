@@ -699,7 +699,13 @@
 
 
 @media (max-width: 900px) {
-  .wrap { padding: 18px 14px; }
+  .wrap {
+    padding: 18px 14px;
+    overflow: visible;
+  }
+  .wrap::before {
+    top: calc(-1 * var(--top-nav-h, 0px));
+  }
   .title { font-size: 22px; }
   .filters { flex-direction: column; align-items: stretch; }
   .filterGroup { width: 100%; min-width: 0; flex: 1 1 auto; }

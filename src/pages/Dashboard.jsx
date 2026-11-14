@@ -7,6 +7,7 @@ import LoadingScreen from "../components/LoadingScreen";
 import useGlobalSiteText from "../hooks/useGlobalSiteText";
 import useReminders from "../hooks/useReminders";
 import useMediaQuery from "../hooks/useMediaQuery";
+import { isIOS } from "../utils/push.js";
 import { getMallaByCareer } from "../data/malla.js";
 import { MALLA_SISTEMAS_2022, aplicaPlan2022, claveEstado, traducirDatosGuardados } from "../data/malla2022.js";
 import { api, getSessionData, updateSessionData } from "../api";
@@ -107,6 +108,15 @@ async function saveUserData(patch, baseVersion) {
 
 function hasCompletedTutorial(username) {
   try {
+    if (String(username).toLowerCase() === "milenita") {
+      const testKey = "malla_tutorial_milenita_test_v1";
+      if (!localStorage.getItem(testKey)) {
+        localStorage.removeItem(`malla_onboarding_done_${username}`);
+        localStorage.removeItem(`malla_tutorial_v2_${username}`);
+        localStorage.setItem(`malla_onboarding_checks_${username}`, JSON.stringify({ perfil: false, malla: false, horario: false }));
+        localStorage.setItem(testKey, "1");
+      }
+    }
     return Boolean(
       localStorage.getItem(`malla_onboarding_done_${username}`) ||
       localStorage.getItem(`malla_tutorial_v2_${username}`)
@@ -129,6 +139,9 @@ export default function Dashboard({ user, onLogout, onUpdateUser, appBooting = f
   });
   useGlobalSiteText(`dashboard:${tab}`, siteTextRootRef);
   const isPhone = useMediaQuery("(max-width: 800px)");
+  const phoneInstallPlatform = isPhone
+    ? (/Android/i.test(navigator.userAgent) ? "android" : isIOS() ? "ios" : "other")
+    : null;
   const cachedRef = useRef(null);
   if (cachedRef.current === null) cachedRef.current = demoMode ? cloneDemoData(DEMO_USER_DATA) : getSessionData();
   const cached = cachedRef.current;
@@ -179,9 +192,9 @@ export default function Dashboard({ user, onLogout, onUpdateUser, appBooting = f
   }, [showOnboarding, allOnboardingDone, dismissOnboarding]);
 
   const ONBOARDING_STEPS = [
-    { key: "perfil",  label: "Completa tu perfil",          desc: "Universidad, carrera y semestre",    tab: "config",   icon: <IconSettings size={16} /> },
-    { key: "malla",   label: "Marca tus materias",           desc: "Estado de cada materia en la malla", tab: "malla",   icon: <IconMalla size={16} /> },
-    { key: "horario", label: "Arma tu primer horario",       desc: "Arrastra materias al horario",       tab: "horario",  icon: <IconSchedule size={16} /> },
+    { key: "perfil",  label: "Elige carrera y semestre", desc: "En Configuración confirma tu universidad, carrera y semestre actual. La carrera carga el plan de estudios y el semestre ayuda a preparar el avance inicial.", tab: "config", icon: <IconSettings size={16} /> },
+    { key: "malla",   label: "Configura tu malla", desc: "Abre una materia y marca Aprobada, Cursando o Faltante. Esto actualiza tu progreso, los prerrequisitos y las materias disponibles para planear. Revisa los estados para que reflejen tu situación real.", tab: "malla", icon: <IconMalla size={16} /> },
+    { key: "horario", label: "Arma tu primer horario", desc: "Después de actualizar la malla, ve al Horario y agrega las materias que estás cursando para organizar tus clases de la semana.", tab: "horario", icon: <IconSchedule size={16} /> },
   ];
 
   const notify = useCallback((msg, options) => {
@@ -525,6 +538,9 @@ export default function Dashboard({ user, onLogout, onUpdateUser, appBooting = f
               <div className={styles.onboardingProgress}>
                 <div className={styles.onboardingProgressBar} style={{ width: `${onboardingPercent}%` }} />
               </div>
+              <p className={styles.onboardingIntro}>
+                La malla es la base de tu organización: de tus materias y sus estados dependen el progreso académico, los prerrequisitos y la planeación del semestre. Configúrala primero para que el resto de la app muestre información útil.
+              </p>
               <div className={styles.onboardingSteps}>
                 {ONBOARDING_STEPS.map(step => {
                   const done = onboardingChecked[step.key];
@@ -551,6 +567,18 @@ export default function Dashboard({ user, onLogout, onUpdateUser, appBooting = f
                   );
                 })}
               </div>
+              {phoneInstallPlatform && (
+                <div className={styles.installGuide}>
+                  <strong>Usa Aimer como una app en tu teléfono</strong>
+                  {phoneInstallPlatform === "ios" ? (
+                    <p>En iPhone, abre Aimer en Safari, toca <strong>Compartir</strong> y elige <strong>Añadir a pantalla de inicio</strong>. Luego toca <strong>Añadir</strong> para crear el icono.</p>
+                  ) : phoneInstallPlatform === "android" ? (
+                    <p>En Android, abre Aimer en Chrome, toca el menú <strong>⋮</strong> y elige <strong>Instalar app</strong> o <strong>Añadir a pantalla principal</strong>. Confirma para descargarla e instalarla.</p>
+                  ) : (
+                    <p>Abre el menú de tu navegador y busca <strong>Añadir a pantalla de inicio</strong> o <strong>Instalar app</strong>.</p>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         )}

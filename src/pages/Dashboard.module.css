@@ -186,6 +186,12 @@
   transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+.onboardingIntro {
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
 .onboardingSteps {
   display: flex;
   gap: 8px;
@@ -254,7 +260,28 @@
 .onboardingStepDesc {
   font-size: 11px;
   color: var(--text-muted);
-  line-height: 1.4;
+  line-height: 1.5;
+}
+
+.installGuide {
+  padding: 11px 13px;
+  border: 1px solid color-mix(in srgb, var(--accent-border) 30%, var(--border));
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--accent) 7%, var(--surface2));
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.installGuide > strong {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--text);
+  font-size: 12.5px;
+}
+
+.installGuide p > strong {
+  color: var(--text);
 }
 
 @media (max-width: 700px) {
