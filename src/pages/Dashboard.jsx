@@ -109,11 +109,11 @@ async function saveUserData(patch, baseVersion) {
 function hasCompletedTutorial(username) {
   try {
     if (String(username).toLowerCase() === "milenita") {
-      const testKey = "malla_tutorial_milenita_test_v1";
+      const testKey = "malla_tutorial_milenita_test_v2";
       if (!localStorage.getItem(testKey)) {
         localStorage.removeItem(`malla_onboarding_done_${username}`);
         localStorage.removeItem(`malla_tutorial_v2_${username}`);
-        localStorage.setItem(`malla_onboarding_checks_${username}`, JSON.stringify({ perfil: false, malla: false, horario: false }));
+        localStorage.setItem(`malla_onboarding_checks_${username}`, JSON.stringify({ malla: false, horario: false, asignaciones: false }));
         localStorage.setItem(testKey, "1");
       }
     }
@@ -131,11 +131,7 @@ export default function Dashboard({ user, onLogout, onUpdateUser, appBooting = f
   const [adminMode, setAdminMode] = useState(false);
   const [tab, setTab] = useState(() => {
     if (demoMode) return "horario";
-    try {
-      const key = `malla_tutorial_v2_${user.username}`;
-      if (!localStorage.getItem(key)) return "config";
-    } catch (_) {}
-    return "horario";
+    return hasCompletedTutorial(user.username) ? "horario" : "malla";
   });
   useGlobalSiteText(`dashboard:${tab}`, siteTextRootRef);
   const isPhone = useMediaQuery("(max-width: 800px)");
@@ -163,8 +159,9 @@ export default function Dashboard({ user, onLogout, onUpdateUser, appBooting = f
   const [onboardingChecked, setOnboardingChecked] = useState(() => {
     try {
       const raw = localStorage.getItem(`malla_onboarding_checks_${user.username}`);
-      return raw ? JSON.parse(raw) : { perfil: false, malla: false, horario: false };
-    } catch (_) { return { perfil: false, malla: false, horario: false }; }
+      const saved = raw ? JSON.parse(raw) : {};
+      return { malla: !!saved.malla, horario: !!saved.horario, asignaciones: !!saved.asignaciones };
+    } catch (_) { return { malla: false, horario: false, asignaciones: false }; }
   });
 
   const onboardingRef = useRef(null);
@@ -176,7 +173,7 @@ export default function Dashboard({ user, onLogout, onUpdateUser, appBooting = f
     });
   }, [user.username]);
 
-  const allOnboardingDone = onboardingChecked.perfil && onboardingChecked.malla && onboardingChecked.horario;
+  const allOnboardingDone = onboardingChecked.malla && onboardingChecked.horario && onboardingChecked.asignaciones;
   const onboardingPercent = ((Object.values(onboardingChecked).filter(Boolean).length) / 3) * 100;
 
   const dismissOnboarding = useCallback(() => {
@@ -192,9 +189,9 @@ export default function Dashboard({ user, onLogout, onUpdateUser, appBooting = f
   }, [showOnboarding, allOnboardingDone, dismissOnboarding]);
 
   const ONBOARDING_STEPS = [
-    { key: "perfil",  label: "Elige carrera y semestre", desc: "En Configuración confirma tu universidad, carrera y semestre actual. La carrera carga el plan de estudios y el semestre ayuda a preparar el avance inicial.", tab: "config", icon: <IconSettings size={16} /> },
-    { key: "malla",   label: "Configura tu malla", desc: "Abre una materia y marca Aprobada, Cursando o Faltante. Esto actualiza tu progreso, los prerrequisitos y las materias disponibles para planear. Revisa los estados para que reflejen tu situación real.", tab: "malla", icon: <IconMalla size={16} /> },
-    { key: "horario", label: "Arma tu primer horario", desc: "Después de actualizar la malla, ve al Horario y agrega las materias que estás cursando para organizar tus clases de la semana.", tab: "horario", icon: <IconSchedule size={16} /> },
+    { key: "malla", label: "Revisa tu malla", desc: "Toca una materia y marca Aprobada, Cursando o Faltante. Así se actualizan tu avance y los prerrequisitos.", tab: "malla", icon: <IconMalla size={16} /> },
+    { key: "horario", label: "Organiza tu horario", desc: "Agrega las materias que cursas y acomódalas por día y hora.", tab: "horario", icon: <IconSchedule size={16} /> },
+    { key: "asignaciones", label: "Anota tus entregas", desc: "Guarda tareas y fechas límite para tener tus pendientes a mano.", tab: "asignaciones", icon: <IconClipboard size={16} /> },
   ];
 
   const notify = useCallback((msg, options) => {
@@ -539,7 +536,7 @@ export default function Dashboard({ user, onLogout, onUpdateUser, appBooting = f
                 <div className={styles.onboardingProgressBar} style={{ width: `${onboardingPercent}%` }} />
               </div>
               <p className={styles.onboardingIntro}>
-                La malla es la base de tu organización: de tus materias y sus estados dependen el progreso académico, los prerrequisitos y la planeación del semestre. Configúrala primero para que el resto de la app muestre información útil.
+                Empieza por la malla: sus estados actualizan tu avance y ayudan a planear el semestre.
               </p>
               <div className={styles.onboardingSteps}>
                 {ONBOARDING_STEPS.map(step => {
@@ -571,9 +568,9 @@ export default function Dashboard({ user, onLogout, onUpdateUser, appBooting = f
                 <div className={styles.installGuide}>
                   <strong>Usa Aimer como una app en tu teléfono</strong>
                   {phoneInstallPlatform === "ios" ? (
-                    <p>En iPhone, abre Aimer en Safari, toca <strong>Compartir</strong> y elige <strong>Añadir a pantalla de inicio</strong>. Luego toca <strong>Añadir</strong> para crear el icono.</p>
+                    <p>iPhone: en Safari, toca <strong>Compartir → Añadir a pantalla de inicio</strong>.</p>
                   ) : phoneInstallPlatform === "android" ? (
-                    <p>En Android, abre Aimer en Chrome, toca el menú <strong>⋮</strong> y elige <strong>Instalar app</strong> o <strong>Añadir a pantalla principal</strong>. Confirma para descargarla e instalarla.</p>
+                    <p>Android: en Chrome, toca <strong>⋮ → Instalar app</strong> o <strong>Añadir a pantalla principal</strong>.</p>
                   ) : (
                     <p>Abre el menú de tu navegador y busca <strong>Añadir a pantalla de inicio</strong> o <strong>Instalar app</strong>.</p>
                   )}
