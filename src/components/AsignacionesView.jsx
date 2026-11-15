@@ -6,6 +6,7 @@ import {
 import { HORAS_FORM } from "../utils/horarioHelpers";
 import { REMINDER_OPTIONS } from "../utils/reminders";
 import { uuid } from "../utils/notasClase";
+import { APPROVED_GREEN } from "../utils/statusColors.js";
 import useBodyScrollLock from "../hooks/useBodyScrollLock";
 
 const CalendarioView = lazy(() => import("./CalendarioView"));
@@ -163,7 +164,7 @@ function AsignacionCard({ item, allMaterias, onUpdate, onDelete, onEdit, onSyncC
         </div>
         <div className={styles.cardRight}>
           {item.nota !== undefined && item.nota !== null ? (
-            <span className={styles.cardNota} style={{ color: (item.nota / (Number(item.valoracion) || 100)) >= NOTA_PASS_PCT ? "#6ec88a" : "#e07070" }}>
+            <span className={styles.cardNota} style={{ color: (item.nota / (Number(item.valoracion) || 100)) >= NOTA_PASS_PCT ? APPROVED_GREEN : "#e07070" }}>
               {item.nota}
               <span className={styles.cardNotaMax}>/{item.valoracion || "?"}</span>
             </span>
@@ -176,7 +177,7 @@ function AsignacionCard({ item, allMaterias, onUpdate, onDelete, onEdit, onSyncC
 
       {expanded && (
         <div className={styles.cardExpanded}>
-          <div className={styles.gradeRow} style={{ "--grade-tone": item.nota === undefined || item.nota === null ? info.color : (item.nota / (Number(item.valoracion) || 100)) >= NOTA_PASS_PCT ? "#6ec88a" : "#e07070" }}>
+          <div className={styles.gradeRow} style={{ "--grade-tone": item.nota === undefined || item.nota === null ? info.color : (item.nota / (Number(item.valoracion) || 100)) >= NOTA_PASS_PCT ? APPROVED_GREEN : "#e07070" }}>
             <div className={styles.formField}>
               <label htmlFor={`grade-${item.id}`}>Nota</label>
               <div className={styles.gradeInputWrap}>

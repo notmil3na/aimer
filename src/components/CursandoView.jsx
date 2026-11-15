@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import styles from "./CursandoView.module.css";
 import { IconCheck, IconX, IconUser, IconPlus, IconClose, IconChevronUp, IconChevronDown, IconSemester, IconGrades } from "./Icons";
 import NotasView from "./NotasView";
+import { APPROVED_GREEN } from "../utils/statusColors.js";
 
 const NOTA_MIN  = 0;
 const NOTA_MAX  = 500;
@@ -79,7 +80,7 @@ function calcPuntosMateria(cortes) {
 
 function colorNota(nota) {
   if (nota === null || nota === undefined || nota === "") return "var(--text-muted)";
-  return Number(nota) >= NOTA_PASS ? "#6ec88a" : "#e07070";
+  return Number(nota) >= NOTA_PASS ? APPROVED_GREEN : "#e07070";
 }
 
 function calcPonderado(materias, cursandoData) {
@@ -247,7 +248,7 @@ function MateriaCard({ materia, data, onChange, colors, borderRadius, horarioCla
   const autoGrupo = horarioClase?.grupo || "";
   const autoSalon = horarioClase?.salonLabel || "";
 
-  const cardColor = paso ? (colors?.aprobada || "#6ec88a")
+  const cardColor = paso ? (colors?.aprobada || APPROVED_GREEN)
     : notaFinal !== null ? "#e07070"
     : (colors?.cursando || "#c8a96e");
 
@@ -560,7 +561,7 @@ export default function CursandoView({
                       <td className={styles.tableCenter}>{puntos?.total.toFixed(1) ?? "—"}</td>
                       <td className={styles.tableCenter}>
                         {nf !== null
-                          ? <span className={styles.tableBadge} style={{ color: paso ? "#6ec88a" : "#e07070", background: paso ? "rgba(110,200,138,0.1)" : "rgba(224,112,112,0.1)" }}>
+                          ? <span className={styles.tableBadge} style={{ color: paso ? APPROVED_GREEN : "#e07070", background: paso ? "rgba(0,138,58,0.1)" : "rgba(224,112,112,0.1)" }}>
                               {paso ? "Aprueba" : "Pierde"}
                             </span>
                           : <span className={styles.tableNone}>—</span>

@@ -9,6 +9,7 @@ import {
   isValidNumericGrade,
   sanitizeNumericGrade,
 } from "../utils/gradeHelpers.js";
+import { APPROVED_GREEN } from "../utils/statusColors.js";
 import { projectDesiredAverage, calcGlobalPond, simulateFailMateria } from "../utils/careerProgress.js";
 import { IconCheck, IconX, IconClose, IconWarning, IconChevronDown } from "./Icons";
 
@@ -215,7 +216,7 @@ export default function NotasView({ malla, notas, onSave, user }) {
   const [retakeGrade, setRetakeGrade]         = useState("400");
 
   const colors = user.themeColors || {};
-  const colorA = colors.aprobada || "#6ec88a";
+  const colorA = colors.aprobada || APPROVED_GREEN;
   const colorC = colors.cursando || "#c8a96e";
   const colorF = colors.faltante || "#3a3a52";
 

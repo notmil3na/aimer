@@ -445,7 +445,7 @@
   border-radius: 999px;
   white-space: nowrap;
 }
-.gradeBadgePass { background: color-mix(in srgb, #6ec88a 16%, transparent); color: #6ec88a; }
+.gradeBadgePass { background: color-mix(in srgb, #008A3A 16%, transparent); color: #008A3A; }
 .gradeBadgeFail { background: color-mix(in srgb, #e07070 16%, transparent); color: #e07070; }
 
 
@@ -526,9 +526,9 @@
 .resumenNota {
   font-family: var(--font-display); font-size: 14px; min-width: 40px; text-align: right;
 }
-.resumenPass { color: #6ec88a; }
+.resumenPass { color: #008A3A; }
 .resumenFail { color: #e07070; }
-.resumenRetake { font-size: 12px; color: #6ec88a; }
+.resumenRetake { font-size: 12px; color: #008A3A; }
 .resumenSinNota { font-size: 12px; color: var(--border); }
 
 .resumenRight {
@@ -719,7 +719,7 @@
 }
 
 .failSimDeltaNeg { color: #e07070; font-weight: 600; }
-.failSimDeltaPos { color: #6ec88a; font-weight: 600; }
+.failSimDeltaPos { color: #008A3A; font-weight: 600; }
 
 .failSimHint {
   font-size: 11.5px;

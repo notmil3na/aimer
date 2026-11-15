@@ -5,6 +5,7 @@ const UpdatePrompt = lazy(() => import("./components/UpdatePrompt"));
 import { api, saveSession, clearSession, getSession, isDemoMode, logout } from "./api";
 import { DEMO_USER } from "./demoData.js";
 import { getPhoto } from "./utils/photo";
+import { normalizeApprovedColor } from "./utils/statusColors.js";
 import useGlobalSiteText from "./hooks/useGlobalSiteText";
 import LoadingScreen from "./components/LoadingScreen";
 import "./App.css";
@@ -163,12 +164,16 @@ export default function App() {
       // sesión real la valida la cookie contra /auth/me.
       const saved = getSession();
       if (saved?.user) {
-        applyTheme(saved.user.appTheme || "ambar", saved.user.appMode || "light", saved.user.fontBody);
-        if (!cancelled) setUser(saved.user);
+        const savedUser = normalizeApprovedColor(saved.user);
+        if (savedUser !== saved.user) saveSession(savedUser, saved.data);
+        applyTheme(savedUser.appTheme || "ambar", savedUser.appMode || "light", savedUser.fontBody);
+        if (!cancelled) setUser(savedUser);
       }
       try {
-        const { user: serverUser } = await api("/auth/me", { soft401: true });
+        const { user: rawServerUser } = await api("/auth/me", { soft401: true });
         if (cancelled) return;
+        const serverUser = normalizeApprovedColor(rawServerUser);
+        if (serverUser !== rawServerUser) saveUser(serverUser).catch(() => {});
         setUser((prev) => {
           if (!prev) return serverUser;
           if (prev.hasPhoto && !serverUser.hasPhoto) {
@@ -199,9 +204,11 @@ export default function App() {
 
   const handleLogin = (auth, remember = true) => {
     if (!auth?.user) return;
-    saveSession(auth.user, auth.data, remember);
-    setUser(auth.user);
-    applyTheme(auth.user.appTheme || "ambar", auth.user.appMode || "light", auth.user.fontBody);
+    const loggedInUser = normalizeApprovedColor(auth.user);
+    saveSession(loggedInUser, auth.data, remember);
+    if (loggedInUser !== auth.user) saveUser(loggedInUser).catch(() => {});
+    setUser(loggedInUser);
+    applyTheme(loggedInUser.appTheme || "ambar", loggedInUser.appMode || "light", loggedInUser.fontBody);
   };
 
   const handleLogout = () => {

@@ -4,6 +4,7 @@ import { SEMESTER_CORTE } from "../utils/semesterCountdown";
 import { UNIVERSITIES, autoSemester } from "../utils/academic";
 import { SECURITY_QUESTIONS } from "../utils/securityQuestions";
 import { api } from "../api";
+import { APPROVED_GREEN } from "../utils/statusColors.js";
 import styles from "./Login.module.css";
 import { IconCheck, IconWarning } from "../components/Icons";
 import AnimatedFace from "../components/AnimatedFace";
@@ -11,7 +12,7 @@ import useBodyScrollLock from "../hooks/useBodyScrollLock";
 
 const DEFAULT_THEME_COLORS = {
   cursando: "#c8a96e",
-  aprobada: "#6ec88a",
+  aprobada: APPROVED_GREEN,
   faltante: "#7c8cff",
 };
 

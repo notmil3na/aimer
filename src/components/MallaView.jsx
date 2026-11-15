@@ -6,6 +6,7 @@ import { canEnrollMateria } from "../utils/gradeHelpers.js";
 import { buildMallaTxt, downloadTxt } from "../utils/mallaExport.js";
 import { IconClose, IconLightbulb, IconWarning } from "./Icons";
 import { getObligatorias } from "../utils/careerProgress.js";
+import { APPROVED_GREEN } from "../utils/statusColors.js";
 import MateriaCard from "./MateriaCard";
 import styles from "./MallaView.module.css";
 
@@ -79,7 +80,7 @@ export default function MallaView({ malla: initialMalla, notas, onSave, user, on
   const obligatorias = useMemo(() => getObligatorias(vistaMalla), [vistaMalla]);
 
   const getColor = useCallback((estado) => {
-    if (estado === "aprobada") return colors.aprobada || "#6ec88a";
+    if (estado === "aprobada") return colors.aprobada || APPROVED_GREEN;
     if (estado === "cursando") return colors.cursando || "#c8a96e";
 
     const isDarkMode = typeof document !== "undefined"
@@ -327,7 +328,7 @@ export default function MallaView({ malla: initialMalla, notas, onSave, user, on
         <div className={styles.headerRight}>
           <div className={styles.stats}>
           {[
-            { label: "Aprobadas", val: stats.aprobadas, color: colors.aprobada || "#6ec88a" },
+            { label: "Aprobadas", val: stats.aprobadas, color: colors.aprobada || APPROVED_GREEN },
             { label: "Cursando",  val: stats.cursando,  color: colors.cursando  || "#c8a96e" },
             { label: "Faltantes", val: stats.faltantes, color: colors.faltante  || "#3a3a52" },
           ].map((s) => (
@@ -364,7 +365,7 @@ export default function MallaView({ malla: initialMalla, notas, onSave, user, on
           <span>Progreso académico</span><span>{progress}%</span>
         </div>
         <div className={styles.progressBar}>
-          <div className={styles.progressFill} style={{ width: `${progress}%`, background: colors.aprobada || "#6ec88a" }} />
+          <div className={styles.progressFill} style={{ width: `${progress}%`, background: colors.aprobada || APPROVED_GREEN }} />
         </div>
       </div>
 

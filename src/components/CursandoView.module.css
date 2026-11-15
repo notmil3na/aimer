@@ -700,7 +700,7 @@
   white-space: nowrap;
 }
 
-.corteTotalStatus.corteStatusOk { --corte-color: #6ec88a; }
+.corteTotalStatus.corteStatusOk { --corte-color: #008A3A; }
 .corteTotalStatus.corteStatusLow { --corte-color: #e07070; }
 
 .notaFinalRow,

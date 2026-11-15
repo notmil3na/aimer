@@ -6,6 +6,7 @@ import { calcCareerTime, estimateGraduation } from "../utils/careerProgress.js";
 import { semesterDatesFor, semesterCorteFor } from "../utils/semesterCountdown.js";
 import { getPhoto, compressPhoto } from "../utils/photo";
 import { FONT_OPTIONS } from "../utils/fonts";
+import { APPROVED_GREEN } from "../utils/statusColors.js";
 import { api, isPersistentSession } from "../api";
 import styles from "./SettingsView.module.css";
 import {
@@ -14,9 +15,9 @@ import {
 } from "./Icons";
 
 const MALLA_PRESETS = [
-  { name: "Aurora",          colors: { cursando: "#B882E8", aprobada: "#6EC8A8", faltante: "#7C8CFF" }, borderRadius: 12 },
-  { name: "Océano profundo", colors: { cursando: "#6BA3E8", aprobada: "#6EC8B4", faltante: "#6E8DFF" }, borderRadius: 10 },
-  { name: "Jardín",          colors: { cursando: "#D4A84B", aprobada: "#6EC88A", faltante: "#7A9BFF" }, borderRadius: 14 },
+  { name: "Aurora",          colors: { cursando: "#B882E8", aprobada: APPROVED_GREEN, faltante: "#7C8CFF" }, borderRadius: 12 },
+  { name: "Océano profundo", colors: { cursando: "#6BA3E8", aprobada: APPROVED_GREEN, faltante: "#6E8DFF" }, borderRadius: 10 },
+  { name: "Jardín",          colors: { cursando: "#D4A84B", aprobada: APPROVED_GREEN, faltante: "#7A9BFF" }, borderRadius: 14 },
   { name: "Crepúsculo",      colors: { cursando: "#E8946B", aprobada: "#E8C86B", faltante: "#8A7CFF" }, borderRadius: 8 },
   { name: "Hielo",           colors: { cursando: "#A0C8E8", aprobada: "#E0E8F0", faltante: "#7FA3FF" }, borderRadius: 16 },
 ];
