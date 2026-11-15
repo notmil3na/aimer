@@ -117,10 +117,8 @@
 
 .onboardingCard {
   width: 100%;
-  background: color-mix(in srgb, var(--surface) 92%, transparent);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+  background: var(--modal-bg);
+  border: 1px solid var(--modal-border);
   border-radius: var(--radius-lg);
   padding: 16px 18px;
   display: flex;
@@ -203,8 +201,8 @@
   align-items: flex-start;
   gap: 10px;
   padding: 10px 12px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
+  background: var(--modal-bg2);
+  border: 1px solid var(--modal-border);
   border-radius: var(--radius-md);
   transition: border-color 0.2s, background 0.2s;
 }
@@ -265,9 +263,9 @@
 
 .installGuide {
   padding: 11px 13px;
-  border: 1px solid color-mix(in srgb, var(--accent-border) 30%, var(--border));
+  border: 1px solid var(--modal-border);
   border-radius: var(--radius-md);
-  background: color-mix(in srgb, var(--accent) 7%, var(--surface2));
+  background: var(--modal-bg2);
   color: var(--text-muted);
   font-size: 12px;
   line-height: 1.5;
